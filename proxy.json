@@ -8,7 +8,7 @@
     ],
     "target": "http://localhost:8080/enchere/hope",
     "cookieDomainRewrite": "localhost",
-    "secure": false,
+    "secure": true,
     "changeOrigin": true
   }
 ]

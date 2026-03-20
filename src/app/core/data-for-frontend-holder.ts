@@ -20,7 +20,7 @@ import { NextRequestState } from 'app/core/next-request-state';
 import { I18n, I18nInjectionToken } from 'app/i18n/i18n';
 import { setReloadButton, setRootAlert, urlJoin } from 'app/shared/helper';
 import { environment } from 'environments/environment';
-import moment from 'moment-mini-ts';
+import { parseISO } from 'date-fns';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -150,7 +150,7 @@ export class DataForFrontendHolder {
 
       const dataForUi = (dataForFrontend || {}).dataForUi;
       // Store the time diff
-      this.timeDiff = new Date().getTime() - moment(dataForUi.currentClientTime).toDate().getTime();
+      this.timeDiff = new Date().getTime() - parseISO(dataForUi.currentClientTime).getTime();
     }
   }
 
@@ -177,10 +177,10 @@ export class DataForFrontendHolder {
   /**
    * As the client clock may be wrong, we consider the server clock
    */
-  now(): moment.Moment {
+  now(): Date {
     const date = new Date();
     date.setTime(date.getTime() + this.timeDiff);
-    return moment(date);
+    return date;
   }
 
   /**

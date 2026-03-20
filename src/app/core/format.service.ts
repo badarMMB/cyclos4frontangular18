@@ -12,10 +12,10 @@ import {
 import { I18nLoadingService } from 'app/core/i18n-loading.service';
 import { I18n, I18nInjectionToken } from 'app/i18n/i18n';
 import { empty, urlJoin } from 'app/shared/helper';
-import moment from 'moment-mini-ts';
+import { format as dateFnsFormat, isValid, parse, parseISO } from 'date-fns';
 import { DataForFrontendHolder } from './data-for-frontend-holder';
 
-export const ISO_DATE = 'YYYY-MM-DD';
+export const ISO_DATE = 'yyyy-MM-dd';
 
 /**
  * Holds a shared instance of DataForFrontend and knows how to format dates and numbers
@@ -40,7 +40,7 @@ export class FormatService {
     });
   }
 
-  /** Uppercase date format. Example: `'DD/MM/YYYY'` */
+  /** Date format compatible with date-fns. Example: `'dd/MM/yyyy'` */
   dateFormat: string;
 
   /** Separator for date fields. Example: `'/'` */
@@ -89,7 +89,7 @@ export class FormatService {
       return isoInput;
     }
     return this.dateParts.map(f => {
-      if (f.includes('D')) {
+      if (f.includes('d')) {
         return isoInput[2];
       } else if (f.includes('M')) {
         return isoInput[1];
@@ -103,8 +103,8 @@ export class FormatService {
     if (dataForUi == null) {
       return;
     }
-    // Cyclos uses Java format, such as dd/MM/yyyy. Moment uses all uppercase for those.
-    this.dateFormat = (dataForUi.dateFormat || ISO_DATE).toUpperCase();
+    // Cyclos uses Java format, such as dd/MM/yyyy, which matches date-fns tokens directly.
+    this.dateFormat = dataForUi.dateFormat || ISO_DATE;
     let arr = /(\w+)(.)(\w+)(.)(\w+)/.exec(this.dateFormat);
     if (arr == null || arr.input !== this.dateFormat) {
       // Invalid pattern. Assume the default.
@@ -245,34 +245,46 @@ export class FormatService {
    * @returns An ISO-8601 date, or `undefined` if the input is invalid
    */
   parseAsDate(value: Date | string): string {
-    const mm = this.parseAsMoment(value);
-    if (mm === null) {
+    const d = this.parseAsDateObject(value);
+    if (d === null) {
       // Empty input
       return null;
     }
     // Returns either the ISO-formatted date or undefined (if invalid)
-    return mm.isValid() ? mm.format(ISO_DATE) : undefined;
+    return d !== undefined && isValid(d) ? dateFnsFormat(d, ISO_DATE) : undefined;
   }
 
   /**
-   * Parses the given date / string in the user locale as a Moment
-   * @param value The moment, or undefined if null
+   * Parses the given date / string in the user locale as a Date object
+   * @param value The date value or string to parse
+   * @returns null if empty, undefined if invalid, or the parsed Date
    */
-  parseAsMoment(value: Date | string): moment.Moment {
+  parseAsDateObject(value: Date | string): Date | null | undefined {
     if (value == null || value === '') {
       return null;
     }
-    if (typeof value === 'string' && value.length !== this.dateFormat.length) {
-      return moment(undefined);
+    if (value instanceof Date) {
+      return isValid(value) ? value : undefined;
     }
-    return moment(value, this.dateFormat);
+    if (value.length !== this.dateFormat.length) {
+      return undefined;
+    }
+    const parsed = parse(value, this.dateFormat, new Date());
+    return isValid(parsed) ? parsed : undefined;
+  }
+
+  /**
+   * @deprecated Use parseAsDateObject instead
+   */
+  parseAsMoment(value: Date | string): Date | null | undefined {
+    return this.parseAsDateObject(value);
   }
 
   /**
    * Formats the given date (or ISO-8601 string) as date according to the current settings
    * @param date The input date or string
    */
-  formatAsDate(date: Date | string | moment.Moment): string {
+  formatAsDate(date: Date | string): string {
     return this.doFormat(date, this.dateFormat);
   }
 
@@ -280,7 +292,7 @@ export class FormatService {
    * Formats the given date (or ISO-8601 string) as time according to the current settings
    * @param date The input date or string
    */
-  formatAsTime(date: Date | string | moment.Moment): string {
+  formatAsTime(date: Date | string): string {
     return this.doFormat(date, this.timeFormat);
   }
 
@@ -288,19 +300,19 @@ export class FormatService {
    * Formats the given date (or ISO-8601 string) as date / time according to the current settings
    * @param date The input date or string
    */
-  formatAsDateTime(date: Date | string | moment.Moment): string {
+  formatAsDateTime(date: Date | string): string {
     return this.doFormat(date, this.dateFormat + ' ' + this.timeFormat);
   }
 
-  private doFormat(date: Date | string | moment.Moment, format: string): string {
+  private doFormat(date: Date | string, format: string): string {
     if (date == null) {
       return '';
     }
-    if (date['format']) {
-      // Already a moment
-      return (date as moment.Moment).format(format);
+    if (date instanceof Date) {
+      return isValid(date) ? dateFnsFormat(date, format) : '';
     }
-    return moment(date).parseZone().format(format);
+    const parsed = parseISO(date as string);
+    return isValid(parsed) ? dateFnsFormat(parsed, format) : '';
   }
 
   /**

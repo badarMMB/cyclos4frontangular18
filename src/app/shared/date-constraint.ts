@@ -1,4 +1,4 @@
-import moment from 'moment-mini-ts';
+import { addDays, addYears, endOfDay, endOfYear, getHours, isValid, parseISO, startOfDay, startOfYear, subDays, subYears } from 'date-fns';
 
 /**
  * A constraint to be used either as minimum / maximum date
@@ -26,38 +26,46 @@ export type DateConstraint =
   | string;
 
 /**
- * Returns a date constraint as a moment instance
+ * Returns a date constraint as a Date instance
  * @param constraint The constraint
- * @returns The corresponding moment, or null if the constraint is null or 'any'
+ * @returns The corresponding Date, or null if the constraint is null or 'any'
  */
-export function dateConstraintAsMoment(constraint: DateConstraint, now: moment.Moment): moment.Moment {
+export function dateConstraintAsDate(constraint: DateConstraint, now: Date): Date {
   switch (constraint || 'any') {
     case 'any':
       return null;
     case 'today':
-      return now.clone().startOf('day');
+      return startOfDay(now);
     case 'todayEnd':
-      return now.clone().endOf('day');
+      return endOfDay(now);
     case 'yesterday':
-      return now.clone().subtract(1, 'day').startOf('day');
+      return startOfDay(subDays(now, 1));
     case 'tomorrow':
-      return now.clone().add(1, 'day').startOf('day');
+      return startOfDay(addDays(now, 1));
     case 'past100':
-      return now.clone().subtract(100, 'years').startOf('year');
+      return startOfYear(subYears(now, 100));
     case 'future100':
-      return now.clone().add(100, 'years').endOf('year');
+      return endOfYear(addYears(now, 100));
     case 'past5':
-      return now.clone().subtract(5, 'years').startOf('year');
+      return startOfYear(subYears(now, 5));
     case 'future5':
-      return now.clone().add(5, 'years').endOf('year').startOf('day');
-    default:
-      const date = moment(constraint);
-      if (!date.isValid()) {
+      return startOfDay(endOfYear(addYears(now, 5)));
+    default: {
+      const date = parseISO(constraint as string);
+      if (!isValid(date)) {
         throw new Error(`Got an invalid date constraint: ${constraint}`);
       }
-      if (date.hours() > 12) {
-        date.add(1, 'day');
+      if (getHours(date) > 12) {
+        return addDays(date, 1);
       }
       return date;
+    }
   }
+}
+
+/**
+ * @deprecated Use dateConstraintAsDate instead
+ */
+export function dateConstraintAsMoment(constraint: DateConstraint, now: Date): Date {
+  return dateConstraintAsDate(constraint, now);
 }

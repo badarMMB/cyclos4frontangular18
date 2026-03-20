@@ -88,7 +88,7 @@
             <div class="client-title-holder">
               <div class="client-name">{{ data.client.name }}</div>
               @if (data.client.website) {
-                <a class="client-link" target="_blank" [href]="data.client.website">{{
+                <a class="client-link" target="_blank" rel="noopener noreferrer" [href]="data.client.website">{{
                   data.client.website
                 }}</a>
               }
@@ -101,6 +101,7 @@
             <a
               class="client-link"
               target="_blank"
+              rel="noopener noreferrer"
               [href]="data.client.privacyPolicyUrl"
               >{{ i18n.consent.privacyPolicy }}</a
               >
@@ -109,6 +110,7 @@
               <a
                 class="client-link"
                 target="_blank"
+                rel="noopener noreferrer"
                 [href]="data.client.termsOfServiceUrl"
                 >{{ i18n.consent.termsOfService }}</a
                 >

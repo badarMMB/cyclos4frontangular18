@@ -19,6 +19,7 @@
             [href]="appendAuth(file.url)"
             [type]="file.contentType"
             target="_blank"
+            rel="noopener noreferrer"
             (click)="downloadFile($event, file)"
             [download]="file.name"
             >{{ file.name }}</a
@@ -84,6 +85,7 @@
               [href]="appendAuth(file.url)"
               [type]="file.contentType"
               target="_blank"
+              rel="noopener noreferrer"
               (click)="downloadFile($event, file)"
               [download]="file.name"
               >{{ file.name }}</a

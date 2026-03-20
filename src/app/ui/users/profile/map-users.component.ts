@@ -32,6 +32,7 @@ import * as L from 'leaflet';
 import 'leaflet-draw';
 import { first } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { environment } from 'environments/environment';
 
 type LayerKind = 'marker' | 'zone';
 
@@ -56,7 +57,7 @@ type MapLayer = L.Layer & {
 const DEFAULT_CENTER = L.latLng(11.5797, 43.1216);
 const DEFAULT_ZOOM = 13;
 const DEFAULT_ZONE_NAME = "Zone d'action";
-const GEOSERVER_WMS_URL = 'http://localhost:8080/geoserver/djibouti_map/wms';
+const GEOSERVER_WMS_URL = environment.geoServerWmsUrl;
 
 @Component({
   selector: 'map-users',

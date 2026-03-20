@@ -151,13 +151,13 @@ export class DateFieldComponent extends BaseFormFieldComponent<string> implement
       } else {
         var min = this.min && isValid(this.min) ? this.min : null;
         if (min && date < min) {
-          errors['minDate'] = {
+          errors.minDate = {
             min: this.format.formatAsDate(this.min)
           };
         }
         var max = this.max && isValid(this.max) ? this.max : null;
         if (max && date > max) {
-          errors['maxDate'] = {
+          errors.maxDate = {
             max: this.format.formatAsDate(this.max)
           };
         }

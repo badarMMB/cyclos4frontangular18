@@ -15,6 +15,7 @@ import { empty, urlJoin } from 'app/shared/helper';
 import { format as dateFnsFormat, isValid, parse, parseISO } from 'date-fns';
 import { DataForFrontendHolder } from './data-for-frontend-holder';
 
+/** ISO date format using date-fns tokens (lowercase 'y' for year, 'd' for day) */
 export const ISO_DATE = 'yyyy-MM-dd';
 
 /**

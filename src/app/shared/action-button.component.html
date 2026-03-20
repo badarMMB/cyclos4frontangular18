@@ -1,0 +1,27 @@
+<button
+  #button
+  type="button"
+  class="btn d-flex justify-content-center align-items-center w-100 h-100"
+  [ngClass]="{
+    'link-with-icon': icon,
+    'btn-flat': actionKind === 'flat',
+    'btn-primary': actionKind !== 'flat' && !outline,
+    'btn-outline-primary': actionKind !== 'flat' && outline,
+    'btn-action-primary': actionKind === 'primary'
+  }"
+  (click)="onClick($event); $event.stopPropagation()"
+  [disabled]="disabled">
+  @if (disabled && (showSpinner$ | async)) {
+    <span
+      class="spinner-border spinner-border-sm"
+      role="status"
+      [ngClass]="{ 'mr-2': icon || label }"
+    aria-hidden="true"></span>
+  }
+  @if (icon) {
+    <icon [icon]="icon"></icon>
+  }
+  @if (label) {
+    <span>{{ label }}</span>
+  }
+</button>

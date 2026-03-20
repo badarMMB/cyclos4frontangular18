@@ -1,0 +1,67 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="data.type.pluralName"
+      [mobileHeading]="data.type.pluralName"
+      [headingActions]="headingActions$ | async">
+      @if (data.user && !authHelper.isSelf(data.user)) {
+        <user-info [user]="data.user"></user-info>
+        <hr />
+      }
+      @for (row of results$ | async; track row; let first = $first) {
+        @if (!first) {
+          <hr />
+        }
+        <label-value [label]="i18n.general.creationDate">
+          {{ row.creationDate | dateTime }}
+        </label-value>
+        <label-value [label]="i18n.record.createdBy">
+          {{ row.createdBy.display }}
+        </label-value>
+        @if (row.lastModifiedBy) {
+          <label-value [label]="i18n.record.lastModificationDate">
+            {{ row.lastModificationDate | dateTime }}
+          </label-value>
+        }
+        @if (row.lastModifiedBy) {
+          <label-value [label]="i18n.record.lastModifiedBy">
+            {{ row.lastModifiedBy.display }}
+          </label-value>
+        }
+        @for (field of fieldsInList; track field) {
+          <label-value [label]="field.name">
+            <format-field-value
+              [fields]="data.customFields"
+              [plainText]="true"
+              [fieldName]="field.internalName"
+              [object]="row"
+              [customValues]="row.customValues">
+            </format-field-value>
+          </label-value>
+        }
+        <actions class="mb-3">
+          @if (data.edit) {
+            <action-button
+              [disabled]="requesting$ | async"
+              (action)="router.navigate(editPath(row))"
+              [label]="i18n.general.edit">
+            </action-button>
+          }
+          <action-button
+            [disabled]="requesting$ | async"
+            (action)="router.navigate(viewPath(row))"
+            [label]="i18n.general.view">
+          </action-button>
+          @if (data.remove) {
+            <action-button
+              outline
+              [disabled]="requesting$ | async"
+              (action)="remove(row)"
+              [label]="i18n.general.remove">
+            </action-button>
+          }
+        </actions>
+      }
+    </page-content>
+  }
+</page-layout>

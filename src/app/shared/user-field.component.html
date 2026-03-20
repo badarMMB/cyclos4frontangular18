@@ -1,0 +1,102 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <ng-container *ngTemplateOutlet="widget"></ng-container>
+}
+
+<ng-template #widget>
+  <div class="d-flex mw-100 w-100">
+    <div class="d-flex flex-grow-1 mw-100">
+      <div
+        style="position: relative"
+        class="w-100 d-flex align-items-center"
+        dropdown
+        #dropdown="bs-dropdown"
+        [autoClose]="false"
+        [insideClick]="false"
+        (onShown)="onShown()"
+        (onHidden)="onHidden()">
+        @if (selection$ | async) {
+          <chip [image]="user.image" [icon]="SvgIcon.Person" (close)="select(null)">
+            @if (user?.locatorPrincipal?.value) {
+              {{ user.locatorPrincipal.value }} - {{ user.display }}
+            } @else {
+              {{ user.display }}
+            }
+          </chip>
+        }
+
+        @if ((selection$ | async) == null) {
+          <input
+            #inputField
+            class="form-control"
+            autocomplete="off"
+            [placeholder]="placeholder"
+            [formControl]="inputFieldControl"
+            (focus)="onInputFocus()"
+            (blur)="onInputBlur()"
+            [ngClass]="{
+              'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+            }" />
+        }
+
+        <div
+          #dropDownMenu
+          class="dropdown-menu"
+          *dropdownMenu
+          role="listbox"
+          [attr.id]="dropdownMenuId"
+          attr.aria-labelledby="id"
+          (click)="$event.preventDefault(); $event.stopPropagation()">
+          @for (user of options$ | async; track user; let i = $index) {
+            <a
+              class="select-option"
+              [ngClass]="ngClassFor(user, i)"
+              href="#"
+              (click)="select(user); $event.stopPropagation(); $event.preventDefault()">
+              {{ user.display }}
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+    @if (user == null && (allowContacts || allowQrCode || !allowSearch)) {
+      <div class="d-flex">
+        @if (allowLocate && !allowSearch) {
+          <button
+            type="button"
+            class="btn btn-icon ml-2"
+            [tooltip]="i18n.field.user.locateTooltip"
+            (click)="locateUser()">
+            <icon [icon]="SvgIcon.Search"></icon>
+          </button>
+        }
+        @if (allowContacts) {
+          <button
+            type="button"
+            class="btn btn-icon ml-2"
+            #contactListButton
+            [tooltip]="i18n.field.user.contactTooltip"
+            (click)="showContactList()">
+            <icon [icon]="SvgIcon.Book"></icon>
+          </button>
+        }
+        @if (allowQrCode) {
+          <button
+            type="button"
+            class="btn btn-icon ml-2"
+            #scanQrCodeButton
+            [tooltip]="i18n.field.user.scanQrCodeTooltip"
+            (click)="showScanQrCode()">
+            <icon [icon]="SvgIcon.QrCodeScan"></icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  <field-errors [control]="formControl"></field-errors>
+</ng-template>
+
+<ng-template #autocomplete> </ng-template>

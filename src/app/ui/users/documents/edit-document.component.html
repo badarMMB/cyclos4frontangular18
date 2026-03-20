@@ -1,0 +1,89 @@
+<page-layout [ready]="data$ | async">
+  <page-content
+    [heading]="create ? i18n.document.title['new'] : i18n.document.title.edit"
+    [mobileHeading]="create ? i18n.document.mobileTitle['new'] : i18n.document.mobileTitle.edit">
+    @if (data) {
+      <ng-container [formGroup]="form">
+        @if (data.user) {
+          <label-value [label]="i18n.general.user" kind="fieldView" labelPosition="side">
+            <user-link [user]="data.user"></user-link>
+          </label-value>
+        }
+        <input-field fieldSize="full" required formControlName="name" [label]="i18n.general.name"> </input-field>
+        @if (data.kind !== DocumentKind.USER) {
+          <input-field
+            fieldSize="full"
+            formControlName="internalName"
+            [label]="i18n.general.internalName">
+        </input-field>
+      }
+      <textarea-field formControlName="description" [label]="i18n.general.description"> </textarea-field>
+      @if (data.kind != DocumentKind.USER) {
+        <single-selection-field
+          required
+          formControlName="category"
+          [label]="i18n.general.category">
+          @for (c of data.categories; track c) {
+            <field-option
+              [value]="c.id"
+              [internalName]="c.internalName"
+            [text]="c.name"></field-option>
+          }
+        </single-selection-field>
+      }
+      <boolean-field formControlName="enabled" [label]="i18n.document.enable"> </boolean-field>
+      @if (data.kind === DocumentKind.STATIC) {
+        <boolean-field
+          formControlName="publiclyAccessible"
+          [label]="i18n.document.publiclyAccessible">
+        </boolean-field>
+      }
+      @if (downloadUrl$ | async) {
+        <label-value [label]="i18n.general.downloadUrl">
+          {{ downloadUrl }}
+        </label-value>
+      }
+      @if (data.kind === DocumentKind.USER) {
+        <boolean-field
+          formControlName="userVisible"
+          [label]="i18n.document.userVisible">
+        </boolean-field>
+      }
+      @if (data.kind === DocumentKind.USER) {
+        <boolean-field
+          formControlName="brokerVisible"
+          [label]="i18n.document.brokerVisible">
+        </boolean-field>
+      }
+      @if (form.controls.brokerVisible.value) {
+        <boolean-field
+          formControlName="brokerManageable"
+          [label]="i18n.document.brokerManageable">
+        </boolean-field>
+      }
+      @if (!create && (fileName$ | async)) {
+        <label-value [label]="i18n.document.document" kind="field">
+          <div>
+            <span> {{ fileName$ | async }} </span>
+            <button
+              type="button"
+              [tooltip]="i18n.general.download"
+              class="btn btn-icon ml-2"
+              (click)="download(); $event.stopPropagation()">
+              <icon [icon]="SvgIcon.Download"></icon>
+            </button>
+          </div>
+        </label-value>
+      }
+      <file-field
+        [required]="create"
+        [label]="create || (fileName$ | async) !== null ? i18n.document.newDocument : i18n.document.replaceDocument"
+        [formControl]="fileControl">
+      </file-field>
+    </ng-container>
+  }
+  <actions>
+    <action-button (action)="save()" [disabled]="requesting$ | async" [label]="i18n.general.save"> </action-button>
+  </actions>
+</page-content>
+</page-layout>

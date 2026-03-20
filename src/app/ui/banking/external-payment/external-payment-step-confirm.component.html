@@ -1,0 +1,68 @@
+@if (!fromSelf && fromUser) {
+  <label-value [label]="i18n.transaction.fromUser">
+    <user-link [user]="fromUser"></user-link>
+  </label-value>
+}
+@if (fromSystem) {
+  <label-value [label]="i18n.transaction.fromAccount">
+    {{ preview.fromAccount.type.name }}
+  </label-value>
+}
+<label-value [label]="preview.toPrincipalType?.name">
+  {{ preview.payment.toPrincipalValue }}
+</label-value>
+@if (showPaymentType) {
+  <label-value [label]="i18n.transaction.type">
+    {{ preview.paymentType.name }}
+  </label-value>
+}
+@if (preview.mainAmount != null && preview.totalAmount !== preview.mainAmount) {
+  <label-value
+    [label]="i18n.transaction.amount">
+    {{ preview.mainAmount | currency : preview.currency }}
+  </label-value>
+}
+@if (fees?.length > 0) {
+  <label-value [label]="i18n.transaction.appliedFees">
+    @for (feePreview of fees; track feePreview) {
+      <div class="row no-gutters align-items-end">
+        <div class="col-3">{{ feePreview.fee.name }}:</div>
+        <div class="col pl-1">{{ feePreview.amount | currency : preview.currency }}</div>
+      </div>
+    }
+  </label-value>
+}
+@for (fv of preview.customValues; track fv) {
+  <custom-field-value [fieldValue]="fv"> </custom-field-value>
+}
+@if (preview.payment.description) {
+  <label-value
+    [label]="i18n.general.description"
+    [value]="preview.payment.description"
+  valueFormat="break"></label-value>
+}
+@if (layout.gtxxs$ | async) {
+  <hr />
+}
+<label-value class="totalAmount" [label]="i18n.transaction.totalAmount">
+  {{ preview.totalAmount | currency : preview.currency }}
+</label-value>
+@if ((preview.confirmationMessage || '').length > 0) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <div class="break-nl">{{ preview.confirmationMessage }}</div>
+}
+@if (preview.confirmationPasswordInput) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <confirmation-password
+    focused
+    [formControl]="form.get('confirmationPassword')"
+    [passwordInput]="preview.confirmationPasswordInput"
+    [createDeviceConfirmation]="createDeviceConfirmation"
+    (showSubmit)="showSubmit.emit($event)"
+    (confirmed)="confirmed.emit($event)">
+  </confirmation-password>
+}

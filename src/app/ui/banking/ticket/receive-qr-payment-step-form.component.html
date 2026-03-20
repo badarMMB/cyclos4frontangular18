@@ -1,0 +1,55 @@
+<ng-container [formGroup]="form">
+  @if (!singleAccount) {
+    <radio-group-field
+      formControlName="account"
+      [label]="i18n.transaction.toAccount"
+      required
+      asColumn>
+      @for (acc of data.accounts; track acc) {
+        <field-option [value]="acc.id" [text]="acc.type.name"></field-option>
+      }
+    </radio-group-field>
+  }
+
+  @if (transferTypes?.length > 1) {
+    <single-selection-field formControlName="type" [label]="i18n.transaction.type">
+      @for (tt of transferTypes; track tt) {
+        <field-option [value]="tt.id" [text]="tt.name"></field-option>
+      }
+    </single-selection-field>
+  }
+
+  @if (typeData?.fixedAmount) {
+    <label-value kind="fieldView" [label]="i18n.transaction.amount">
+      {{ typeData.fixedAmount | currency : currency }}
+    </label-value>
+  } @else {
+    <decimal-field
+      formControlName="amount"
+      focused
+      [label]="i18n.transaction.amount"
+      required
+      [prefix]="currency?.prefix"
+      [suffix]="currency?.suffix"
+      [scale]="currency?.decimalDigits">
+    </decimal-field>
+  }
+
+  @if (typeData?.customFields?.length > 0) {
+    <ng-container [formGroup]="form.controls.customValues">
+      @for (cf of typeData.customFields; track cf) {
+        <custom-field-input
+          [formControlName]="cf.internalName"
+        [field]="cf"></custom-field-input>
+      }
+    </ng-container>
+  }
+
+  @if (typeData?.descriptionAvailability !== 'disabled') {
+    <textarea-field
+      formControlName="description"
+      [label]="i18n.general.description"
+      [required]="typeData?.descriptionAvailability === 'required'">
+    </textarea-field>
+  }
+</ng-container>

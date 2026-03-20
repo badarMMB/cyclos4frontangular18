@@ -1,0 +1,10 @@
+<page-layout [ready]="data$ | async" size="medium" hideMenu>
+  @if (data) {
+    <page-content>
+      <registration-step-done [result]="result"></registration-step-done>
+      <actions>
+        <action-button (action)="goToLogin()" [label]="i18n.menu.login"> </action-button>
+      </actions>
+    </page-content>
+  }
+</page-layout>

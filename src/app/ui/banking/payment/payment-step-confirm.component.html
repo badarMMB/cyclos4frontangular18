@@ -1,0 +1,187 @@
+@if (preview.pendingAuthorization) {
+  <notification class="mb-3" type="warning">
+    {{ i18n.transaction.requiresAuthorization }}
+  </notification>
+}
+
+<!-- From/To operator -->
+@if (preview.fromOperator) {
+  <label-value [label]="i18n.general.performedBy">
+    <user-link [user]="preview.fromOperator"></user-link>
+  </label-value>
+}
+@if (preview.toOperator) {
+  <label-value [label]="i18n.transaction.receivedBy">
+    <user-link [user]="preview.toOperator"></user-link>
+  </label-value>
+}
+
+@if (fromSelf && toSelf) {
+  <!-- For payments between own accounts, show the account names -->
+  <label-value [label]="i18n.transaction.fromAccount">
+    {{ preview.fromAccount.type.name }}
+  </label-value>
+  <label-value [label]="i18n.transaction.toAccount">
+    {{ preview.toAccount.type.name }}
+  </label-value>
+}
+
+<!-- From -->
+@if (preview.payment.fromName) {
+  <label-value [label]="i18n.transaction.from">
+    <user-link [user]="fromUser" [hideLink]="fromSelf" [hideIcon]="fromSelf" [display]="preview.payment.fromName">
+    </user-link>
+  </label-value>
+} @else {
+  @if (fromUser) {
+    @if (!fromSelf) {
+      <label-value [label]="i18n.transaction.fromUser">
+        <user-link [user]="fromUser"></user-link>
+      </label-value>
+    }
+  } @else {
+    <label-value [label]="i18n.transaction.fromAccount">
+      {{ preview.fromAccount.type.name }}
+    </label-value>
+  }
+}
+
+<!-- To -->
+@if (preview.payment.toName) {
+  <label-value [label]="i18n.transaction.to">
+    <user-link [user]="toUser" [display]="preview.payment.toName"></user-link>
+  </label-value>
+} @else {
+  @if (!(fromSelf && toSelf)) {
+    @if (toUser) {
+      <label-value [label]="i18n.transaction.toUser">
+        <user-link [user]="toUser"></user-link>
+      </label-value>
+    } @else {
+      <label-value [label]="i18n.transaction.toAccount">
+        {{ preview.toAccount.type.name }}
+      </label-value>
+    }
+  }
+}
+
+@if (showPaymentType) {
+  <label-value [label]="i18n.transaction.type">
+    {{ preview.paymentType.name }}
+  </label-value>
+}
+@if (preview.mainAmount != null && preview.totalAmount !== preview.mainAmount) {
+  <label-value
+    [label]="i18n.transaction.amount">
+    {{ preview.mainAmount | currency : preview.currency }}
+  </label-value>
+}
+@if (fees?.length > 0) {
+  <label-value [label]="i18n.transaction.appliedFees">
+    @for (feePreview of fees; track feePreview) {
+      <div class="row no-gutters align-items-end">
+        <div class="col-3">{{ feePreview.fee.name }}:</div>
+        <div class="col pl-1">{{ feePreview.amount | currency : preview.currency }}</div>
+      </div>
+    }
+  </label-value>
+}
+@for (fv of preview.customValues; track fv) {
+  <custom-field-value [fieldValue]="fv"> </custom-field-value>
+}
+@if (preview.installments?.length === 1) {
+  <label-value [label]="i18n.transaction.dueDate">
+    {{ preview.installments[0].dueDate | date }}
+  </label-value>
+}
+@if (preview.installments?.length > 1) {
+  <label-value [label]="i18n.transaction.installments">
+    <table class="table table-hover">
+      @if (layout.gtxs$ | async) {
+        <thead>
+          <th>{{ i18n.transaction.installmentNumber }}</th>
+          <th>{{ i18n.transaction.dueDate }}</th>
+          <th class="text-right">{{ i18n.transaction.amount }}</th>
+        </thead>
+      }
+      <tbody>
+        @for (installment of preview.installments; track installment) {
+          <tr>
+            <td>
+              {{ installment.number }}
+            </td>
+            <td>
+              {{ installment.dueDate | date }}
+            </td>
+            <td class="text-right">
+              {{ installment.mainAmount | currency : preview.currency }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </label-value>
+}
+@if (preview.payment.scheduling === 'recurring') {
+  <label-value [label]="i18n.transaction.recurringPayment">
+    @if (preview.payment.firstOccurrenceDate == null) {
+      @if (preview.payment.occurrencesCount == null) {
+        {{ i18n.transaction.recurringPaymentNowManual }}
+      }
+      @if (preview.payment.occurrencesCount != null) {
+        {{ i18n.transaction.recurringPaymentNowFixed(preview.payment.occurrencesCount) }}
+      }
+    } @else {
+      @if (preview.payment.occurrencesCount == null) {
+        {{ i18n.transaction.recurringPaymentDateManual(preview.payment.firstOccurrenceDate | date) }}
+      }
+      @if (preview.payment.occurrencesCount != null) {
+        {{
+        i18n.transaction.recurringPaymentDateFixed({
+        date: preview.payment.firstOccurrenceDate | date,
+        count: preview.payment.occurrencesCount
+        })
+        }}
+      }
+    }
+    <ng-container>
+      <br />
+      {{
+      i18n.transaction.recurringPaymentOccurrenceInterval(format.formatTimeInterval(preview.payment.occurrenceInterval))
+      }}
+    </ng-container>
+  </label-value>
+}
+@if (preview.payment.description) {
+  <label-value
+    [label]="i18n.general.description"
+    [value]="preview.payment.description"
+  valueFormat="break"></label-value>
+}
+@if (layout.gtxxs$ | async) {
+  <hr />
+}
+<label-value class="totalAmount" [label]="i18n.transaction.totalAmount">
+  {{ preview.totalAmount | currency : preview.currency }}
+</label-value>
+@if ((preview.confirmationMessage || '').length > 0) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <div class="break-nl">{{ preview.confirmationMessage }}</div>
+}
+@if (preview.confirmationPasswordInput) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <confirmation-password
+    focused
+    [formControl]="form.get('confirmationPassword')"
+    [pos]="pos"
+    [passwordInput]="preview.confirmationPasswordInput"
+    [createDeviceConfirmation]="createDeviceConfirmation"
+    (showSubmit)="showSubmit.emit($event)"
+    (confirmed)="confirmed.emit($event)"
+    [paymentPreview]="preview">
+  </confirmation-password>
+}

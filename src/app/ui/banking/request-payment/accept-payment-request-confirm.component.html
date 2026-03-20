@@ -1,0 +1,176 @@
+@if (preview.pendingAuthorization) {
+  <notification class="mb-3" type="warning">
+    {{ i18n.transaction.requiresAuthorization }}
+  </notification>
+}
+
+@if (!fromSelf && fromUser) {
+  <label-value [label]="i18n.transaction.fromUser">
+    <user-link [user]="fromUser"></user-link>
+  </label-value>
+}
+@if (fromSystem) {
+  <label-value [label]="i18n.transaction.fromAccount">
+    {{ preview.fromAccount.type.name }}
+  </label-value>
+}
+@if (toUser) {
+  <label-value [label]="i18n.transaction.toUser">
+    <user-link [user]="toUser"></user-link>
+  </label-value>
+}
+@if (toSystem) {
+  <label-value [label]="i18n.transaction.toAccount">
+    {{ preview.toAccount.type.name }}
+  </label-value>
+}
+@if (showPaymentType) {
+  <label-value [label]="i18n.transaction.type">
+    {{ preview.paymentType.name }}
+  </label-value>
+}
+@if (preview.mainAmount != null && preview.totalAmount !== preview.mainAmount) {
+  <label-value
+    [label]="i18n.transaction.amount">
+    {{ preview.mainAmount | currency : preview.currency }}
+  </label-value>
+}
+@if (fees?.length > 0) {
+  <label-value [label]="i18n.transaction.appliedFees">
+    @for (feePreview of fees; track feePreview) {
+      <div class="row no-gutters align-items-end">
+        <div class="col-3">{{ feePreview.fee.name }}:</div>
+        <div class="col pl-1">{{ feePreview.amount | currency : preview.currency }}</div>
+      </div>
+    }
+  </label-value>
+}
+@for (fv of preview.customValues; track fv) {
+  <custom-field-value [fieldValue]="fv"> </custom-field-value>
+}
+@if (preview.installments?.length === 1) {
+  <label-value [label]="i18n.transaction.dueDate">
+    {{ preview.installments[0].dueDate | date }}
+  </label-value>
+}
+@if (preview.installments?.length > 1) {
+  <label-value [label]="i18n.transaction.installments">
+    <table class="table table-hover">
+      @if (layout.gtxs$ | async) {
+        <thead>
+          <th>{{ i18n.transaction.installmentNumber }}</th>
+          <th>{{ i18n.transaction.dueDate }}</th>
+          <th class="text-right">{{ i18n.transaction.amount }}</th>
+        </thead>
+      }
+      <tbody>
+        @for (installment of preview.installments; track installment) {
+          <tr>
+            <td>
+              {{ installment.number }}
+            </td>
+            <td>
+              {{ installment.dueDate | date }}
+            </td>
+            <td class="text-right">
+              {{ installment.mainAmount | currency : preview.currency }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </label-value>
+}
+@if (preview.payment.scheduling === 'recurring') {
+  <label-value [label]="i18n.transaction.recurringPayment">
+    @if (preview.payment.firstOccurrenceDate == null) {
+      @if (preview.payment.occurrencesCount == null) {
+        {{ i18n.transaction.recurringPaymentNowManual }}
+      }
+      @if (preview.payment.occurrencesCount != null) {
+        {{ i18n.transaction.recurringPaymentNowFixed(preview.payment.occurrencesCount) }}
+      }
+    } @else {
+      @if (preview.payment.occurrencesCount == null) {
+        {{ i18n.transaction.recurringPaymentDateManual(preview.payment.firstOccurrenceDate | date) }}
+      }
+      @if (preview.payment.occurrencesCount != null) {
+        {{
+        i18n.transaction.recurringPaymentDateFixed({
+        date: preview.payment.firstOccurrenceDate | date,
+        count: preview.payment.occurrencesCount
+        })
+        }}
+      }
+    }
+    @if (preview.payment.occurrenceInterval) {
+      <label-value [label]="i18n.transaction.occurrenceInterval">
+        {{ format.formatTimeInterval(preview.payment.occurrenceInterval) }}
+      </label-value>
+    }
+  </label-value>
+}
+@if (preview.payment.description) {
+  <label-value
+    [label]="i18n.general.description"
+    [value]="preview.payment.description"
+  valueFormat="break"></label-value>
+}
+@if (layout.gtxxs$ | async) {
+  <hr />
+}
+<label-value class="totalAmount" [label]="i18n.transaction.totalAmount">
+  {{ preview.totalAmount | currency : preview.currency }}
+</label-value>
+@if ((preview.confirmationMessage || '').length > 0) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <div class="break-nl">{{ preview.confirmationMessage }}</div>
+}
+<ng-container [formGroup]="form">
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <label-value kind="fieldView" [label]="i18n.general.expirationDate">
+    {{ preview.paymentRequest.expirationDate | date }}
+  </label-value>
+
+  <single-selection-field [label]="i18n.transaction.scheduling" [formControl]="scheduleTo">
+    <field-option [value]="PaymentRequestScheduledTo.NOW" [text]="i18n.transaction.paymentRequestSchedulingNow">
+    </field-option>
+    <field-option [value]="PaymentRequestScheduledTo.DATE" [text]="i18n.transaction.paymentRequestSchedulingDate">
+    </field-option>
+    <field-option
+      [value]="PaymentRequestScheduledTo.EXPIRY"
+      [text]="
+        i18n.transaction.paymentRequestSchedulingExpiration(format.formatAsDate(preview.paymentRequest.expirationDate))
+      ">
+    </field-option>
+  </single-selection-field>
+
+  @if ((scheduleTo.valueChanges | async) === PaymentRequestScheduledTo.DATE) {
+    <date-field
+      formControlName="processDate"
+      [label]="i18n.transaction.processDate"
+      minDate="tomorrow"
+      [maxDate]="preview.paymentRequest.expirationDate"
+      [tooltip]="i18n.transaction.processDateTooltip">
+    </date-field>
+  }
+
+  <textarea-field [label]="i18n.general.comments" formControlName="comments"> </textarea-field>
+  @if (preview.confirmationPasswordInput) {
+    @if (layout.gtxxs$ | async) {
+      <hr />
+    }
+    <confirmation-password
+      focused
+      formControlName="confirmationPassword"
+      [passwordInput]="preview.confirmationPasswordInput"
+      [createDeviceConfirmation]="createDeviceConfirmation"
+      (showSubmit)="showSubmit.emit($event)"
+      (confirmed)="confirmed.emit($event)">
+    </confirmation-password>
+  }
+</ng-container>

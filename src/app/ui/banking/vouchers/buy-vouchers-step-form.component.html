@@ -1,0 +1,104 @@
+<ng-container [formGroup]="form">
+  @if (data.user && !authHelper.isSelf(data.user)) {
+    <user-info [user]="data.user"></user-info>
+  }
+  <!-- description + image -->
+  <label-value [label]="i18n.voucher.originAccount" kind="fieldView">
+    {{ data.account.type.name }}
+  </label-value>
+  <label-value [label]="i18n.account.availableBalance" kind="fieldView">
+    {{ data.account.status.availableBalance | currency : currency }}
+  </label-value>
+  @if (data.minimumTimeToRedeem) {
+    <label-value kind="fieldView" [label]="i18n.voucher.buy.minTimeToRedeem">
+      {{ i18n.voucher.buy.minTimeToRedeemAfterBuy(format.formatTimeInterval(data.minimumTimeToRedeem)) }}
+    </label-value>
+  }
+  @if (data.expirationDate) {
+    <label-value kind="fieldView" [label]="i18n.general.expirationDate">
+      {{ data.expirationDate | date }}
+    </label-value>
+  }
+  @if (data.redeemOnWeekDays) {
+    <label-value kind="fieldView" [label]="i18n.voucher.redeem.onDays">
+      {{ format.formatWeekDays(data.redeemOnWeekDays) || i18n.voucher.redeem.onDaysAny }}
+    </label-value>
+  }
+  @if (data.type.maxVouchersPerBuy == null || data.type.maxVouchersPerBuy > 1) {
+    <input-field
+      type="number"
+      formControlName="count"
+      required
+      fieldSize="small"
+      [label]="i18n.voucher.numberOfVouchers">
+  </input-field>
+}
+@if (fixedAmount) {
+  <label-value kind="fieldView" [label]="countLabel$ | async">
+    {{ fixedAmount | currency : currency }}
+  </label-value>
+} @else {
+  <label-value kind="field" required [label]="countLabel$ | async" fieldSize="medium">
+    <decimal-field
+      formControlName="amount"
+      [prefix]="currency.prefix"
+      required
+      [suffix]="currency.suffix"
+      [scale]="currency.decimalDigits">
+    </decimal-field>
+  </label-value>
+  @if (data.amountRange?.min && data.amountRange?.max) {
+    <label-value
+      kind="fieldView"
+      [label]="i18n.voucher.buy.amountRange"
+      [value]="
+        format.formatRange({
+          min: data.amountRange.min | currency : currency,
+          max: data.amountRange.max | currency : currency
+        })
+      ">
+    </label-value>
+  }
+  @if (data.amountRange?.min && !data.amountRange?.max) {
+    <label-value
+      kind="fieldView"
+      [label]="i18n.voucher.buy.minimumAmount"
+      [value]="data.amountRange.min | currency : currency">
+    </label-value>
+  }
+  @if (!data.amountRange?.min && data.amountRange?.max) {
+    <label-value
+      kind="fieldView"
+      [label]="i18n.voucher.buy.maximumAmount"
+      [value]="data.amountRange.max | currency : currency">
+    </label-value>
+  }
+}
+@if (data.type.gift === 'choose') {
+  <radio-group-field
+    asColumn
+    [label]="i18n.voucher.buy.usage"
+    formControlName="gift">
+    <field-option [value]="false" [text]="i18n.voucher.buy.usageSelf"> </field-option>
+    <field-option [value]="true" [text]="i18n.voucher.buy.usageGift"> </field-option>
+  </radio-group-field>
+}
+@if (data.type.gift === 'never') {
+  <label-value
+    kind="fieldView"
+    [label]="i18n.voucher.buy.usage"
+  [value]="i18n.voucher.buy.usageAlwaysSelf"></label-value>
+}
+@for (cf of data.paymentCustomFields; track cf) {
+  <custom-field-input
+    [field]="cf"
+    [formControl]="form.controls.paymentCustomValues.get(cf.internalName)">
+  </custom-field-input>
+}
+@for (cf of data.voucherCustomFields; track cf) {
+  <custom-field-input
+    [field]="cf"
+    [formControl]="form.controls.voucherCustomValues.get(cf.internalName)">
+  </custom-field-input>
+}
+</ng-container>

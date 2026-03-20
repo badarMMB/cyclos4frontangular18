@@ -1,0 +1,56 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content [heading]="i18n.ad.title.answerQuestion" [mobileHeading]="i18n.ad.mobileTitle.answerQuestion">
+      @if (data.advertisement.image && (layout.ltsm$ | async)) {
+        <div class="d-flex justify-content-center mt-2 mb-4">
+          <avatar-lightbox
+            [roundBorders]="false"
+            [zoom]="false"
+            size="120"
+          [image]="data.advertisement.image"></avatar-lightbox>
+        </div>
+      }
+      <div class="d-flex flex-row-reverse">
+        @if (data.advertisement.image && (layout.gtxs$ | async)) {
+          <div class="image ml-4">
+            <avatar-lightbox [roundBorders]="false" [zoom]="false" size="120" [image]="data.advertisement.image">
+            </avatar-lightbox>
+          </div>
+        }
+        <div class="d-flex flex-grow-1 flex-column">
+          <label-value [label]="i18n.ad.name">
+            {{ data.advertisement.name }}
+          </label-value>
+          <label-value [label]="i18n.general.by">
+            <user-link [user]="data.user"></user-link>
+          </label-value>
+          <label-value [label]="i18n.general.date">
+            {{ data.questionDate | dateTime }}
+          </label-value>
+          <label-value [label]="i18n.ad.question">
+            {{ data.question }}
+          </label-value>
+          <label-value
+            [ngClass]="{ 'pt-1': !data.answer }"
+            [label]="i18n.ad.answer"
+            [required]="!data.answer"
+            [forId]="'answer'">
+            @if (!data.answer) {
+              <textarea-field required="true" [formControl]="answer" [id]="'answer'">
+              </textarea-field>
+            }
+            @if (data.answer) {
+              {{ data.answer }}
+            }
+          </label-value>
+        </div>
+      </div>
+      @if (!data.answer) {
+        <actions>
+          <action-button [disabled]="requesting$ | async" (action)="submit()" [label]="i18n.general.submit">
+          </action-button>
+        </actions>
+      }
+    </page-content>
+  }
+</page-layout>

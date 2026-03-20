@@ -1,0 +1,22 @@
+:host {
+  display: inline-block;
+}
+
+.countdown-timer {
+  gap: 0.5rem;
+}
+
+.countdown-badge {
+  min-width: 3.6rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  border-radius: 0.65rem;
+}
+
+.countdown-badge-single {
+  min-width: auto;
+  padding-inline: 1rem;
+}

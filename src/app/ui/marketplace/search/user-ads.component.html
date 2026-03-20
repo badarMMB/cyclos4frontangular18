@@ -1,0 +1,74 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="filters"
+      [heading]="resolveHeading(false)"
+      [mobileHeading]="resolveHeading(true)"
+      [headingActions]="headingActions$ | async">
+      <div [formGroup]="form" class="filters-form filters-form-separator border-bottom">
+        <div class="row">
+          @if (!self) {
+            <div class="col-12 col-md-6">
+              <label-value [label]="i18n.general.user" kind="fieldView">
+                <user-link [user]="data.user"></user-link>
+              </label-value>
+            </div>
+          }
+          <div class="col-12 col-md-6">
+            <input-field formControlName="keywords" [label]="i18n.general.keywords" fieldSize="full"></input-field>
+          </div>
+          @if (!simple) {
+            <div class="col-12 col-md-6">
+              <input-field formControlName="productNumber" [label]="i18n.ad.productNumber" fieldSize="full"></input-field>
+            </div>
+          }
+          <div class="col-12 col-md-6">
+            <single-selection-field
+              formControlName="orderBy"
+              [label]="i18n.general.orderBy"
+              [emptyOption]="i18n.general.noOptionSelected">
+              <field-option value="date" [text]="i18n.ad.orderBy.date"> </field-option>
+              <field-option value="distance" [text]="i18n.ad.orderBy.distance"> </field-option>
+              <field-option value="priceDesc" [text]="i18n.ad.orderBy.priceDesc"> </field-option>
+              <field-option value="priceAsc" [text]="i18n.ad.orderBy.priceAsc"> </field-option>
+              <field-option value="relevance" [text]="i18n.ad.orderBy.relevance"> </field-option>
+            </single-selection-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <multi-selection-field
+              formControlName="statuses"
+              [label]="i18n.general.status"
+              [emptyLabel]="i18n.general.all">
+              <field-option value="active" [text]="i18n.ad.status.active"> </field-option>
+              @if (isManager) {
+                <field-option value="disabled" [text]="i18n.ad.status.disabled"> </field-option>
+              }
+              @if (canViewDraft) {
+                <field-option value="draft" [text]="i18n.ad.status.draft"> </field-option>
+              }
+              @if (canViewPending) {
+                <field-option value="pending" [text]="i18n.ad.status.pending"> </field-option>
+              }
+              <field-option value="expired" [text]="i18n.ad.status.expired"> </field-option>
+              <field-option value="hidden" [text]="i18n.ad.status.hidden"> </field-option>
+              <field-option value="scheduled" [text]="i18n.ad.status.scheduled"> </field-option>
+            </multi-selection-field>
+          </div>
+        </div>
+      </div>
+      <div class="filters-row">
+        <result-type-field [formControl]="resultTypeControl" [allowedResultTypes]="allowedResultTypes$ | async">
+        </result-type-field>
+      </div>
+    </page-content>
+    <ads-results
+      [results]="results$ | async"
+      [rendering$]="rendering$"
+      singleUser
+      [data]="data$ | async"
+      [resultType]="resultType$ | async"
+      (update)="update($event)">
+    </ads-results>
+  }
+</page-layout>
+

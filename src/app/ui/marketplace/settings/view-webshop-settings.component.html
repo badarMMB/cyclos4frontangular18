@@ -1,0 +1,37 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="viewForm"
+      [heading]="i18n.ad.title.webshopSettings"
+      [mobileHeading]="i18n.ad.mobileTitle.webshopSettings"
+      [headingActions]="headingActions$ | async">
+      @if (!self) {
+        <label-value [label]="i18n.general.user" labelPosition="side">
+          <user-link [user]="data.user"></user-link>
+        </label-value>
+      }
+      <label-value
+        [label]="i18n.ad.productNumber"
+        [value]="data.productNumberGenerated ? i18n.ad.generated : i18n.ad.manual">
+      </label-value>
+      @if (!data.productNumberGenerated) {
+        <label-value
+          [label]="i18n.ad.productNumberMask"
+          [value]="data.productNumberMask">
+        </label-value>
+      }
+      @if (!data.productNumberGenerated || data.customOrderNumberFormat) {
+        <hr />
+      }
+      <label-value
+        [label]="i18n.ad.orderNumber"
+        [value]="!data.customOrderNumberFormat ? i18n.ad.generated : i18n.ad.manual">
+      </label-value>
+      @if (data.customOrderNumberFormat) {
+        <label-value [label]="i18n.ad.prefix" [value]="data.orderNumberPrefix"> </label-value>
+        <label-value [label]="i18n.ad.length" [value]="data.orderNumberInnerLength"> </label-value>
+        <label-value [label]="i18n.ad.suffix" [value]="data.orderNumberSuffix"> </label-value>
+      }
+    </page-content>
+  }
+</page-layout>

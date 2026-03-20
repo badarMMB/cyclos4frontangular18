@@ -1,0 +1,57 @@
+<h1>{{ i18n.field.user.contactTitle }}</h1>
+
+@if ((results$ | async) === null) {
+  <spinner></spinner>
+} @else {
+  <div>
+    @for (row of (results$ | async)?.results; track row) {
+      <div class="mb-2">
+        <a (click)="emit(row); $event.preventDefault()" href="#">
+          {{ row.contact.display }}
+        </a>
+      </div>
+    }
+  </div>
+  <actions kind="secondary" forceRow>
+    @if (results$.value.hasNext) {
+      <action-button (action)="update(1)" outline [label]="i18n.general.next">
+      </action-button>
+    }
+    @if (!results$.value.hasNext) {
+      <span></span>
+    }
+    @if (currentPage > 0) {
+      <action-button (action)="update(-1)" outline [label]="i18n.general.previous">
+      </action-button>
+    }
+  </actions>
+}
+
+<ng-template #results>
+  <div>
+    @for (row of (results$ | async)?.results; track row) {
+      <div class="mb-2">
+        <a (click)="emit(row); $event.preventDefault()" href="#">
+          {{ row.contact.display }}
+        </a>
+      </div>
+    }
+  </div>
+  <actions kind="secondary" forceRow>
+    @if (results$.value.hasNext) {
+      <action-button (action)="update(1)" outline [label]="i18n.general.next">
+      </action-button>
+    }
+    @if (!results$.value.hasNext) {
+      <span></span>
+    }
+    @if (currentPage > 0) {
+      <action-button (action)="update(-1)" outline [label]="i18n.general.previous">
+      </action-button>
+    }
+  </actions>
+</ng-template>
+
+<actions>
+  <action-button class="d-block w-100" (action)="modalRef.hide()" [label]="i18n.general.cancel"> </action-button>
+</actions>

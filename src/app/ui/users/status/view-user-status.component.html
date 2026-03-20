@@ -1,0 +1,30 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="operator ? i18n.userStatus.title.statusOperator : i18n.userStatus.title.statusUser"
+      [mobileHeading]="operator ? i18n.userStatus.mobileTitle.statusOperator : i18n.userStatus.mobileTitle.statusUser"
+      [headingActions]="headingActions$ | async">
+      <user-info [user]="data.user"></user-info>
+      <label-value [label]="i18n.userStatus.current">
+        {{ userHelper.userStatus(data.status) }}
+      </label-value>
+      @if (editable) {
+        <hr />
+        <ng-container [formGroup]="form">
+          <single-selection-field formControlName="status" [label]="i18n.userStatus['new']" required>
+            @for (status of data.possibleNewStatuses; track status) {
+              <field-option
+                [value]="status"
+                [text]="userHelper.userStatus(status)">
+              </field-option>
+            }
+          </single-selection-field>
+          <textarea-field formControlName="comment" [label]="i18n.general.comments"></textarea-field>
+        </ng-container>
+        <actions>
+          <action-button (action)="save()" [label]="i18n.general.submit"> </action-button>
+        </actions>
+      }
+    </page-content>
+  }
+</page-layout>

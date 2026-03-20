@@ -1,0 +1,38 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="operator ? i18n.groupMembership.title.groupOperator : i18n.groupMembership.title.groupUser"
+    [mobileHeading]="
+      operator ? i18n.groupMembership.mobileTitle.groupOperator : i18n.groupMembership.mobileTitle.groupUser
+    "
+      [headingActions]="headingActions$ | async">
+      <user-info [user]="data.user"></user-info>
+      <label-value [label]="i18n.groupMembership.current">
+        {{ data.group ? data.group.name : i18n.user.operatorNoGroup }}
+      </label-value>
+      @if (editable) {
+        <hr />
+        <ng-container [formGroup]="form">
+          <single-selection-field
+            formControlName="group"
+            [label]="i18n.groupMembership['new']"
+            [required]="!allowEmptyGroup"
+            [emptyOption]="allowEmptyGroup ? i18n.user.operatorNoGroup : null">
+            @for (group of data.possibleNewGroups; track group) {
+              <field-option
+                [value]="ApiHelper.internalNameOrId(group)"
+                [id]="group.id"
+                [internalName]="group.internalName"
+                [text]="group.name">
+              </field-option>
+            }
+          </single-selection-field>
+          <textarea-field formControlName="comment" [label]="i18n.general.comments"></textarea-field>
+        </ng-container>
+        <actions>
+          <action-button (action)="save()" [label]="i18n.general.submit"> </action-button>
+        </actions>
+      }
+    </page-content>
+  }
+</page-layout>

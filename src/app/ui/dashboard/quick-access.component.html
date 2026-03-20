@@ -1,0 +1,37 @@
+<page-content
+  [heading]="i18n.dashboard.quickAccess"
+  hideBack
+  [mode]="(layout.xxs$ | async) ? 'fullHeightTight' : 'tight'"
+  [headingActions]="headingActions$ | async">
+  <div class="quick-access">
+    <div class="quick-access-container">
+      @for (action of actions; track action) {
+        @if (action.entry) {
+          <div class="quick-access-item-container" [ngClass]="itemClass$ | async">
+            <a
+              #anchor
+              [attr.href]="router.createUrlTree([action.url || action.entry.url])"
+              class="quick-access-item"
+              (click)="navigate(action, $event); blurIfClick(anchor, $event)">
+              <div class="quick-access-icon">
+                <icon [icon]="action.icon" size="2.2rem"></icon>
+              </div>
+              <div class="quick-access-text">
+                @if (shortcutKey(action)) {
+                  {{
+                  i18n.dashboard.quickAccessShortcutTemplate({
+                  shortcut: shortcutKey(action),
+                  label: action.label
+                  })
+                  }}
+                } @else {
+                  {{ action.label }}
+                }
+              </div>
+            </a>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</page-content>

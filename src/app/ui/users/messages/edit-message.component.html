@@ -1,0 +1,94 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="resolveTitle()"
+      [mobileHeading]="resolveMobileTitle()"
+      [headingActions]="headingActions$ | async">
+      @if (toUser) {
+        <label-value class="mb-1" [label]="i18n.message.sendTo">
+          <user-link [user]="toUser"></user-link>
+        </label-value>
+      }
+      <ng-container [formGroup]="form">
+        @if (destinations.length > 1 && toUser == null) {
+          <single-selection-field
+            formControlName="destination"
+            [label]="i18n.message.sendTo"
+            required>
+            @for (destination of destinations; track destination) {
+              <field-option
+                [value]="destination"
+                [text]="messageHelper.resolveDestination(destination)">
+              </field-option>
+            }
+          </single-selection-field>
+        }
+        @if (
+          (destinations.length === 1 && destinations[0] === MessageDestinationEnum.USER && toUser == null) ||
+          (form.controls.destination.valueChanges | async) === MessageDestinationEnum.USER
+          ) {
+          @if (maxRecipients === 1) {
+            <user-field
+              formControlName="toUsers"
+              [label]="i18n.message.messageDestination.user"
+              required>
+            </user-field>
+          }
+          @if (maxRecipients === 0 || maxRecipients > 1) {
+            <multiple-users-field
+              formControlName="toUsers"
+              [label]="i18n.message.toUsers"
+              required>
+            </multiple-users-field>
+          }
+        }
+        @if (
+          groups.length > 0 &&
+          ((destinations.length === 1 && destinations[0] === MessageDestinationEnum.GROUP) ||
+          (form.controls.destination.valueChanges | async) === MessageDestinationEnum.GROUP)
+          ) {
+          <multi-selection-field
+            formControlName="toGroups"
+            [emptyLabel]="i18n.general.notApplied"
+            [label]="i18n.message.toGroups"
+            required>
+            @for (group of groups; track group) {
+              <field-option
+                [value]="ApiHelper.internalNameOrId(group)"
+                [internalName]="group.internalName"
+                [id]="group.id"
+                [text]="group.name"
+                [parent]="group.groupSet">
+              </field-option>
+            }
+          </multi-selection-field>
+        }
+        @if (
+          categories.length > 0 &&
+          !reply &&
+          (dataForFrontendHolder.role === RoleEnum.ADMINISTRATOR ||
+          (destinations.length === 1 && destinations[0] === MessageDestinationEnum.SYSTEM) ||
+          (form.controls.destination.valueChanges | async) === MessageDestinationEnum.SYSTEM)
+          ) {
+          <single-selection-field
+            formControlName="category"
+            [label]="i18n.general.category"
+            required>
+            @for (category of categories; track category) {
+              <field-option
+                [value]="category.id"
+                [internalName]="category.internalName"
+                [text]="category.name">
+              </field-option>
+            }
+          </single-selection-field>
+        }
+        <input-field [label]="i18n.message.subject" formControlName="subject" required></input-field>
+        <html-field class="mt-2" formControlName="body" required></html-field>
+      </ng-container>
+      <actions forceRow>
+        <action-button [disabled]="requesting$ | async" (action)="send()" [label]="i18n.message.send"> </action-button>
+      </actions>
+    </page-content>
+  }
+</page-layout>

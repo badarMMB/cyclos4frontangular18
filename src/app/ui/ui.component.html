@@ -1,0 +1,33 @@
+@if ((initialized$ | async) && (i18n.initialized$ | async)) {
+  @if (dataForFrontendHolder.dataForFrontend?.dataForUi?.auth?.unauthorizedAddress !== true) {
+    <snack-bar #snackBar></snack-bar>
+    <sidenav #sidenav></sidenav>
+    <push-notifications #pushNotifications></push-notifications>
+    <div class="root-container">
+      <top-bar
+        [user]="login.user$ | async"
+        [breakpoints]="layout.breakpointChanges$ | async"
+        [activeMenu]="menu.activeMenu$ | async"
+      (toggleSidenav)="sidenav.toggle()"></top-bar>
+      @if (menuBar) {
+        <menu-bar
+          [ngClass]="{ 'd-none': layout.ltlg$ | async }"
+        [activeMenu]="menu.activeMenu$ | async"></menu-bar>
+      }
+      <div #mainContainer class="main-container container-md d-flex flex-column flex-grow-1">
+        @if ((loggingOut$ | async) === false) {
+          <router-outlet> </router-outlet>
+        }
+      </div>
+    </div>
+    @if ((uiLayout.fullWidth$ | async) === false) {
+      @if (dataForFrontendHolder.dataForFrontend?.footer; as footer) {
+        <div
+          class="footer"
+        [innerHTML]="footer | trust"></div>
+      }
+    }
+  }
+} @else {
+  <spinner></spinner>
+}

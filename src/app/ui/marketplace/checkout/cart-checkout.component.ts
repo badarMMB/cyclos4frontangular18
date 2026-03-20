@@ -1,0 +1,296 @@
+import { ChangeDetectionStrategy, Component, Injector, OnInit } from '@angular/core';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  Address,
+  DeliveryMethod,
+  DeliveryMethodTypeEnum,
+  DeviceConfirmationTypeEnum,
+  ShoppingCartCheckout,
+  ShoppingCartDataForCheckout
+} from 'app/api/models';
+import { ShoppingCartsService } from 'app/api/services/shopping-carts.service';
+import { empty, validateBeforeSubmit } from 'app/shared/helper';
+import { AddressHelperService } from 'app/ui/core/address-helper.service';
+import { MarketplaceHelperService } from 'app/ui/core/marketplace-helper.service';
+import { BasePageComponent } from 'app/ui/shared/base-page.component';
+import { ActiveMenu, Menu } from 'app/ui/shared/menu';
+import { cloneDeep } from 'lodash-es';
+import { BehaviorSubject } from 'rxjs';
+import { Validators } from '@angular/forms';
+import { PaymentSchedulingEnum, TransactionTypeData } from 'app/api/models';
+import { PaymentsService } from 'app/api/services/payments.service';
+import { first } from 'rxjs/operators';
+
+
+export type CheckoutStep = 'delivery' | 'address' | 'payment' | 'confirm';
+
+/**
+ * Component used to perform a checkout process (in multiple steps) after shopping cart.
+ */
+@Component({
+  selector: 'cart-checkout',
+  templateUrl: 'cart-checkout.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class CartCheckoutComponent extends BasePageComponent<ShoppingCartDataForCheckout> implements OnInit {
+  step$ = new BehaviorSubject<CheckoutStep>(null);
+  deliveryMethod$ = new BehaviorSubject<DeliveryMethod>(null);
+  address$ = new BehaviorSubject<Address>(null);
+  showSubmit$ = new BehaviorSubject(true);
+
+  form: UntypedFormGroup;
+  addressForm: UntypedFormGroup;
+  confirmationPassword: UntypedFormControl;
+  paymentTypeData$ = new BehaviorSubject<TransactionTypeData>(null);
+
+  constructor(
+  injector: Injector,
+  private shoppingCartService: ShoppingCartsService,
+  private paymentsService: PaymentsService,   // 👈
+  private addressHelper: AddressHelperService,
+  private marketplaceHelper: MarketplaceHelperService
+) { super(injector); }
+
+
+  ngOnInit() {
+    super.ngOnInit();
+    const id = this.route.snapshot.params.id;
+    this.addSub(this.shoppingCartService.getShoppingCartDataForCheckout({ id }).subscribe(data => (this.data = data)));
+  }
+
+  onDataInitialized(data: ShoppingCartDataForCheckout) {
+    const hasDeliveryMethods = !empty(data.deliveryMethods);
+    this.form = this.formBuilder.group({ remarks: null });
+    this.step = data.deliveryMethods.length > 1 ? 'delivery' : 'address';
+    this.addSub(this.form.get('scheduling').valueChanges.subscribe(() => this.adjustInstallmentsValidators()));
+    this.addSub(this.form.get('firstInstallmentIsNow').valueChanges.subscribe(() => this.adjustInstallmentsValidators()));
+    
+
+
+    // The confirmation password is hold in a separated control
+    this.confirmationPassword = this.formBuilder.control(null);
+    this.form.setControl('confirmationPassword', this.confirmationPassword);
+
+    // Delivery methods
+    if (hasDeliveryMethods) {
+      const deliveryField = this.formBuilder.control(data.deliveryMethods);
+      this.form.addControl('deliveryMethod', deliveryField);
+      this.addSub(deliveryField.valueChanges.subscribe(dm => this.updateDeliveryMethod(dm, data)));
+      deliveryField.setValue(data.deliveryMethods[0].id, { emitEvent: true });
+    }
+
+    // Addresses
+    const customAddress: Address = {
+      id: 'customAddress',
+      name: this.i18n.ad.customAddress
+    };
+    data.addresses.push(customAddress);
+    const addressField = this.formBuilder.control(data.addresses);
+    this.form.addControl('address', addressField);
+    this.addSub(addressField.valueChanges.subscribe(a => this.updateAddress(a, data)));
+    this.addressForm = this.addressHelper.addressFormGroup(data.addressConfiguration);
+    addressField.setValue(data.addresses[0].id, { emitEvent: true });
+
+    // Payment types
+     if (!empty(data.paymentTypes)) {
+  const paymentField = this.formBuilder.control(data.paymentTypes);
+  this.form.addControl('paymentType', paymentField);
+
+  this.addSub(
+    paymentField.valueChanges.subscribe((typeId: string) => {
+      // seller locator: mieux d’utiliser le même helper que device confirmation
+      const to = this.ApiHelper.accountOwner(this.data.cart.seller);
+
+      this.paymentsService
+        .dataForPerformPayment({ owner: 'self', to, type: typeId, fields: ['paymentTypeData'] })
+        .pipe(first())
+        .subscribe(res => {
+          this.paymentTypeData$.next(res.paymentTypeData);
+          this.adjustInstallmentsValidators(); // 👈
+        });
+    })
+  );
+
+  paymentField.setValue(data.paymentTypes[0].id, { emitEvent: true });
+}
+
+
+    // Scheduling / installments (like banking payment form)
+this.form.addControl('scheduling', this.formBuilder.control(PaymentSchedulingEnum.DIRECT, Validators.required));
+this.form.addControl('installmentsCount', this.formBuilder.control(null));
+this.form.addControl('firstInstallmentIsNow', this.formBuilder.control(true));
+this.form.addControl('firstInstallmentDate', this.formBuilder.control(null));
+
+  }
+
+  /**
+   * Changes the delivery method and updates the delivery information section
+   */
+  protected updateDeliveryMethod(id: string, data: ShoppingCartDataForCheckout) {
+    this.deliveryMethod = data.deliveryMethods.find(dm => dm.id === id);
+  }
+
+  /**
+   * Changes the address and updates the address fields section
+   */
+  protected updateAddress(id: string, data: ShoppingCartDataForCheckout) {
+    this.address = data.addresses.find(a => a.id === id);
+    if (this.address.id === 'customAddress') {
+      this.addressForm.reset();
+    } else {
+      this.addressForm.patchValue(this.address);
+    }
+  }
+
+  resolveMenu() {
+    return Menu.SHOPPING_CART;
+  }
+
+  /**
+   * Goes forward in the checkout process until confirmation
+   */
+  next() {
+    switch (this.step) {
+      case 'delivery':
+        this.step = 'address';
+        break;
+      case 'address':
+        this.step = this.data.paymentTypes.length > 1 ? 'payment' : 'confirm';
+        break;
+      case 'payment':
+        this.step = 'confirm';
+        break;
+      case 'confirm':
+        this.submit();
+        break;
+    }
+  }
+
+  /**
+   * Goes backward in the checkout process until the initial page (delivery or address)
+   */
+  back() {
+    switch (this.step) {
+      case 'confirm':
+        this.step = this.data.paymentTypes.length > 1 ? 'payment' : 'address';
+        break;
+      case 'payment':
+        this.step = 'address';
+        break;
+      case 'address':
+        if (this.data.deliveryMethods.length > 1) {
+          this.step = 'delivery';
+        }
+        break;
+    }
+  }
+
+  /**
+   * Finish the checkout process by submitting the order
+   */
+  submit(password?: string) {
+    if (password) {
+      this.confirmationPassword.setValue(password);
+    }
+    if (!validateBeforeSubmit(this.confirmationPassword)) {
+      return;
+    }
+
+    const checkout: ShoppingCartCheckout = cloneDeep(this.form.value);
+    delete checkout['address'];
+    checkout.deliveryAddress =
+      this.deliveryMethod !== null && this.deliveryMethod.deliveryType === DeliveryMethodTypeEnum.PICKUP
+        ? this.deliveryMethod.address
+        : this.addressForm.value;
+
+    this.addSub(
+      this.shoppingCartService
+        .checkoutShoppingCart({
+          id: this.data.cart.id,
+          body: checkout,
+          confirmationPassword: this.confirmationPassword.value
+        })
+        .subscribe(items => {
+          this.marketplaceHelper.cartItems = items;
+          this.notification.snackBar(this.i18n.ad.orderWaitingForSellersApproval);
+          this.menu.navigate({ menu: new ActiveMenu(Menu.PURCHASES), replaceUrl: true });
+        })
+    );
+  }
+private adjustInstallmentsValidators() {
+  const scheduling = this.form.get('scheduling')?.value;
+  const max = this.paymentTypeData$.value?.maxInstallments || 0;
+
+  const count = this.form.get('installmentsCount');
+  const firstIsNow = this.form.get('firstInstallmentIsNow')?.value;
+  const firstDate = this.form.get('firstInstallmentDate');
+
+  if (scheduling === PaymentSchedulingEnum.SCHEDULED) {
+    count.setValidators([
+      Validators.required,
+      Validators.min(2),
+      max > 0 ? Validators.max(max) : null,
+    ].filter(Boolean));
+
+    if (firstIsNow === false) {
+      firstDate.setValidators([Validators.required]);
+    } else {
+      firstDate.clearValidators();
+      firstDate.setValue(null, { emitEvent: false });
+    }
+  } else {
+    count.clearValidators();
+    count.setValue(null, { emitEvent: false });
+    firstDate.clearValidators();
+    firstDate.setValue(null, { emitEvent: false });
+  }
+
+  count.updateValueAndValidity({ emitEvent: false });
+  firstDate.updateValueAndValidity({ emitEvent: false });
+}
+
+  get step(): CheckoutStep {
+    return this.step$.value;
+  }
+  set step(step: CheckoutStep) {
+    this.step$.next(step);
+  }
+
+  get deliveryMethod(): DeliveryMethod {
+    return this.deliveryMethod$.value;
+  }
+  set deliveryMethod(deliveryMethod: DeliveryMethod) {
+    this.deliveryMethod$.next(deliveryMethod);
+  }
+
+  get address(): Address {
+    return this.address$.value;
+  }
+  set address(address: Address) {
+    this.address$.next(address);
+  }
+
+  get totalPrice(): number {
+    const price = +this.data.cart.totalPrice;
+
+    if (this.negotiated) {
+      return price;
+    }
+    return +this.deliveryMethod.chargeAmount + price;
+  }
+
+  get negotiated(): boolean {
+    return this.deliveryMethod == null || this.deliveryMethod.chargeAmount == null;
+  }
+
+  get createDeviceConfirmation() {
+    return () => {
+      return {
+        type: DeviceConfirmationTypeEnum.SHOPPING_CART_CHECKOUT,
+        seller: this.ApiHelper.accountOwner(this.data.cart.seller),
+        amount: this.totalPrice,
+        paymentType: this.form.value.paymentType
+      };
+    };
+  }
+}

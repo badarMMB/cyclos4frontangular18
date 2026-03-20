@@ -1,0 +1,27 @@
+@if (entries$ | async; as entries) {
+  <div class="card mx-auto shadow-sm">
+    @if (entries.title) {
+      <div class="side-menu-header">
+        <div class="side-menu-icon">
+          <icon [icon]="entries.icon"></icon>
+        </div>
+        <div class="side-menu-title">
+          {{ entries.title }}
+        </div>
+      </div>
+    }
+    <nav class="navbar d-flex flex-column align-items-stretch">
+      @for (entry of entries.entries; track entry) {
+        <a
+          #anchor
+          class="nav-item"
+          [routerLink]="entry.url"
+          [ngClass]="{ active: (menu.activeMenu$ | async)?.matches(entry) }"
+          (click)="navigate(entry, $event); blurIfClick(anchor, $event)">
+          <icon [icon]="entry.icon"></icon>
+          <div class="nav-item-text">{{ entry.label }}</div>
+        </a>
+      }
+    </nav>
+  </div>
+}

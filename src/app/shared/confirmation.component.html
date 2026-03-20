@@ -1,0 +1,49 @@
+@if (title) {
+  <h1>{{ title }}</h1>
+}
+<ng-container [formGroup]="form">
+  @if (message && canConfirm) {
+    <div
+      class="mb-1"
+      [ngClass]="{ 'mt-3': title != null }"
+    [innerHTML]="message | trust"></div>
+  }
+
+  @for (cf of customFields; track cf; let first = $first) {
+    <custom-field-input
+      [field]="cf"
+      [focused]="first"
+      [labelPosition]="labelPosition"
+      [formControl]="form.get('customValues').get(cf.internalName)">
+    </custom-field-input>
+  }
+
+  @if (passwordInput) {
+    <confirmation-password
+      formControlName="confirmationPassword"
+      [focused]="!hasFields"
+      [createDeviceConfirmation]="createDeviceConfirmation"
+      (showSubmit)="showSubmit$.next($event)"
+      (createDeviceConfirmationError)="hide()"
+      (confirmed)="confirm($event)"
+      [passwordInput]="passwordInput"
+    [ngClass]="{
+      'mt-3': hasFields || message == null,
+      'mt-4': !hasFields && message != null
+    }">
+    </confirmation-password>
+  }
+
+  <actions forceRow>
+    @if (showSubmit$ | async) {
+      <action-button
+        [disabled]="!canConfirm || (requesting$ | async)"
+        (action)="confirm()"
+        [label]="confirmLabel">
+      </action-button>
+    } @else {
+      &nbsp;
+    }
+    <action-button outline (action)="hide()" [label]="cancelLabel"> </action-button>
+  </actions>
+</ng-container>

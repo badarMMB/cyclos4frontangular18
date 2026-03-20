@@ -1,0 +1,94 @@
+import { ChangeDetectionStrategy, Component, Injector, OnInit } from '@angular/core';
+import { UntypedFormControl } from '@angular/forms';
+import { Agreement, UserAgreementsData } from 'app/api/models';
+import { AgreementsService } from 'app/api/services/agreements.service';
+import { SvgIcon } from 'app/core/svg-icon';
+import { HeadingAction } from 'app/shared/action';
+import { validateBeforeSubmit } from 'app/shared/helper';
+import { BaseViewPageComponent } from 'app/ui/shared/base-view-page.component';
+import { Menu } from 'app/ui/shared/menu';
+
+/**
+ * Displays the currently accepted user agreements and allows users to change the optional agreements
+ */
+@Component({
+  selector: 'view-user-agreements',
+  templateUrl: 'view-user-agreements.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ViewUserAgreementsComponent extends BaseViewPageComponent<UserAgreementsData> implements OnInit {
+  constructor(injector: Injector, private agreementsService: AgreementsService) {
+    super(injector);
+  }
+
+  param: string;
+  self: boolean;
+  optionalControl: UntypedFormControl;
+  noAgreements: boolean;
+  allOptional: Agreement[];
+  acceptedOptional: Agreement[];
+  acceptedRequired: Agreement[];
+  hasOptional: boolean;
+
+  ngOnInit() {
+    super.ngOnInit();
+    this.param = this.route.snapshot.params.user;
+    this.addSub(
+      this.agreementsService
+        .getUserAgreements({
+          user: this.param,
+          fields: ['-history']
+        })
+        .subscribe(data => {
+          this.data = data;
+        })
+    );
+  }
+
+  onDataInitialized(data: UserAgreementsData) {
+    this.self = this.authHelper.isSelf(data.user);
+    const acceptedIds = Object.keys(data.accepted || {});
+    const accepted = (data.agreements || []).filter(a => acceptedIds.includes(a.id));
+    this.allOptional = (data.agreements || []).filter(a => !a.required);
+    this.hasOptional = this.allOptional.length > 0;
+    this.acceptedOptional = accepted.filter(a => !a.required);
+    this.acceptedRequired = accepted.filter(a => a.required);
+    if (data.canEdit) {
+      if (this.hasOptional) {
+        this.optionalControl = this.formBuilder.control(this.acceptedOptional.map(a => a.id));
+      }
+    } else {
+      this.noAgreements = accepted.length === 0;
+    }
+    if (!this.noAgreements) {
+      this.headingActions = [
+        new HeadingAction(
+          SvgIcon.Clock,
+          this.i18n.general.viewHistory,
+          () => this.router.navigate(['/users', this.param, 'agreements', 'history']),
+          true
+        )
+      ];
+    }
+  }
+
+  save() {
+    if (!validateBeforeSubmit(this.optionalControl)) {
+      return;
+    }
+    this.addSub(
+      this.agreementsService
+        .acceptOptionalAgreements({
+          agreements: this.optionalControl.value
+        })
+        .subscribe(() => {
+          this.notification.snackBar(this.i18n.agreements.optionalSaved);
+          this.reload();
+        })
+    );
+  }
+
+  resolveMenu(data: UserAgreementsData) {
+    return this.menu.userMenu(data.user, Menu.AGREEMENTS);
+  }
+}

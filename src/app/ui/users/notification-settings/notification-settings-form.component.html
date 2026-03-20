@@ -1,0 +1,158 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content [heading]="i18n.notificationSettings.title" [mobileHeading]="i18n.notificationSettings.mobileTitle">
+      <ng-container [formGroup]="form">
+        @if (data.forwardMessagesAllowed) {
+          <label-value
+            [forId]="'forwardMessages'"
+            [label]="i18n.notificationSettings.forwardMessages"
+            kind="view">
+            <boolean-field formControlName="forwardMessages" switch [disabled]="!data.canEdit" [id]="'forwardMessages'">
+            </boolean-field>
+          </label-value>
+        }
+        @if (data.emailMailingsAllowed) {
+          <label-value
+            [forId]="'emailMailings'"
+            [label]="i18n.notificationSettings.emailMailings"
+            kind="view">
+            <boolean-field formControlName="emailMailings" switch [disabled]="!data.canEdit" [id]="'emailMailings'">
+            </boolean-field>
+          </label-value>
+        }
+        @if (data.smsMailingsAllowed) {
+          <label-value
+            [forId]="'smsMailings'"
+            [label]="i18n.notificationSettings.smsMailings"
+            kind="view">
+            <boolean-field formControlName="smsMailings" switch [disabled]="!data.canEdit" [id]="'smsMailings'">
+            </boolean-field>
+          </label-value>
+        }
+        @if (data.appMailingsAllowed) {
+          <label-value
+            [forId]="'appMailings'"
+            [label]="i18n.notificationSettings.appMailings"
+            kind="view">
+            <boolean-field formControlName="appMailings" switch [disabled]="!data.canEdit" [id]="'appMailings'">
+            </boolean-field>
+          </label-value>
+        }
+        @for (at of data.userAccounts; track at; let first = $first) {
+          @if (form.get('userAccounts').get(at.id); as accountForm) {
+            @if (first) {
+              <h2 [ngClass]="{ 'border-top-0': !data.forwardMessagesAllowed }">
+                {{ i18n.notificationSettings.payments }}
+              </h2>
+            }
+            <ng-container [formGroup]="accountForm">
+              @if (!singleAccount) {
+                <h3 class="mt-3 mb-0">
+                  {{ at.name }}
+                </h3>
+              }
+              <ng-container *ngTemplateOutlet="accountDetails; context: { $implicit: at }"> </ng-container>
+            </ng-container>
+          }
+        }
+        @if (data.messageCategories.length > 0) {
+          <multi-selection-field
+            [label]="i18n.notificationSettings.forwardMessages"
+            formControlName="forwardMessageCategories">
+            @for (cat of data.messageCategories; track cat) {
+              <field-option
+                [value]="ApiHelper.internalNameOrId(cat)"
+                [id]="cat.id"
+                [internalName]="cat.internalName"
+                [text]="cat.name">
+              </field-option>
+            }
+          </multi-selection-field>
+        }
+        @for (section of notificationSections.keys(); track section; let first = $first) {
+          @if (section !== '') {
+            <h2
+            [ngClass]="{
+              'border-top-0':
+                first &&
+                data.userAccounts.length === 0 &&
+                data.messageCategories.length === 0 &&
+                !data.forwardMessagesAllowed
+            }"
+              class="d-flex flex-column flex-xs-row justify-content-between">
+              <div class="mb-2 mb-xs-0">
+                {{ section }}
+              </div>
+              @if (!adminSettings && notificationSections.get(section).length > 3 && data.canEdit) {
+                <div
+                  [ngClass]="{ 'section-title-action': layout.gtsm$ | async }"
+                  >
+                  <action-button
+                    outline
+                    [ngClass]="{ 'mr-3': !(layout.ltxs$ | async), 'mb-2': layout.ltxs$ | async }"
+                    (action)="enableNotifications(section, true)"
+                    [label]="i18n.notificationSettings.enableAll">
+                  </action-button>
+                  <action-button
+                    outline
+                    (action)="enableNotifications(section, false)"
+                    [label]="i18n.notificationSettings.disableAll">
+                  </action-button>
+                </div>
+              }
+            </h2>
+          }
+          @for (notification of notificationSections.get(section); track notification) {
+            <label-value [label]="resolveNotificationLabel(notification)" kind="field">
+              <notification-type-setting
+                [setting]="notification"
+                [options]="typeFieldOptionsMap.get(notification.type)"
+                [form]="resolveControl(notification.type)"
+                [multiSelectionControl]="typeControlsMap.get(notification.type)"
+                [disabled]="!data.canEdit">
+              </notification-type-setting>
+            </label-value>
+          }
+        }
+        @if (data.smsAllowed) {
+          <h2>{{ i18n.general.sendMedium.sms }}</h2>
+          <label>{{
+            i18n.notificationSettings.smsCount({ count: data.smsCountThisMonth, total: data.maxSmsPerMonth })
+          }}</label>
+        }
+      </ng-container>
+      <actions>
+        @if (data.canEdit) {
+          <action-button
+            [disabled]="requesting$ | async"
+            (action)="save()"
+            [label]="i18n.general.save">
+          </action-button>
+        }
+      </actions>
+    </page-content>
+  }
+</page-layout>
+
+<ng-template #accountDetails let-at>
+  <ng-container [formGroup]="form.get('userAccounts').get(at.id).get('paymentAmount')">
+    <decimal-field
+      [label]="i18n.notificationSettings.paymentNotificationsAbove"
+      formControlName="min"
+      [scale]="at.currency.decimalDigits"
+      [prefix]="at.currency.prefix"
+      [suffix]="at.currency.suffix"
+      [disabled]="!data.canEdit"
+      [emptyLabel]="i18n.general.notSet">
+    </decimal-field>
+    <decimal-field
+      [label]="i18n.notificationSettings.paymentNotificationsBelow"
+      formControlName="max"
+      [scale]="at.currency.decimalDigits"
+      [prefix]="at.currency.prefix"
+      [suffix]="at.currency.suffix"
+      [disabled]="!data.canEdit"
+      [emptyLabel]="i18n.general.notSet">
+    </decimal-field>
+  </ng-container>
+</ng-template>

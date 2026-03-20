@@ -1,0 +1,14 @@
+[
+  {
+    "context": [
+      "/api",
+      "/ui",
+      "/consent",
+      "/unsubscribe"
+    ],
+    "target": "http://localhost:8080/enchere/hope",
+    "cookieDomainRewrite": "localhost",
+    "secure": false,
+    "changeOrigin": true
+  }
+]

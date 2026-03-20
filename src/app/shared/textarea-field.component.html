@@ -1,0 +1,39 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <textarea
+    #textarea
+    [id]="id"
+    rows="3"
+    [formControl]="formControl"
+    [name]="name"
+    [attr.autocomplete]="autocomplete"
+    [placeholder]="placeholder"
+    class="form-control"
+    [ngClass]="{
+      'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+    }"
+    >{{ value }}</textarea
+    >
+    <field-errors [control]="formControl"></field-errors>
+  }
+
+  <ng-template #widget>
+    <textarea
+      #textarea
+      [id]="id"
+      rows="3"
+      [formControl]="formControl"
+      [name]="name"
+      [attr.autocomplete]="autocomplete"
+      [placeholder]="placeholder"
+      class="form-control"
+    [ngClass]="{
+      'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+    }"
+      >{{ value }}</textarea
+      >
+      <field-errors [control]="formControl"></field-errors>
+    </ng-template>

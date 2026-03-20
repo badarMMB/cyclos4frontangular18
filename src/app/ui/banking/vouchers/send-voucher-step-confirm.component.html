@@ -1,0 +1,63 @@
+@if (preview.user && !authHelper.isSelf(preview.user)) {
+  <user-info [user]="preview.user"> </user-info>
+}
+<!-- description + image -->
+<label-value [label]="i18n.voucher.voucher">
+  {{ preview.type.voucherTitle }}
+</label-value>
+<label-value [label]="i18n.user.email">
+  {{ sendVoucher.email }}
+</label-value>
+@if (preview.owner) {
+  <label-value [label]="i18n.voucher.owner">
+    <user-link [user]="preview.owner"></user-link>
+  </label-value>
+}
+<label-value [label]="i18n.transaction.amount">
+  {{ sendVoucher.amount | currency : preview.type.configuration.currency }}
+</label-value>
+@if (sendVoucher.message) {
+  <label-value [label]="i18n.voucher.send.message" valueFormat="break">{{
+    sendVoucher.message
+  }}</label-value>
+}
+<!-- payment fields -->
+@for (cf of paymentCustomFields; track cf) {
+  <label-value
+    [hidden]="!fieldHelper.hasValue(cf.internalName, sendVoucher.paymentCustomValues)"
+    [label]="cf.name"
+    [labelPosition]="labelOnTop(layout.ltsm$ | async, cf) ? 'top' : 'auto'">
+    <format-field-value
+      [customValues]="sendVoucher.paymentCustomValues"
+      [fields]="paymentCustomFields"
+      [fieldName]="cf.internalName">
+    </format-field-value>
+  </label-value>
+}
+<!-- custom fields -->
+@for (cf of voucherCustomFields; track cf) {
+  <label-value
+    [hidden]="!fieldHelper.hasValue(cf.internalName, sendVoucher.voucherCustomValues)"
+    [label]="cf.name"
+    [labelPosition]="labelOnTop(layout.ltsm$ | async, cf) ? 'top' : 'auto'">
+    <format-field-value
+      [customValues]="sendVoucher.voucherCustomValues"
+      [fields]="voucherCustomFields"
+      [fieldName]="cf.internalName">
+    </format-field-value>
+  </label-value>
+}
+
+@if (preview.confirmationPasswordInput) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <confirmation-password
+    focused
+    [formControl]="form.get('confirmationPassword')"
+    [passwordInput]="preview.confirmationPasswordInput"
+    [createDeviceConfirmation]="createDeviceConfirmation"
+    (showSubmit)="showSubmit.emit($event)"
+    (confirmed)="confirmed.emit($event)">
+  </confirmation-password>
+}

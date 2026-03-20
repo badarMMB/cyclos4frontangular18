@@ -1,0 +1,20 @@
+<h1>{{ i18n.field.camera.titleQrCode }}</h1>
+
+<video #video [ngClass]="{ 'd-none': (ready$ | async) === false }"></video>
+
+@if ((ready$ | async) === false) {
+  <spinner></spinner>
+}
+
+@if ((cameras$ | async).length > 1) {
+  <select class="mt-3 custom-select" [formControl]="cameraControl">
+    @for (cam of cameras$.value; track cam) {
+      <option [value]="cam.id" [text]="cam.label"></option>
+    }
+  </select>
+}
+
+<actions>
+  <span></span>
+  <action-button outline (action)="modalRef.hide()" [label]="i18n.general.cancel"> </action-button>
+</actions>

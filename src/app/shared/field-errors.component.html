@@ -1,0 +1,5 @@
+@if ((control.statusChanges | async) === 'INVALID' && control.touched) {
+  <div class="invalid-feedback">
+    {{ message }}
+  </div>
+}

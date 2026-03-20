@@ -1,0 +1,204 @@
+<results-layout
+  (update)="update.emit($event)"
+  [categories]="data.categories"
+  [results]="results"
+  [rendering$]="rendering$"
+  [resultType]="resultType"
+  [referencePoint]="referencePoint"
+  [toAddress]="toAddress"
+  [toMarkerTitle]="toMarkerTitle"
+  [toLink]="toLink">
+  <div *resultCategory="let cat" class="card">
+    <div class="category-title">
+      <a class="category-title-text" href="#" (click)="$event.preventDefault(); selectCategory(cat)">
+        <avatar
+          [image]="cat.svgIcon ? null : cat.image"
+          size="small"
+          [icon]="cat.svgIcon || SvgIcon.Basket"
+          [iconColor]="cat.svgIconColor">
+        </avatar>
+        {{ cat.name }}
+      </a>
+    </div>
+    <div class="card-body">
+      @for (child of categoryChildren(cat); track child) {
+        <a class="sub-category-text" href="#" (click)="$event.preventDefault(); selectCategory(child)">
+          {{ child.name }}
+        </a>
+      }
+    </div>
+    @if ((layout.gtxxs$ | async) && hasMoreChildren(cat)) {
+      <a
+        class="category-footer"
+        href="#"
+        (click)="$event.preventDefault(); showAllChildren(cat)">
+        {{ i18n.ad.showAllCategories }}
+      </a>
+    }
+  </div>
+
+  <mobile-result *mobileResult="let ad" [avatarImage]="ad.image" [avatarIcon]="SvgIcon.Basket">
+    <div class="d-flex">
+      <div>
+        @if (ad.price) {
+          <div class="cell-main">
+            @if (ad.promotionalPrice) {
+              <span class="promo-price">
+                {{ ad.price | number : decimals(ad) }}
+              </span>
+            }
+            {{ ad.promotionalPrice || ad.price | currency : lookupCurrency(ad) }}
+          </div>
+        }
+        <div class="cell-text">
+          {{ ad.name }}
+        </div>
+        @if (ad.user) {
+          <div class="cell-text">
+            {{ i18n.ad.byOwner(ad.user.display) }}
+          </div>
+        }
+        @for (field of data.fieldsInList; track field) {
+          <div class="cell-small">
+            <format-field-value [fields]="data.customFields" [plainText]="true" [fieldName]="field" [object]="ad">
+            </format-field-value>
+          </div>
+        }
+      </div>
+      @if (
+        dataForFrontendHolder.auth?.permissions?.marketplace?.favorites &&
+        ad.user.id !== dataForFrontendHolder.user.id
+        ) {
+        <div
+          class="ml-auto text-right d-flex flex-column">
+          <ad-favorite [ad]="ad"></ad-favorite>
+        </div>
+      }
+    </div>
+  </mobile-result>
+
+  <table *resultTable class="table table-hover cursor-pointer">
+    <thead>
+      <th class="avatar"></th>
+      <th>{{ i18n.ad.name }}</th>
+      @if (!singleUser && !data.hideOwner) {
+        <th colspan="2">{{ i18n.ad.owner }}</th>
+      }
+      @for (field of data.fieldsInList; track field) {
+        <th>{{ fieldName(field) }}</th>
+      }
+      @if (!data.hidePrice) {
+        <th class="text-right">{{ i18n.ad.price }}</th>
+      }
+      @if (dataForFrontendHolder.auth?.permissions?.marketplace?.favorites) {
+        <th class="actions"></th>
+      }
+    </thead>
+    <tbody>
+      @for (ad of results?.results; track ad) {
+        <tr (click)="router.navigate(path(ad))">
+          <td class="avatar">
+            <avatar [image]="ad.image" [icon]="SvgIcon.Basket"></avatar>
+          </td>
+          <td>
+            {{ ad.name }}
+          </td>
+          @if (!singleUser && ad.user) {
+            <td class="avatar">
+              <avatar [image]="ad.user.image"></avatar>
+            </td>
+            <td>
+              {{ ad.user.display }}
+            </td>
+          }
+          @if (layout.gtxs$ | async) {
+            @for (field of data.fieldsInList; track field) {
+              <td>
+                <format-field-value [fields]="data.customFields" [plainText]="true" [fieldName]="field" [object]="ad">
+                </format-field-value>
+              </td>
+            }
+          }
+          @if (!data.hidePrice) {
+            <td class="text-right">
+              @if (ad.promotionalPrice) {
+                <span class="promo-price">
+                  {{ ad.price | number : decimals(ad) }}
+                </span>
+              }
+              {{ ad.promotionalPrice || ad.price | currency : lookupCurrency(ad) }}
+            </td>
+          }
+          @if (dataForFrontendHolder.auth?.permissions?.marketplace?.favorites) {
+            <td class="actions">
+              @if (ad.user.id !== dataForFrontendHolder.user.id) {
+                <ad-favorite [ad]="ad"></ad-favorite>
+              }
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <tiled-result *resultTile="let ad" [image]="ad.image" [zoom]="true" [icon]="SvgIcon.Basket">
+    @if (
+      dataForFrontendHolder.auth?.permissions?.marketplace?.favorites && ad.user.id !== dataForFrontendHolder.user.id
+      ) {
+      <ng-container
+        header
+        >
+        <ad-favorite [ad]="ad" class="btn-favorite"></ad-favorite>
+      </ng-container>
+    }
+    @if (!singleUser && ad.user) {
+      <div class="tile-floating-avatar">
+        <avatar
+          class="solid-icon"
+          [image]="ad.user.image"
+          [tooltip]="ad.user.display"
+          size="medium-large"
+          (click)="
+            $event.preventDefault(); ($event.stopPropagation); router.navigate(['/users', ad.user.id, 'profile'])
+          ">
+        </avatar>
+      </div>
+    }
+    @if (ad.price) {
+      <div class="card-title">
+        @if (ad.promotionalPrice) {
+          <span class="promo-price">
+            {{ ad.price | number : decimals(ad) }}
+          </span>
+        }
+        {{ ad.promotionalPrice || ad.price | currency : lookupCurrency(ad) }}
+      </div>
+    } @else {
+      <div class="card-title">
+        <br />
+      </div>
+    }
+    <div class="card-text">
+      {{ ad.name }}
+    </div>
+  </tiled-result>
+
+  <map-result *resultInfoWindow="let ad; let addr = address" [image]="ad.image" [address]="addr">
+    <div class="font-weight-bold mb-2">{{ ad.name }}</div>
+
+    @if (ad.price) {
+      <div class="font-weight-bold">
+        @if (ad.promotionalPrice) {
+          <span class="promo-price">
+            {{ ad.price | number : decimals(ad) }}
+          </span>
+        }
+        {{ ad.promotionalPrice || ad.price | currency : lookupCurrency(ad) }}
+      </div>
+    }
+
+    @if (ad.user) {
+      <div>{{ i18n.ad.byOwner(ad.user.display) }}</div>
+    }
+  </map-result>
+</results-layout>

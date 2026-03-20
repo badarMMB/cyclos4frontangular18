@@ -1,0 +1,64 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.quickAccessSettings.title"
+      [mobileHeading]="i18n.quickAccessSettings.mobileTitle"
+      [headingActions]="headingActions$ | async">
+      @if (!self) {
+        <user-info [user]="data.user"></user-info>
+        <hr />
+      }
+      <div>{{ i18n.quickAccessSettings.information }}</div>
+      <hr />
+      <div class="quick-access-container d-flex flex-column flex-md-row w-100">
+        <div class="d-flex flex-column flex-grow-1 w-100">
+          <div class="mb-2">{{ i18n.quickAccessSettings.enabled }}</div>
+          <div class="enabled-quick-access" cdkDropList (cdkDropListSorted)="sort($event)">
+            @for (item of enabledItems; track item; let i = $index) {
+              <div
+                class="quick-access-setting-item"
+                [ngClass]="{ 'cursor-pointer': data.canEdit }"
+                cdkDragLockAxis="y"
+                cdkDrag
+                [cdkDragDisabled]="!data.canEdit"
+                (click)="disableItem(i)">
+                <div class="quick-access-icon">
+                  <icon [icon]="item.icon" size="2.2rem"></icon>
+                </div>
+                <div class="quick-access-text">
+                  {{ item.label }}
+                </div>
+                @if (layout.ltlg) {
+                  <div class="quick-access-drag-handle" cdkDragHandle>
+                    <icon [icon]="SvgIcon.ArrowDownUp"></icon>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        @if (layout.ltmd$ | async) {
+          <hr />
+        }
+        <div class="d-flex flex-column flex-grow-1 w-100">
+          <div class="mb-2">{{ i18n.quickAccessSettings.disabled }}</div>
+          <div class="disabled-quick-access">
+            @for (item of disabledItems; track item; let i = $index) {
+              <div
+                class="quick-access-setting-item disabled"
+                [ngClass]="{ 'cursor-pointer': data.canEdit }"
+                (click)="enableItem(i)">
+                <div class="quick-access-icon">
+                  <icon [icon]="item.icon" size="2.2rem"></icon>
+                </div>
+                <div class="quick-access-text">
+                  {{ item.label }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </page-content>
+  }
+</page-layout>

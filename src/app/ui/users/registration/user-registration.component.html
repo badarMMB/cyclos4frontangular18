@@ -1,0 +1,127 @@
+<page-layout [ready]="step$ | async" size="large">
+  @switch (step$ | async) {
+    @case ('group') {
+      <page-content
+        [heading]="i18n.user.title.registration"
+        [mobileHeading]="i18n.user.mobileTitle.registration"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <div class="flex-grow-1">
+          <registration-step-group [groupSets]="groupSets" [groups]="groups" [control]="group"> </registration-step-group>
+        </div>
+        <actions forceRow>
+          <action-button [disabled]="requesting$ | async" (action)="showIdentityProviders()" [label]="i18n.general.next">
+          </action-button>
+        </actions>
+      </page-content>
+    }
+    @case ('idp') {
+      <page-content
+        [heading]="i18n.user.title.registration"
+        [mobileHeading]="i18n.user.mobileTitle.registration"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <div class="flex-grow-1">
+          <registration-step-idp [identityProviders]="data.identityProviders" (continue)="continueWithProvider($event)">
+          </registration-step-idp>
+        </div>
+        <actions forceRow>
+          <action-button [disabled]="requesting$ | async" (action)="continueWithProvider(null)" [label]="i18n.general.skip">
+          </action-button>
+          @if (groups.length > 1) {
+            <action-button outline (action)="backToGroup()" [label]="i18n.general.previous">
+            </action-button>
+          }
+        </actions>
+      </page-content>
+    }
+    @case ('fields') {
+      <page-content
+        [heading]="i18n.user.title.registration"
+        [mobileHeading]="i18n.user.mobileTitle.registration"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <div class="flex-grow-1">
+          <registration-step-fields
+            [data]="data"
+            [form]="form"
+            [mobileForm]="mobileForm"
+            [landLineForm]="landLineForm"
+            [defineAddress]="defineAddress"
+            [addressForm]="addressForm"
+            [imageControl]="imageControl"
+            [image]="image"
+            [fromExternalPayment]="fromExternalPayment()"
+            (imageUploaded)="image = $event"
+            (imageRemoved)="image = null"
+            (customImagesUploaded)="addCustomImages($event)"
+            (customFilesUploaded)="addCustomFiles($event)">
+          </registration-step-fields>
+        </div>
+        <actions forceRow>
+          <action-button [disabled]="requesting$ | async" (action)="showConfirm()" [label]="i18n.general.next">
+          </action-button>
+          @if (groups.length > 1 || data.identityProviders?.length > 0) {
+            <action-button
+              outline
+              (action)="backToIdentityProviders()"
+              [label]="i18n.general.previous">
+            </action-button>
+          }
+        </actions>
+      </page-content>
+    }
+    @case ('confirm') {
+      <page-content
+        [heading]="i18n.user.title.registrationConfirmation"
+        [mobileHeading]="i18n.user.mobileTitle.registrationConfirmation"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <div class="flex-grow-1">
+          <registration-step-confirm
+            [data]="data"
+            [form]="confirmForm"
+            [user]="userNew"
+            [image]="image"
+            [customImages]="customImages"
+            [customFiles]="customFiles">
+          </registration-step-confirm>
+        </div>
+        <actions forceRow>
+          <action-button [disabled]="requesting$ | async" (action)="register()" [label]="i18n.general.submit">
+          </action-button>
+          <action-button outline (action)="backToFields()" [label]="i18n.general.previous"> </action-button>
+        </actions>
+      </page-content>
+    }
+    @case ('done') {
+      <page-content
+        [heading]="i18n.user.title.registrationDone"
+        [mobileHeading]="i18n.user.mobileTitle.registrationDone"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <div class="flex-grow-1">
+          <registration-step-done [result]="result$ | async"> </registration-step-done>
+        </div>
+        <actions forceRow>
+          @if (login.user) {
+            <action-button (action)="reload()" [label]="i18n.user.registration.registerAnotherUser">
+            </action-button>
+          }
+          @if (login.user) {
+            <action-button (action)="viewProfile()" [label]="i18n.user.registration.viewProfile">
+            </action-button>
+          }
+          @if (!login.user) {
+            <action-button (action)="goToLogin()" [label]="i18n.menu.login"> </action-button>
+          }
+        </actions>
+      </page-content>
+    }
+    @default {
+      <page-content>
+        <spinner></spinner>
+      </page-content>
+    }
+  }
+</page-layout>

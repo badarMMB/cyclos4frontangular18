@@ -1,0 +1,87 @@
+@if (data$ | async) {
+  <page-layout hideMenu>
+    <div class="dashboard">
+      @if (data.passwordsNeedingAttention?.length > 0 || data.pendingSecurityQuestion || data.pendingTotp) {
+        <div
+          class="notifications"
+          >
+          @for (password of data.passwordsNeedingAttention; track password) {
+            <notification type="warning">
+              {{ passwordMessage(password) }}
+              <br />
+              <a [routerLink]="['/personal', 'passwords']" class="mt-2" (click)="goToPasswords($event)">
+                {{ i18n.dashboard.passwords.proceed }}
+              </a>
+            </notification>
+          }
+          @if (data.pendingTotp) {
+            <notification type="warning">
+              {{ i18n.dashboard.passwords.totp }}
+              <br />
+              <a [routerLink]="['/personal', 'passwords']" class="mt-2" (click)="goToPasswords($event)">
+                {{ i18n.dashboard.passwords.proceed }}
+              </a>
+            </notification>
+          }
+          @if (data.pendingSecurityQuestion) {
+            <notification type="warning">
+              {{ i18n.dashboard.passwords.securityAnswer }}
+              <br />
+              <a [routerLink]="['/personal', 'passwords']" class="mt-2" (click)="goToPasswords($event)">
+                {{ i18n.dashboard.passwords.proceed }}
+              </a>
+            </notification>
+          }
+        </div>
+      }
+      <div class="dashboard-cards">
+        @if (actions?.length > 0) {
+          <quick-access [data]="data" [actions]="actions"> </quick-access>
+        }
+        @for (accts of accounts; track accts) {
+          @if (!data.mergeAccounts) {
+            <account-status [account]="accts[0]"> </account-status>
+          }
+          @if (data.mergeAccounts) {
+            <combined-account-status [accounts]="accts"> </combined-account-status>
+          }
+        }
+        @if (data.showLatestAds) {
+          <latest-ads [ads]="data.latestAds"> </latest-ads>
+        }
+        @if (data.showLatestUsers) {
+          <latest-users [users]="data.latestUsers"> </latest-users>
+        }
+        @if (data.content) {
+          <div class="dashboard-item" [ngClass]="{ 'dashboard-item-full': data.content.fullWidth }">
+            <ng-container *ngTemplateOutlet="showContent"></ng-container>
+          </div>
+        }
+      </div>
+    </div>
+  </page-layout>
+} @else {
+  <spinner></spinner>
+}
+
+<ng-template #showContent>
+  @if (data.content.layout !== FrontendContentLayoutEnum.FULL) {
+    <page-content
+      [heading]="data.content.title"
+      [mobileHeading]="data.content.title"
+      last
+      hideBack
+      [mode]="data.content.layout === FrontendContentLayoutEnum.CARD_TIGHT ? 'tight' : 'normal'">
+      <div class="custom-content-container" [innerHTML]="data.content.content | trust"></div>
+    </page-content>
+  }
+  @if (data.content.layout === FrontendContentLayoutEnum.FULL) {
+    <div
+      class="custom-content-container"
+    [innerHTML]="data.content.content | trust"></div>
+  }
+</ng-template>
+
+<ng-template #spinner>
+  <spinner></spinner>
+</ng-template>

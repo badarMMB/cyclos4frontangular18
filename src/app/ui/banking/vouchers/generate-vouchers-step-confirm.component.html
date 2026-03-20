@@ -1,0 +1,42 @@
+<label-value [label]="i18n.general.type">
+  {{ data.type.voucherTitle }}
+</label-value>
+<label-value [label]="i18n.voucher.numberOfVouchers">
+  {{ generateVoucher.count }}
+</label-value>
+@if (showAmount) {
+  <label-value [label]="i18n.voucher.amountPerVoucher">
+    {{ generateVoucher.amount | currency : data.account.currency }}
+  </label-value>
+}
+@if (user) {
+  <label-value [label]="i18n.general.user">
+    <user-link [user]="user"></user-link>
+  </label-value>
+}
+@for (cf of data.voucherCustomFields; track cf) {
+  <label-value
+    [hidden]="!fieldHelper.hasValue(cf.internalName, generateVoucher.voucherCustomValues)"
+    [label]="cf.name"
+    [labelPosition]="labelOnTop(layout.ltsm$ | async, cf) ? 'top' : 'auto'">
+    <format-field-value
+      [customValues]="generateVoucher.voucherCustomValues"
+      [fields]="data.voucherCustomFields"
+      [fieldName]="cf.internalName">
+    </format-field-value>
+  </label-value>
+}
+
+@if (confirmationPasswordInput) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <confirmation-password
+    focused
+    [formControl]="form.get('confirmationPassword')"
+    [passwordInput]="confirmationPasswordInput"
+    [createDeviceConfirmation]="createDeviceConfirmation"
+    (showSubmit)="showSubmit.emit($event)"
+    (confirmed)="confirmed.emit($event)">
+  </confirmation-password>
+}

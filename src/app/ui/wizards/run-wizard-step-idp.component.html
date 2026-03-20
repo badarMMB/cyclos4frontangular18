@@ -1,0 +1,16 @@
+@for (idp of identityProviders; track idp) {
+  <button
+    type="button"
+    class="identity-provider btn-action-primary centered-button"
+  [ngStyle]="{
+    border: '1px solid ' + idp.borderColor,
+    background: idp.backgroundColor,
+    color: idp.textColor
+  }"
+    (click)="registerWith(idp)">
+    @if (idp.image) {
+      <img [src]="idp.image.url" [alt]="idp.name" class="aria-hidden" />
+    }
+    <span [innerHTML]="i18n.identityProvider.login(idp.name) | trust"></span>
+  </button>
+}

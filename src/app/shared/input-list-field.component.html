@@ -1,0 +1,49 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <div class="input-fields">
+    @for (control of array.controls; track control; let index = $index; let last = $last) {
+      <div class="field-and-action">
+        <input-field [formControl]="getControl(index)"></input-field>
+        @if (last && index < maxItems - 1) {
+          <button type="button" class="btn btn-icon" (click)="add()">
+            <icon [icon]="SvgIcon.PlusCircle"></icon>
+          </button>
+        }
+        @if (!last) {
+          <button type="button" class="btn btn-icon" (click)="remove(index)">
+            <icon [icon]="SvgIcon.DashCircle"></icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  @if (formControl) {
+    <field-errors [control]="formControl"></field-errors>
+  }
+}
+
+<ng-template #widget>
+  <div class="input-fields">
+    @for (control of array.controls; track control; let index = $index; let last = $last) {
+      <div class="field-and-action">
+        <input-field [formControl]="getControl(index)"></input-field>
+        @if (last && index < maxItems - 1) {
+          <button type="button" class="btn btn-icon" (click)="add()">
+            <icon [icon]="SvgIcon.PlusCircle"></icon>
+          </button>
+        }
+        @if (!last) {
+          <button type="button" class="btn btn-icon" (click)="remove(index)">
+            <icon [icon]="SvgIcon.DashCircle"></icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  @if (formControl) {
+    <field-errors [control]="formControl"></field-errors>
+  }
+</ng-template>

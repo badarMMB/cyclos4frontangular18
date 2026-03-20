@@ -1,0 +1,298 @@
+@import 'src/definitions';
+
+button[disabled],
+button[disabled]:hover {
+  cursor: default !important;
+}
+
+.btn {
+  min-height: $input-height;
+  width: 100%;
+
+  icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+@include media-breakpoint-up(xs) {
+  .btn {
+    width: auto;
+  }
+}
+
+.btn-transparent,
+.btn-transparent:focus {
+  background: transparent;
+  border: none;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.lt-sm {
+  .btn-main {
+    height: 3rem;
+  }
+}
+
+.btn-primary {
+  @include button-variant($button-color, $button-border-color);
+}
+
+.btn-outline-primary {
+  @include button-outline-variant($button-color);
+}
+
+.btn-outline-primary {
+  border-color: rgba($button-color, 0.8);
+}
+
+.btn-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: $button-icon-width;
+  padding: 0;
+  height: $input-height;
+  @include button-variant($button-icon-bg, $button-icon-border-color);
+  color: $button-icon-color;
+}
+
+.btn-flat {
+  @include button-variant($button-icon-bg, $button-icon-border-color);
+  color: $button-icon-color;
+}
+
+.btn-flat {
+  box-shadow: none !important;
+}
+
+
+table.table {
+  .btn-icon {
+    min-height: unset;
+  }
+}
+
+.identity-provider {
+  display: flex;
+  margin-top: 1rem;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: auto;
+  padding: 0.7rem 0;
+  border-radius: $input-border-radius;
+
+  img {
+    max-width: 1.6rem;
+    position: absolute;
+    left: 0.7rem;
+  }
+
+  span {
+    position: relative;
+    top: 1px;
+  }
+}
+
+.dropdown-menu button {
+  width: 100%;
+}
+
+.centered-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@include media-breakpoint-up(sm) {
+  .centered-button {
+    width: 18rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+body.dark {
+  .btn-primary {
+    @include button-variant($button-color-dark, $button-border-color-dark);
+  }
+
+  .btn-outline-primary {
+    @include button-outline-variant($button-color-dark);
+  }
+
+  .btn-icon,
+  .btn-flat {
+    @include button-variant($button-icon-bg-dark, $button-icon-border-color-dark);
+    color: $button-icon-color-dark;
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+actions {
+  margin-top: 2rem;
+
+  &.minimal {
+
+    button,
+    .button {
+      min-width: 0 !important;
+    }
+  }
+
+  button+button,
+  button+.button,
+  .button+button,
+  .button+.button {
+    margin-top: 1rem;
+  }
+}
+
+.actions-primary .button,
+.actions-primary button,
+.btn-action-primary {
+  min-height: 3rem;
+}
+
+@include media-breakpoint-up(sm) {
+  actions {
+
+    button,
+    .button,
+    a,
+    input[type=button],
+    input[type=submit] {
+      min-width: 10rem;
+    }
+
+    button+button,
+    button+.button,
+    .button+button,
+    .button+.button {
+      margin-top: 0;
+    }
+  }
+
+  .actions-primary .button,
+  .actions-primary button,
+  .btn-action-primary {
+    min-height: $input-height;
+  }
+
+  distance-selection actions {
+
+    button+button,
+    button+.button,
+    .button+button,
+    .button+.button {
+      margin-top: 1rem;
+    }
+  }
+}
+
+@media print {
+  actions {
+    display: none;
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+actions-toolbar {
+  .actions-toolbar-container {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid $border-color;
+    padding: 0.55rem 0;
+  }
+
+  .actions-toolbar-item-right {
+    flex-grow: 1;
+    text-align: end;
+  }
+
+  heading-action-button {
+    margin-left: 0.75rem;
+  }
+}
+
+body.dark actions-toolbar {
+  .actions-toolbar-container {
+    border-bottom: 1px solid $border-color-dark;
+  }
+}
+
+@media print {
+  actions-toolbar {
+    display: none;
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+heading-action-button {
+  display: inline-block;
+
+  .btn {
+    max-width: 100%; // Makes text ellipis work
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: calc(#{$input-height} - 3px);
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: calc(#{$btn-padding-x} - 2px);
+    box-shadow: none;
+
+    color: $toolbar-button-color;
+    background-color: $toolbar-button-bg;
+    border-color: $toolbar-button-border-color;
+
+    icon {
+      position: relative;
+      top: -1px;
+      color: $toolbar-button-icon-color;
+    }
+
+    &:active,
+    &.focus,
+    &:hover {
+      color: $toolbar-button-hover-color;
+      background-color: $toolbar-button-hover-bg;
+      border-color: $toolbar-button-hover-border-color;
+    }
+
+    &>div {
+      padding-left: 0.5rem;
+      text-align: start;
+      @include text-truncate();
+    }
+  }
+
+  .dropdown-menu {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+body.dark heading-action-button {
+  .btn {
+    color: $toolbar-button-color-dark;
+    background-color: $toolbar-button-bg-dark;
+    border-color: $toolbar-button-border-color-dark;
+
+    icon {
+      color: $toolbar-button-icon-color-dark;
+    }
+
+    &:active,
+    &.focus,
+    &:hover {
+      color: $toolbar-button-hover-color-dark;
+      background-color: $toolbar-button-hover-bg-dark;
+      border-color: $toolbar-button-hover-border-color-dark;
+    }
+  }
+}

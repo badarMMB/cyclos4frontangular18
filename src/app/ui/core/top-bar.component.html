@@ -1,0 +1,223 @@
+@if (roots$ | async; as roots) {
+  <nav class="navbar navbar-expand-md">
+    <div class="navbar-container container-lg">
+      <!-- The sidenav toggle on mobile / tablet -->
+      @if (layout.ltlg$ | async) {
+        <a
+          #sidenavTrigger
+          class="never-active"
+          id="sidenav-trigger"
+          href="#"
+          (click)="toggleSidenav.emit(); $event.preventDefault(); blurIfClick('sidenav-trigger', $event)"
+          [attr.aria-label]="i18n.menu.menu">
+          <icon [icon]="SvgIcon.List"></icon>
+        </a>
+      }
+      <a #brand class="navbar-brand" routerLink="/">
+        <!-- The application logo -->
+        @if (layout.gtxs$ | async) {
+          <img class="logo" [src]="dataForFrontendHolder.dataForFrontend.logoUrl" />
+        }
+        <!-- The title -->
+        <div class="top-title">
+          {{
+          (layout.xxs$ | async)
+          ? (uiLayout.title$ | async) || dataForFrontendHolder.dataForFrontend.mobileTitle
+          : (layout.ltmd$ | async)
+          ? dataForFrontendHolder.dataForFrontend.mobileTitle
+          : dataForFrontendHolder.dataForFrontend.title
+          }}
+        </div>
+      </a>
+      <div #menuContainer class="menu-container">
+        @if (layout.xxs$ | async) {
+          <!-- When on xxs, show an icon that integrates navigation and page actions -->
+          <ng-container *ngTemplateOutlet="xxsMenu"></ng-container>
+        } @else {
+          @if (hasMenu && (layout.gtmd$ | async)) {
+            <!-- The menu is integrated in the top bar -->
+            <menus
+              class="expanded"
+              [roots]="roots"
+              [density]="density"
+              [tooltipForNonActive]="density === 'dense' && (layout.lg$ | async)"
+              [menuType]="MenuType.TOP"
+              [activeMenu]="activeMenu"
+              [userName]="userName"
+              (dropdownShown)="dropdownShown($event)"
+            (dropdownHidden)="dropdownHidden()"></menus>
+            <div [ngClass]="separatorNgClass"></div>
+          }
+          <!-- We also have custom menus (profile, notifications, logout, etc) -->
+          <ng-container *ngTemplateOutlet="customMenus"></ng-container>
+        }
+      </div>
+    </div>
+  </nav>
+}
+<ng-template #customMenus>
+  <div class="custom-menus">
+    @if (user != null && (layout.gtxxs$ | async)) {
+      @if (authHelper.restrictedAccess) {
+        <div class="profile-label">
+          @if (user.image) {
+            <avatar size="small" [image]="user.image" [icon]="SvgIcon.Person"> </avatar>
+          }
+          @if (!user.image) {
+            <icon [icon]="SvgIcon.Person"> </icon>
+          }
+          @if (layout.gtsm$ | async) {
+            <div class="personal-label">
+              {{ userName }}
+            </div>
+          }
+        </div>
+      } @else {
+        <a
+          routerLink="/users/self/profile"
+          id="profile-link"
+          (click)="navigate(Menu.MY_PROFILE, $event); blurIfClick('profile-link', $event)"
+          [ngClass]="customNgClass(Menu.MY_PROFILE)"
+          [tooltip]="hasMenu ? i18n.menu.personal : null">
+          @if (user.image) {
+            <avatar size="small" [image]="user.image"> </avatar>
+          }
+          @if (!user.image) {
+            <icon [icon]="SvgIcon.Person"> </icon>
+          }
+          @if (layout.gtsm$ | async) {
+            <div class="personal-label">
+              {{ userName }}
+            </div>
+          }
+        </a>
+      }
+      @if ((layout.gtxxs$ | async) && (messageHelper.messageStatus$ | async)) {
+        <a
+          routerLink="/users/messages/search"
+          id="messages-link"
+          (click)="navigate(messageHelper.resolveMenu(), $event); blurIfClick('messages-link', $event)"
+          [ngClass]="customNgClass(messageHelper.resolveMenu())"
+          [tooltip]="hasMenu ? messageHelper.resolveLabel() : null"
+          [attr.aria-label]="messageHelper.resolveLabel()">
+          <icon-with-counter [icon]="SvgIcon.Envelope" [count]="(messageHelper.messageStatus$ | async).newMessages">
+          </icon-with-counter>
+          @if ((layout.gtmd$ | async) && !hasMenu) {
+            <div class="ml-2">
+              {{ messageHelper.resolveLabel() }}
+            </div>
+          }
+        </a>
+      }
+    }
+    @if ((layout.gtxxs$ | async) && (notification.notificationsStatus$ | async)) {
+      <a
+        routerLink="/personal/notifications"
+        id="notifications-link"
+        (click)="navigate(Menu.NOTIFICATIONS, $event); blurIfClick('notifications-link', $event)"
+        [ngClass]="customNgClass(Menu.NOTIFICATIONS)"
+        [tooltip]="hasMenu ? i18n.menu.personalNotifications : null"
+        [attr.aria-label]="i18n.menu.personalNotifications">
+        <icon-with-counter [icon]="SvgIcon.Bell" [count]="(notification.notificationsStatus$ | async).newNotifications">
+        </icon-with-counter>
+        @if ((layout.gtmd$ | async) && !hasMenu) {
+          <div class="ml-2">
+            {{ i18n.menu.personalNotifications }}
+          </div>
+        }
+      </a>
+    }
+
+    @if (user != null && shoppingCart) {
+      <a
+        href="#"
+        id="shopping-cart"
+        routerLink="/marketplace/shopping-cart"
+        class="nav-item"
+        [ngClass]="customNgClass(Menu.SHOPPING_CART)"
+        [tooltip]="hasMenu ? i18n.menu.shoppingCart : null"
+        [attr.aria-label]="i18n.menu.shoppingCart"
+        (click)="navigate(Menu.SHOPPING_CART, $event); blurIfClick('shopping-cart', $event)">
+        <icon-with-counter [icon]="SvgIcon.Cart3" [count]="marketplaceHelper.cartItems$ | async"></icon-with-counter>
+        @if ((layout.gtmd$ | async) && !hasMenu) {
+          <div class="ml-2">
+            {{ i18n.menu.shoppingCart }}
+          </div>
+        }
+      </a>
+    }
+
+    @if (dataForFrontendHolder.dataForFrontend.hasHelp) {
+      <a
+        href="#"
+        id="help-link"
+        class="nav-item"
+        [ngClass]="customNgClass(this.menu.helpMenu)"
+        [tooltip]="(layout.gtsm$ | async) && (user == null || !hasMenu) ? null : i18n.menu.help"
+        [attr.aria-label]="i18n.menu.help"
+        (click)="navigate(this.menu.helpMenu, $event); blurIfClick('help-link', $event)">
+        <icon [icon]="SvgIcon.QuestionCircle"></icon>
+        @if ((layout.gtsm$ | async) && (user == null || !hasMenu)) {
+          <div class="ml-2">
+            {{ i18n.menu.help }}
+          </div>
+        }
+      </a>
+    }
+
+    @if ((layout.gtxxs$ | async) && user != null) {
+      <a
+        href="#"
+        id="logout-trigger"
+        class="nav-item"
+        [ngClass]="customNgClass(Menu.LOGOUT)"
+        [tooltip]="hasMenu ? i18n.menu.logout : null"
+        [attr.aria-label]="i18n.menu.logout"
+        (click)="navigate(Menu.LOGOUT, $event); blurIfClick('logout-trigger', $event)">
+        <icon [icon]="SvgIcon.Logout2"></icon>
+        @if ((layout.gtmd$ | async) && !hasMenu) {
+          <div class="ml-2">
+            {{ i18n.menu.logout }}
+          </div>
+        }
+      </a>
+    }
+    @if (user == null) {
+      @if ((layout.gtsm$ | async) && menu.menuEntry(Menu.PUBLIC_REGISTRATION)) {
+        <a
+          routerLink="/users/registration"
+          id="register-link"
+          [attr.aria-label]="i18n.menu.register"
+          (click)="navigate(Menu.PUBLIC_REGISTRATION, $event); blurIfClick('register-link', $event)"
+          [ngClass]="customNgClass(Menu.PUBLIC_REGISTRATION)">
+          <icon [icon]="SvgIcon.PersonPlus"></icon>
+          @if (layout.gtsm$ | async) {
+            <div class="ml-2">
+              {{ i18n.menu.register }}
+            </div>
+          }
+        </a>
+      }
+      <a
+        routerLink="/login"
+        id="login-link"
+        [attr.aria-label]="i18n.menu.login"
+        (click)="navigate(Menu.LOGIN, $event); blurIfClick('login-link', $event)"
+        [ngClass]="customNgClass(Menu.LOGIN)">
+        <icon [icon]="SvgIcon.Login2"></icon>
+        @if (layout.gtsm$ | async) {
+          <div class="ml-2">
+            {{ i18n.menu.login }}
+          </div>
+        }
+      </a>
+    }
+  </div>
+</ng-template>
+
+<ng-template #xxsMenu>
+  <heading-actions
+    root
+    [headingActions]="xxsActions(uiLayout.headingActions$ | async, router.events | async, login.user$ | async)">
+  </heading-actions>
+</ng-template>

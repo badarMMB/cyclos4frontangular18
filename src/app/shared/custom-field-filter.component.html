@@ -1,0 +1,137 @@
+@if (hasValuesList) {
+  <multi-selection-field
+    #multiSelectionField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [separator]="ApiHelper.VALUE_SEPARATOR"
+    [fieldOptions]="fieldOptions"
+    [emptyLabel]="i18n.general.notApplied">
+  </multi-selection-field>
+} @else {
+  <!-- string, URL, text -->
+  @if (input) {
+    <input-field
+      #inputField
+      [id]="id"
+      [label]="label"
+      [name]="name"
+      [labelPosition]="labelPosition"
+      [fieldSize]="fieldSize"
+      [required]="required"
+      [formControl]="formControl"
+      [type]="type == 'integer' ? 'number' : type == 'url' ? 'url' : 'text'"
+    [mask]="field.pattern"></input-field>
+  }
+  <!-- boolean -->
+  @if (type == 'boolean') {
+    <single-selection-field
+      #singleSelectionField
+      [id]="id"
+      [label]="label"
+      [name]="name"
+      [labelPosition]="labelPosition"
+      [fieldSize]="fieldSize"
+      [required]="required"
+      [formControl]="formControl"
+      [emptyOption]="i18n.general.notApplied">
+    <field-option [value]="true" [text]="i18n.general.yes"></field-option>
+    <field-option [value]="false" [text]="i18n.general.no"></field-option>
+  </single-selection-field>
+}
+<!-- multi selection -->
+@if (enumerated) {
+  <multi-selection-field
+    #multiSelectionField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [separator]="ApiHelper.VALUE_SEPARATOR"
+    [fieldOptions]="fieldOptions">
+  </multi-selection-field>
+}
+<!-- linked entity: user (other linked entities are also handled as input -->
+@if (user) {
+  <user-field
+    #userField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [allowSelf]="true"
+    [required]="required"
+    [formControl]="formControl"
+    [filters]="userSearchFilters()">
+  </user-field>
+}
+<!-- Integer, decimal and date are ranges -->
+@if (range) {
+  <label-value
+    [label]="label"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    kind="field">
+    <div class="range">
+      @switch (type) {
+        @case ('integer') {
+          <input-field
+            #integerMin
+            [id]="id + '_min'"
+            [name]="name ? name + '_min' : null"
+            [formControl]="range.at(0)"
+          [type]="'number'"></input-field>
+          <input-field
+            #integerMax
+            [id]="id + '_max'"
+            [name]="name ? name + '_max' : null"
+            [formControl]="range.at(1)"
+          [type]="'number'"></input-field>
+        }
+        @case ('decimal') {
+          <decimal-field
+            #decimalMin
+            [id]="id + '_min'"
+            [scale]="field.decimalDigits"
+            [name]="name ? name + '_min' : null"
+            [formControl]="range.at(0)">
+        </decimal-field>
+        <decimal-field
+          #decimalMax
+          [id]="id + '_max'"
+          [scale]="field.decimalDigits"
+          [name]="name ? name + '_max' : null"
+          [formControl]="range.at(1)">
+        </decimal-field>
+      }
+      @case ('date') {
+        <date-field
+          #dateMin
+          [id]="id + '_min'"
+          [tooltip]="(layout.ltmd$ | async) ? null : (range.at(0).valueChanges | async | date)"
+          [name]="name ? name + '_min' : null"
+          [formControl]="range.at(0)">
+        </date-field>
+        <date-field
+          #dateMax
+          [id]="id + '_max'"
+          [tooltip]="(layout.ltmd$ | async) ? null : (range.at(1).valueChanges | async | date)"
+          [name]="name ? name + '_max' : null"
+          [formControl]="range.at(1)">
+        </date-field>
+      }
+    }
+  </div>
+</label-value>
+}
+}
+

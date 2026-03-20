@@ -1,0 +1,12 @@
+<avatar
+  [icon]="icon"
+  [iconColor]="iconColor"
+  [zoom]="zoom"
+  [roundBorders]="roundBorders"
+  [size]="size"
+  [iconSize]="iconSize"
+  [image]="image"
+(click)="showLightbox()"></avatar>
+@if (galleryImages?.length > 0) {
+  <ngx-gallery [options]="galleryOptions" [images]="galleryImages"> </ngx-gallery>
+}

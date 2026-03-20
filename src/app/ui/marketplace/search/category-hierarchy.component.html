@@ -1,0 +1,10 @@
+<a class="d-block mb-1 undecorated" [ngClass]="'category-level-' + level" href="#" (click)="emit(category, $event)">
+  {{ category.name }}
+</a>
+
+@for (sub of category.children; track sub) {
+  <category-hierarchy
+    [category]="sub"
+    [level]="level + 1"
+  (select)="select.next($event)"></category-hierarchy>
+}

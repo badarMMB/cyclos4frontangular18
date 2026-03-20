@@ -1,0 +1,362 @@
+<!-- A read-only label-value rendered when the control is disabled -->
+@if (disabled || (disabledChange | async)) {
+  <label-value
+    [label]="field.name"
+    kind="fieldView"
+    [labelPosition]="labelPosition"
+    [informationText]="getInformationText()">
+    <format-field-value
+      [fields]="[field]"
+      [object]="disabledValueObject"
+      [fieldName]="field.internalName"
+      [files]="binaryValues?.fileValues[field.internalName]"
+      [images]="binaryValues?.imageValues[field.internalName]">
+    </format-field-value>
+  </label-value>
+} @else {
+  @if (hasValuesList) {
+    @if (control == 'radio') {
+      <radio-group-field
+        #radioGroupField
+        [id]="id"
+        [label]="label"
+        [name]="name"
+        [labelPosition]="labelPosition"
+        [fieldSize]="fieldSize"
+        [required]="required"
+        [formControl]="formControl"
+        [fieldOptions]="fieldOptions"
+        [informationText]="getInformationText()">
+      </radio-group-field>
+    } @else {
+      <single-selection-field
+        #singleSelectionField
+        [id]="id"
+        [label]="label"
+        [name]="name"
+        [labelPosition]="labelPosition"
+        [fieldSize]="fieldSize"
+        [required]="required"
+        [formControl]="formControl"
+        emptyOption
+        [fieldOptions]="fieldOptions"
+        [informationText]="getInformationText()">
+      </single-selection-field>
+    }
+  } @else {
+    <!-- integer or entity -->
+    @if (type === 'integer' || (type === 'linkedEntity' && linkedEntityType !== 'user')) {
+      <input-field
+        #inputField
+        [id]="id"
+        [label]="label"
+        [name]="name"
+        [labelPosition]="labelPosition"
+        [fieldSize]="fieldSize"
+        [required]="required"
+        [formControl]="formControl"
+        [autocomplete]="autocomplete"
+        [type]="type === 'integer' ? 'tel' : 'text'"
+        [mask]="field.pattern"
+        [placeholder]="field.pattern || ''"
+      [informationText]="getInformationText()"></input-field>
+    }
+    <!-- string -->
+    @if (type === 'string') {
+      @if (label) {
+        <label-value
+          [label]="label"
+          kind="field"
+          [labelPosition]="labelPosition"
+          [fieldSize]="fieldSize"
+          [informationText]="getInformationText()"
+          [required]="required">
+        <ng-container [ngTemplateOutlet]="stringTemplate"></ng-container>
+      </label-value>
+    } @else {
+      <div class="d-flex w-100">
+        <input-field
+          #inputField
+          [id]="id"
+          [name]="name"
+          [labelPosition]="labelPosition"
+          [fieldSize]="fieldSize"
+          [required]="required"
+          [formControl]="formControl"
+          [autocomplete]="autocomplete"
+          type="text"
+          [mask]="field.pattern"
+          [placeholder]="field.pattern || ''"
+        [informationText]="getInformationText()"></input-field>
+        @if (field.showQrCodeScan) {
+          <div class="ml-2">
+            <button
+              type="button"
+              class="btn btn-icon"
+              #scanQrCodeButton
+              [tooltip]="i18n.field.user.scanQrCodeTooltip"
+              (click)="showScanQrCode()">
+            <icon [icon]="SvgIcon.QrCodeScan"></icon>
+          </button>
+        </div>
+      }
+    </div>
+  }
+}
+<!-- url -->
+@if (type === 'url') {
+  <url-field
+    #urlField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [autocomplete]="autocomplete"
+    [informationText]="getInformationText()">
+  </url-field>
+}
+<!-- text -->
+@if (type === 'text') {
+  <textarea-field
+    #textareaField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [informationText]="getInformationText()">
+  </textarea-field>
+}
+<!-- richText -->
+@if (type === 'richText') {
+  @if (field.internalName === 'mapUsers') {
+    <map-users
+      #richTextField
+      [id]="id"
+      [field]="field"
+      [name]="name"
+      [label]="label"
+      [labelPosition]="labelPosition"
+      [fieldSize]="fieldSize"
+      [required]="required"
+      [formControl]="formControl"
+      [binaryValues]="binaryValues"
+      [informationText]="getInformationText()">
+    </map-users>
+  } @else {
+    <html-field
+      #richTextField
+      [id]="id"
+      [label]="label"
+      [name]="name"
+      [labelPosition]="labelPosition"
+      [fieldSize]="fieldSize"
+      [required]="required"
+      [formControl]="formControl"
+      [informationText]="getInformationText()">
+    </html-field>
+  }
+}
+<!-- boolean -->
+@if (type == 'boolean') {
+  <boolean-field
+    #booleanField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    labelPosition="sideForced"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [informationText]="getInformationText()">
+  </boolean-field>
+}
+<!-- decimal -->
+@if (type == 'decimal') {
+  <decimal-field
+    #decimalField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [scale]="field.decimalDigits"
+    [informationText]="getInformationText()">
+  </decimal-field>
+}
+<!-- date -->
+@if (type == 'date') {
+  <date-field
+    #dateField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    minDate="past100"
+    maxDate="future100"
+    [informationText]="getInformationText()">
+  </date-field>
+}
+<!-- single selection -->
+@if (type == 'singleSelection' && control == 'singleSelection') {
+  <single-selection-field
+    #singleSelectionField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    emptyOption
+    [fieldOptions]="fieldOptions"
+    [informationText]="getInformationText()">
+  </single-selection-field>
+}
+@if (type == 'singleSelection' && control == 'radio') {
+  <radio-group-field
+    #radioGroupField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [fieldOptions]="fieldOptions"
+    [informationText]="getInformationText()">
+  </radio-group-field>
+}
+<!-- multi selection -->
+@if (['multiSelection', 'dynamicMultiSelection'].includes(type) && control == 'multiSelection') {
+  <multi-selection-field
+    #multiSelectionField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [separator]="ApiHelper.VALUE_SEPARATOR"
+    [fieldOptions]="fieldOptions"
+    [informationText]="getInformationText()">
+  </multi-selection-field>
+}
+@if (['multiSelection', 'dynamicMultiSelection'].includes(type) && control == 'checkbox') {
+  <checkbox-group-field
+    #cheboxGroupField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [separator]="ApiHelper.VALUE_SEPARATOR"
+    [fieldOptions]="fieldOptions"
+    [informationText]="getInformationText()">
+  </checkbox-group-field>
+}
+<!-- images -->
+@if (type == 'image') {
+  <images-field
+    #imagesField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [initialImages]="binaryValues?.imageValues[field.internalName]"
+    target="customValue"
+    [customField]="field"
+    [separator]="ApiHelper.VALUE_SEPARATOR"
+    [maxFiles]="field.maxFiles"
+    (upload)="imagesUploaded.emit($event)"
+    [informationText]="getInformationText()">
+  </images-field>
+}
+<!-- files -->
+@if (type == 'file') {
+  <files-field
+    #filesField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [initialFiles]="binaryValues?.fileValues[field.internalName]"
+    [customField]="field"
+    [separator]="ApiHelper.VALUE_SEPARATOR"
+    [maxFiles]="field.maxFiles"
+    [mimeTypes]="field.mimeTypes"
+    (upload)="filesUploaded.emit($event)"
+    [informationText]="getInformationText()">
+  </files-field>
+}
+<!-- Linked user -->
+@if (linkedEntityType === 'user') {
+  <user-field
+    #userField
+    [id]="id"
+    [label]="label"
+    [name]="name"
+    [labelPosition]="labelPosition"
+    [allowSelf]="true"
+    [fieldSize]="fieldSize"
+    [required]="required"
+    [formControl]="formControl"
+    [informationText]="getInformationText()"
+    [filters]="userSearchFilters()">
+  </user-field>
+}
+}
+}
+
+<!-- Template rendered when the field is editable, that is, there's a control -->
+
+
+
+<ng-template #stringTemplate>
+  <div class="d-flex w-100">
+    <input-field
+      #inputField
+      [id]="id"
+      [name]="name"
+      [labelPosition]="labelPosition"
+      [fieldSize]="fieldSize"
+      [required]="required"
+      [formControl]="formControl"
+      [autocomplete]="autocomplete"
+      type="text"
+      [mask]="field.pattern"
+      [placeholder]="field.pattern || ''"
+    [informationText]="getInformationText()"></input-field>
+    @if (field.showQrCodeScan) {
+      <div class="ml-2">
+        <button
+          type="button"
+          class="btn btn-icon"
+          #scanQrCodeButton
+          [tooltip]="i18n.field.user.scanQrCodeTooltip"
+          (click)="showScanQrCode()">
+        <icon [icon]="SvgIcon.QrCodeScan"></icon>
+      </button>
+    </div>
+  }
+</div>
+</ng-template>

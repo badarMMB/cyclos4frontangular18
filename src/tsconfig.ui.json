@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/ui",
+    "types": []
+  },
+  "files": [
+    "ui/main.ts"
+  ],
+  "include": [
+    "*.d.ts"
+  ]
+}

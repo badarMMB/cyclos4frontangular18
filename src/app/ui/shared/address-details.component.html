@@ -1,0 +1,77 @@
+@if (address.addressLine1) {
+  <div [ngClass]="elementClass">
+    {{ address.addressLine1 }}
+  </div>
+}
+@if (address.addressLine2) {
+  <div [ngClass]="elementClass">
+    {{ address.addressLine2 }}
+  </div>
+}
+@if (address.street) {
+  <div [ngClass]="elementClass">
+    {{ addressHelper.addressStreet(address) }}
+  </div>
+}
+@if (address.neighborhood) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ i18n.address.neighborhood }}</span>
+    {{ address.neighborhood }}
+  </div>
+}
+@if (address.poBox) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ i18n.address.poBox }}</span>
+    {{ address.poBox }}
+  </div>
+}
+@if (address.zip) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ i18n.address.zip }}</span>
+    {{ address.zip }}
+  </div>
+}
+@if (address.city) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ i18n.address.city }}</span>
+    {{ address.city }}
+  </div>
+}
+@if (address.region) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ i18n.address.region }}</span>
+    {{ address.region }}
+  </div>
+}
+@if (address.country && countriesResolve.data | async) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ i18n.address.country }}</span>
+    {{ country }}
+  </div>
+}
+@if (contactInfo) {
+  @if (contactInfo.email) {
+    <div [ngClass]="elementClass">
+      <span class="inline-label">{{ i18n.user.email }}</span>
+      <a [href]="'mailTo:' + contactInfo.email">
+        {{ contactInfo.email }}
+      </a>
+    </div>
+  }
+  @if (contactInfo.mobilePhone) {
+    <div [ngClass]="elementClass">
+      <span class="inline-label">{{ i18n.phone.mobile }}</span>
+      <a [href]="'tel:' + contactInfo.normalizedMobilePhone">
+        {{ contactInfo.mobilePhone }}
+      </a>
+    </div>
+  }
+  @if (contactInfo.landLinePhone) {
+    <div [ngClass]="elementClass">
+      <span class="inline-label">{{ i18n.phone.landLine }}</span>
+      <a [href]="'tel:' + contactInfo.normalizedLandLinePhone">
+        {{ contactInfo.landLinePhone }}
+      </a>
+    </div>
+  }
+}

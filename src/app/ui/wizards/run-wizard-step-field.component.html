@@ -1,0 +1,279 @@
+<!--
+{{ field.kind }}: {{ field.basicProfileField }}{{ field.customProfileField }}
+{{ field.wizardField }}
+-->
+@if (
+  field.readOnly &&
+  field.basicProfileField !== BasicProfileFieldEnum.ADDRESS &&
+  field.kind !== WizardStepFieldKind.CONTACT_INFO) {
+  <label-value kind="fieldView" [label]="label">
+    <format-field-value [fieldValue]="field.readOnlyFieldValue"> </format-field-value>
+  </label-value>
+} @else {
+  <!-- Basic profile fields + phones -->
+  @if (basicOrPhone) {
+    <label-value
+      [label]="label"
+      kind="field"
+      [required]="required"
+      [ignoreExtraCell]="!privacyControl">
+      <input-field [formControl]="formControl"> </input-field>
+      <field-privacy *extraCell [field]="privacyField" [control]="privacyControl"></field-privacy>
+    </label-value>
+  }
+  <!-- Email verification -->
+  @if (
+    field.basicProfileField === BasicProfileFieldEnum.EMAIL &&
+    field.requireVerification &&
+    (!data.step.verifiedEmail ||
+    data.step.verifiedEmail !== ((formControl.valueChanges | async) || formControl.value))
+    ) {
+    <label-value
+      [label]="i18n.wizard.emailVerificationCode"
+      kind="field"
+      required>
+      <div class="row no-gutters w-100">
+        <div class="col-6 col-md-4">
+          <input-field [formControl]="emailValidation" size="full"> </input-field>
+        </div>
+        <div class="col-6 col-md-8 pl-2">
+          <countdown-button
+            #emailCode
+            [label]="i18n.general.sendCode"
+            [disabledSeconds]="data.step.verificationCodeSeconds"
+            [disabledKey]="codeSentMessage"
+            (action)="sendEmailCode(emailCode)">
+          </countdown-button>
+        </div>
+      </div>
+    </label-value>
+  }
+  @if (
+    field.phoneKind === PhoneKind.MOBILE &&
+    field.requireVerification &&
+    (!data.step.verifiedSms ||
+    data.step.verifiedSms !==
+    ((mobilePhone.controls.number.valueChanges | async) || mobilePhone.controls.number.value))
+    ) {
+    <label-value
+      [label]="i18n.wizard.smsVerificationCode"
+      kind="field"
+      required>
+      <div class="row no-gutters w-100">
+        <div class="col-6 col-md-4">
+          <input-field [formControl]="smsValidation" size="full"> </input-field>
+        </div>
+        <div class="col-6 col-md-8 pl-2">
+          <countdown-button
+            #smsCode
+            [label]="i18n.general.sendCode"
+            [disabledSeconds]="data.step.verificationCodeSeconds"
+            [disabledKey]="codeSentMessage"
+            (action)="sendSmsCode(smsCode)">
+          </countdown-button>
+        </div>
+      </div>
+    </label-value>
+  }
+  @if (field.phoneKind === PhoneKind.LAND_LINE && dataForNew.phoneConfiguration.extensionEnabled) {
+    <label-value
+      [label]="i18n.phone.extension"
+      kind="field">
+      <input-field [formControl]="landLinePhone.controls.extension"> </input-field>
+    </label-value>
+  }
+  @if (field.basicProfileField === BasicProfileFieldEnum.ADDRESS) {
+    @if (dataForNew.addressConfiguration.availability === AvailabilityEnum.OPTIONAL) {
+      <boolean-field
+        [formControl]="defineAddress"
+        [label]="i18n.user.addressDefine">
+      </boolean-field>
+    }
+    @if (defineAddress.value) {
+      <address-form
+        [addressForm]="address"
+        ignoreContactFields
+        [configuration]="dataForNew.addressConfiguration"
+        [managePrivacy]="dataForNew.addressConfiguration.managePrivacy">
+      </address-form>
+    }
+  }
+  @if (field.basicProfileField === BasicProfileFieldEnum.IMAGE) {
+    <images-field
+      [label]="dataForNew.imageConfiguration.maxImages === 1 ? i18n.user.title.image : i18n.user.title.images"
+      avatarSize="large"
+      [formControl]="user.controls.images"
+      [required]="dataForNew.imageConfiguration.availability === AvailabilityEnum.REQUIRED"
+      [maxFiles]="dataForNew.imageConfiguration.maxImages"
+      [initialImages]="dataForNew.images"
+    [target]="TempImageTargetEnum.USER_REGISTRATION"></images-field>
+  }
+  @if (customField) {
+    <label-value
+      [label]="customField.name"
+      kind="field"
+      [ignoreExtraCell]="!privacyControl"
+      [fieldSize]="customField.size"
+      [required]="customField.required"
+      [informationText]="customField.informationText">
+      <custom-field-input
+        [field]="customField"
+        hideLabel
+        [formControl]="formControl"
+        hideInformationText
+        (imagesUploaded)="customImagesUploaded.emit($event)"
+        (filesUploaded)="customFilesUploaded.emit($event)">
+      </custom-field-input>
+      <field-privacy *extraCell [field]="privacyField" [control]="privacyControl"></field-privacy>
+    </label-value>
+  }
+  @if (field.kind === WizardStepFieldKind.CONTACT_INFO) {
+    <boolean-field [formControl]="defineContactInfo" [label]="i18n.user.contactInfoDefine"> </boolean-field>
+    @if (defineContactInfo.value) {
+      <ng-container [formGroup]="contactInfo">
+        @if (!isContactInfoReadonly() || contactInfo.get('image')?.value) {
+          <images-field
+            formControlName="image"
+            target="contactInfo"
+            [initialImages]="dataForNew.contactInfoImage"
+            [label]="i18n.general.image"
+            separator="@"
+            avatarSize="large">
+          </images-field>
+        }
+        <input-field
+          [id]="'contact-info_name'"
+          formControlName="name"
+          [label]="i18n.general.name"
+          [required]="defineContactInfo?.value && !isContactInfoReadonly()">
+      </input-field>
+      @if (!isContactInfoReadonly() || contactInfo.get('email')?.value) {
+        <input-field
+          [id]="'contact-info_email'"
+          formControlName="email"
+        [label]="i18n.user.email"></input-field>
+      }
+      @if (!isContactInfoReadonly() || contactInfo.get('mobilePhone')?.value) {
+        <input-field
+          [id]="'contact-info_mobilePhone'"
+          formControlName="mobilePhone"
+          [label]="i18n.phone.mobile">
+      </input-field>
+    }
+    @if (!isContactInfoReadonly() || contactInfo.get('landLinePhone')?.value) {
+      <input-field
+        [id]="'contact-info_landLinePhone'"
+        formControlName="landLinePhone"
+        [label]="i18n.phone.landLine">
+    </input-field>
+  }
+  @if (
+    (!isContactInfoReadonly() || contactInfo.get('landLineExtension')?.value) &&
+    dataForNew.phoneConfiguration.extensionEnabled
+    ) {
+    <input-field
+      [id]="'contact-info_landLineExtension'"
+      formControlName="landLineExtension"
+      [label]="i18n.phone.extension">
+  </input-field>
+}
+@for (cf of dataForNew.contactInfoConfiguration.customFields; track cf) {
+  <ng-container
+    [formGroup]="contactInfo.get('customValues')">
+    @if (!isContactInfoReadonly() || contactInfo.get('customValues').get(cf.internalName)?.value) {
+      <custom-field-input
+        [field]="cf"
+        [formControlName]="cf.internalName">
+      </custom-field-input>
+    }
+  </ng-container>
+}
+<label-value [label]="i18n.field.privacy.name" kind="field" labelPosition="sideForced">
+  <div class="d-flex w-100 justify-content-between">
+    <field-privacy [control]="contactInfo.get('hidden')" justifyStart></field-privacy>
+  </div>
+</label-value>
+</ng-container>
+}
+}
+@if (field.kind === WizardStepFieldKind.PASSWORDS) {
+  @for (pt of dataForNew.passwordTypes; track pt; let i = $index) {
+    @if (pt.description) {
+      <alert type="info">{{ pt.description }}</alert>
+    }
+    @if (passwordForm(i); as password) {
+      <ng-container [formGroup]="password">
+        <input-field
+          required
+          formControlName="value"
+          type="password"
+          autocomplete="new-password"
+          [label]="pt.name"
+          [maxLength]="pt.maxLength">
+      </input-field>
+      @if (layout.gtxs$ | async) {
+        <label-value label=" ">
+          <password-hints [passwordType]="pt" [control]="passwordForm(i).controls.value"> </password-hints>
+        </label-value>
+      }
+      @if (layout.ltsm$ | async) {
+        <password-hints
+          [passwordType]="pt"
+          ngClass="mb-3"
+          [control]="passwordForm(i).controls.value">
+        </password-hints>
+      }
+      <input-field
+        required
+        formControlName="confirmationValue"
+        type="password"
+        autocomplete="new-password"
+        [label]="i18n.user.passwordConfirmation(pt.name)">
+    </input-field>
+    @if (pt.canForceChange) {
+      <boolean-field
+        formControlName="forceChange"
+        [label]="i18n.user.registration.passwordForceChange">
+      </boolean-field>
+    }
+  </ng-container>
+}
+}
+}
+@if (field.kind === WizardStepFieldKind.SECURITY_QUESTION) {
+  <single-selection-field
+    [formControl]="user.controls.securityQuestion"
+    [label]="i18n.securityQuestion.question"
+    [required]="dataForNew.requireSecurityQuestion"
+    [emptyOption]="i18n.user.securityQuestionEmpty">
+    @for (q of dataForNew.securityQuestions; track q) {
+      <field-option [value]="q.internalName" [text]="q.name">
+      </field-option>
+    }
+  </single-selection-field>
+  @if (!empty(user.controls.securityQuestion.valueChanges | async) || user.controls.securityQuestion.value) {
+    <input-field
+      #securityAnswer
+      [formControl]="user.controls.securityAnswer"
+      required
+      [label]="i18n.securityQuestion.answer">
+  </input-field>
+}
+}
+@if (field.kind === WizardStepFieldKind.AGREEMENTS) {
+  <label-value kind="field" [label]="i18n.user.profile.agreements">
+    <accept-agreements
+      [agreements]="dataForNew.agreements"
+    [formControl]="user.controls.acceptAgreements"></accept-agreements>
+  </label-value>
+}
+@if (
+  field.kind === WizardStepFieldKind.CAPTCHA &&
+  dataForNew.captchaInput &&
+  !dataForNew.user.identityProviderRequestId
+  ) {
+  <label-value kind="field" [label]="i18n.user.captcha" required>
+    <captcha [captchaInput]="dataForNew.captchaInput" [form]="user.controls.captcha"></captcha>
+  </label-value>
+}
+}

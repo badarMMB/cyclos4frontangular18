@@ -1,0 +1,94 @@
+<h1>{{ i18n.field.html.image.titleInsert }}</h1>
+
+@if (ready$ | async) {
+  @if (allowUrl) {
+    <h2>{{ i18n.field.html.image.sourceUrl }}</h2>
+    <input-field
+      focused
+      [label]="i18n.field.html.image.url"
+      [formControl]="urlControl"
+      (enter)="selectUrl(urlControl.value)">
+  </input-field>
+  <actions>
+    <action-button (action)="selectUrl(urlControl.value)" [label]="i18n.general.submit"> </action-button>
+    @if (urlOnly) {
+      <action-button outline (action)="modalRef.hide()" [label]="i18n.general.cancel"> </action-button>
+    }
+  </actions>
+}
+@if (systemCustom$ | async; as data) {
+  @if (data.categories?.length > 0) {
+    @if (allowUrl) {
+      <hr />
+      <h2>{{ i18n.field.html.image.sourceExisting }}</h2>
+    }
+    @if (data.categories?.length > 1) {
+      <single-selection-field
+        [label]="i18n.general.category"
+        [formControl]="categoryControl">
+        @for (cat of data.categories; track cat) {
+          <field-option [value]="cat.category.id" [text]="cat.category.name">
+          </field-option>
+        }
+      </single-selection-field>
+    }
+    <ng-container *ngTemplateOutlet="images"></ng-container>
+  }
+}
+@if (userCustom$ | async; as data) {
+  @if (allowUrl) {
+    <hr />
+    <h2>{{ i18n.field.html.image.sourceExisting }}</h2>
+  }
+  <ng-container *ngTemplateOutlet="images"></ng-container>
+}
+} @else {
+  <spinner class="mx-auto my-3"></spinner>
+}
+
+<ng-template #spinner>
+  <spinner class="mx-auto my-3"></spinner>
+</ng-template>
+
+<ng-template #images>
+  @if ((images$ | async)?.length > 0) {
+    <div class="thumbnails">
+      @for (image of images$.value; track image) {
+        <avatar
+          [image]="image"
+          size="huge"
+          class="cursor-pointer"
+          [roundBorders]="false"
+          [tooltip]="image.name"
+          (click)="selectUrl(image.url)">
+        </avatar>
+      }
+    </div>
+  } @else {
+    <div>{{ i18n.field.html.image.noImages }}</div>
+  }
+</ng-template>
+
+<ng-template #noImages>
+  <div>{{ i18n.field.html.image.noImages }}</div>
+</ng-template>
+
+<image-upload
+  #upload
+  [target]="uploadKind"
+  [owner]="uploadOwner$ | async"
+(uploadDone)="selectUrl($event[0]?.url)"></image-upload>
+
+@if (!urlOnly) {
+  <actions>
+    @if (canUpload$ | async) {
+      <action-button
+        (action)="upload.perform()"
+        [label]="i18n.field.html.image.upload">
+      </action-button>
+    } @else {
+      <span></span>
+    }
+    <action-button outline (action)="modalRef.hide()" [label]="i18n.general.cancel"> </action-button>
+  </actions>
+}

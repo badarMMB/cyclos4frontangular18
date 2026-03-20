@@ -1,0 +1,233 @@
+<!-- Image -->
+@if (imageAvailability !== 'disabled') {
+  <h2 class="border-0">{{ i18n.user.title.image }}</h2>
+  <div class="row">
+    <div class="col-12 col-sm-4">
+      <div class="d-flex justify-content-center justify-content-sm-start">
+        @if (image$ | async) {
+          <avatar-lightbox [image]="image" size="huge"> </avatar-lightbox>
+        } @else {
+          <div class="d-flex flex-column">
+            @if (data.imageConfiguration.availability === 'required') {
+              <div tabindex="0" [ngClass]="{ 'is-invalid': imageControl.hasError }">
+                {{ i18n.user.noImageRequired }}
+                <span class="required-marker">&nbsp;*</span>
+                @if (imageControl) {
+                  <field-errors [control]="imageControl"> </field-errors>
+                }
+              </div>
+            } @else {
+              {{ i18n.user.noImage }}
+            }
+          </div>
+        }
+        <ng-template #noImage>
+          <div class="d-flex flex-column">
+            @if (data.imageConfiguration.availability === 'required') {
+              <div tabindex="0" [ngClass]="{ 'is-invalid': imageControl.hasError }">
+                {{ i18n.user.noImageRequired }}
+                <span class="required-marker">&nbsp;*</span>
+                @if (imageControl) {
+                  <field-errors [control]="imageControl"> </field-errors>
+                }
+              </div>
+            } @else {
+              {{ i18n.user.noImage }}
+            }
+          </div>
+        </ng-template>
+      </div>
+      <image-upload
+        #upload
+        containerClass="mt-3"
+        target="userRegistration"
+        keepUrls
+      (uploadDone)="onUploadDone($event[0])"></image-upload>
+    </div>
+    @if ((upload.uploading$ | async) === false) {
+      <div
+        class="col-12 col-sm-8 mt-3 mt-sm-0 d-flex justify-content-between justify-content-sm-end align-items-end"
+        >
+        <action-button
+          [disabled]="requesting$ | async"
+          (action)="upload.perform()"
+          [label]="i18n.field.image.upload"
+          outline>
+        </action-button>
+        @if (image) {
+          <action-button
+            class="ml-3"
+            outline
+            [disabled]="requesting$ | async"
+            (action)="removeImage()"
+            [label]="i18n.field.image.remove">
+          </action-button>
+        }
+      </div>
+    }
+  </div>
+  <h2 class="mt-4">{{ i18n.user.title.fields }}</h2>
+}
+
+<!-- Basic profile fields-->
+<ng-container [formGroup]="form">
+  @if (data.broker) {
+    <label-value [label]="i18n.user.broker">
+      <user-link [user]="data.broker" hideLink></user-link>
+    </label-value>
+  }
+  @if (canEdit('name')) {
+    <input-field
+      formControlName="name"
+      [label]="data.nameLabel || i18n.user.name"
+    required></input-field>
+  }
+  @if (canEdit('username')) {
+    <input-field
+      formControlName="username"
+      [label]="i18n.user.username"
+    required></input-field>
+  }
+  @if (fromExternalPayment && data.user.email) {
+    <label-value [label]="i18n.user.email" kind="fieldView">
+      {{ data.user.email }}
+    </label-value>
+  } @else {
+    @if (canEdit('email')) {
+      <label-value
+        [label]="i18n.user.email"
+        kind="field"
+        [ignoreExtraCell]="!canManagePrivacy('email')"
+        [required]="data.emailRequired">
+      <input-field formControlName="email" [required]="data.emailRequired"> </input-field>
+      <field-privacy *extraCell field="email" [control]="form.get('hiddenFields')"></field-privacy>
+    </label-value>
+    @if (data.allowSetSendActivationEmail) {
+      <boolean-field
+        [label]="i18n.user.registration.skipActivationEmail"
+      formControlName="skipActivationEmail"></boolean-field>
+    }
+  }
+}
+</ng-container>
+
+<!-- Custom profile fields -->
+@for (cf of fieldsWithoutSection; track cf) {
+  <ng-container [formGroup]="form.get('customValues')">
+    @if (canEdit(cf)) {
+      <label-value
+        [label]="cf.name"
+        kind="field"
+        [ignoreExtraCell]="!canManagePrivacy(cf)"
+        [fieldSize]="cf.size"
+        [required]="cf.required"
+        [informationText]="cf.informationText">
+        <custom-field-input
+          [field]="cf"
+          hideLabel
+          [formControlName]="cf.internalName"
+          hideInformationText
+          (imagesUploaded)="customImagesUploaded.emit($event)"
+          (filesUploaded)="customFilesUploaded.emit($event)">
+        </custom-field-input>
+        <field-privacy *extraCell [field]="cf.internalName" [control]="form.get('hiddenFields')"></field-privacy>
+      </label-value>
+    }
+  </ng-container>
+}
+@for (key of fieldsWithSection.keys(); track key) {
+  <h2>{{ key.name }}</h2>
+  @if (key.informationText) {
+    <div class="mb-3">
+      {{ key.informationText }}
+    </div>
+  }
+  @for (cf of fieldsWithSection.get(key); track cf) {
+    <ng-container [formGroup]="form.get('customValues')">
+      @if (canEdit(cf)) {
+        <label-value
+          [label]="cf.name"
+          kind="field"
+          [ignoreExtraCell]="!canManagePrivacy(cf)"
+          [fieldSize]="cf.size"
+          [required]="cf.required"
+          [informationText]="cf.informationText">
+          <custom-field-input
+            [field]="cf"
+            hideLabel
+            [formControlName]="cf.internalName"
+            hideInformationText
+            (imagesUploaded)="customImagesUploaded.emit($event)"
+            (filesUploaded)="customFilesUploaded.emit($event)">
+          </custom-field-input>
+          <field-privacy *extraCell [field]="cf.internalName" [control]="form.get('hiddenFields')"></field-privacy>
+        </label-value>
+      }
+    </ng-container>
+  }
+}
+<!-- Add a separator for next sections -->
+@if (
+  (fieldsWithSection.size > 0 || fieldsWithoutSection.length > 0) &&
+  (mobileAvailability !== 'disabled' || landLineAvailability !== 'disabled' || addressAvailability !== 'disabled')
+  ) {
+  <hr
+    />
+}
+
+<!-- Mobile phone -->
+@if (mobileAvailability !== 'disabled') {
+  @if (fromExternalPayment && data.user.mobilePhones?.length > 0) {
+    <label-value [label]="i18n.phone.mobile" kind="fieldView">
+      {{ data.user.mobilePhones[0].number }}
+    </label-value>
+  } @else {
+    <label-value
+      [label]="i18n.phone.mobile"
+      [required]="mobileAvailability === 'required'"
+      kind="field"
+      [formGroup]="mobileForm">
+      <input-field formControlName="number" [placeholder]="data.phoneConfiguration.mobileExample"></input-field>
+      <field-privacy *extraCell [control]="mobileForm.get('hidden')"> </field-privacy>
+    </label-value>
+  }
+}
+
+<!-- Land-line phone -->
+@if (landLineAvailability !== 'disabled') {
+  <ng-container [formGroup]="landLineForm">
+    <label-value
+      [label]="i18n.phone.landLine"
+      [required]="data.phoneConfiguration.landLineAvailability === 'required'"
+      kind="field">
+      <input-field formControlName="number" [placeholder]="data.phoneConfiguration.landLineExample"></input-field>
+      <field-privacy *extraCell [control]="landLineForm.get('hidden')"> </field-privacy>
+    </label-value>
+    @if (data.phoneConfiguration.extensionEnabled) {
+      <input-field
+        formControlName="extension"
+        fieldSize="tiny"
+      [label]="i18n.phone.extension"></input-field>
+    }
+  </ng-container>
+}
+
+<!-- Address -->
+@if (addressAvailability !== 'disabled') {
+  <h2 class="mt-4">{{ i18n.address.address }}</h2>
+  @if (data.addressConfiguration.availability !== 'required') {
+    <boolean-field
+      [formControl]="defineAddress"
+      [label]="i18n.user.addressDefine"
+      switch>
+  </boolean-field>
+}
+@if (defineAddress.value) {
+  <address-form
+    [addressForm]="addressForm"
+    ignoreContactFields
+    [configuration]="data.addressConfiguration"
+    [managePrivacy]="data.addressConfiguration.managePrivacy">
+  </address-form>
+}
+}

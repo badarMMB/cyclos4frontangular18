@@ -1,0 +1,68 @@
+<page-layout [ready]="data$ | async">
+  @switch (step$ | async) {
+    <!-- Step 1: Select voucher type -->
+    @case ('select-type') {
+      <voucher-type-selection
+        [user]="data.user"
+        [heading]="i18n.voucher.title.buy"
+        [mobileHeading]="i18n.voucher.mobileTitle.buy"
+        [categories]="data.categories"
+        [types]="data.types"
+        (typeSelected)="toForm($event)">
+      </voucher-type-selection>
+    }
+    <!-- Step 2: Buy form -->
+    @case ('form') {
+      <page-content
+        [heading]="dataTypeForBuy.type.voucherTitle"
+        [mobileHeading]="dataTypeForBuy.type.voucherTitle"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <buy-vouchers-step-form class="flex-grow-1" [data]="dataTypeForBuy" [form]="form"> </buy-vouchers-step-form>
+        <actions forceRow>
+          <action-button [disabled]="requesting$ | async" (action)="toConfirm()" [label]="i18n.general.next">
+          </action-button>
+          @if (!singleType) {
+            <action-button outline (action)="backToSelectType()" [label]="i18n.general.previous">
+            </action-button>
+          }
+        </actions>
+      </page-content>
+    }
+    <!-- Step 3: Buy confirmation -->
+    @case ('confirm') {
+      <page-content
+        [heading]="i18n.voucher.title.buyConfirmation"
+        [mobileHeading]="i18n.voucher.mobileTitle.buyConfirmation"
+        [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+        last>
+        <buy-vouchers-step-confirm
+          class="flex-grow-1"
+          [preview]="preview"
+          [paymentCustomFields]="dataTypeForBuy.paymentCustomFields"
+          [voucherCustomFields]="dataTypeForBuy.voucherCustomFields"
+          [confirmationPassword]="confirmationPassword"
+          (showSubmit)="showSubmit$.next($event)"
+          (confirmed)="buy($event)">
+        </buy-vouchers-step-confirm>
+        <actions forceRow>
+          @if (showSubmit$ | async) {
+            <action-button
+              [disabled]="!canConfirm || (requesting$ | async)"
+              (action)="buy()"
+              [label]="i18n.general.confirm">
+            </action-button>
+          } @else {
+            &nbsp;
+          }
+          <action-button outline (action)="backToForm()" [label]="i18n.general.previous"> </action-button>
+        </actions>
+      </page-content>
+    }
+    @default {
+      <page-content>
+        <spinner></spinner>
+      </page-content>
+    }
+  }
+</page-layout>

@@ -1,0 +1,204 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="viewForm"
+      [heading]="i18n.operatorGroup.title.view"
+      [mobileHeading]="i18n.operatorGroup.mobileTitle.view"
+      [headingActions]="headingActions$ | async">
+      @if (!self) {
+        <label-value [label]="i18n.general.user" labelPosition="side">
+          <user-link [user]="group.user"></user-link>
+        </label-value>
+      }
+      <label-value [label]="i18n.general.name" [value]="group.name"> </label-value>
+      @if (group.description) {
+        <label-value
+          [label]="i18n.general.description"
+          [value]="group.description"
+          valueFormat="break">
+        </label-value>
+      }
+      <!-- General -->
+      @if (
+        group.editOwnProfile ||
+        group.notifications ||
+        group.viewAdvertisements ||
+        group.manageAdvertisements ||
+        group.messages ||
+        group.brokering ||
+        group.enableToken ||
+        group.records?.length > 0 ||
+        group.operations?.length > 0
+        ) {
+        <h2
+          class="mt-3 mb-0"
+          >
+          {{ (layout.ltsm$ | async) ? i18n.operatorGroup.mobileTitle.general : i18n.operatorGroup.title.general }}
+        </h2>
+      }
+      @if (group.editOwnProfile) {
+        <label-value [label]="i18n.operatorGroup.editOwnProfile" [value]="i18n.general.yes">
+        </label-value>
+      }
+      @if (group.notifications) {
+        <label-value [label]="i18n.operatorGroup.notifications" [value]="i18n.general.yes">
+        </label-value>
+      }
+      @if (group.viewAdvertisements) {
+        <label-value
+          [label]="i18n.operatorGroup.viewAdvertisements"
+          [value]="i18n.general.yes">
+        </label-value>
+      }
+      @if (group.manageAdvertisements) {
+        <label-value
+          [label]="i18n.operatorGroup.manageAdvertisements"
+          [value]="i18n.general.yes">
+        </label-value>
+      }
+      @if (group.messages) {
+        <label-value [label]="i18n.operatorGroup.messages" [value]="i18n.general.yes">
+        </label-value>
+      }
+      @if (hasTokenPermissions()) {
+        <label-value [label]="i18n.operatorGroup.tokens.label">
+          @for (p of getTokenPermissions(); track p; let last = $last) {
+            {{ p }}@if (!last) {
+            ,
+          }
+        }
+      </label-value>
+    }
+    @if (group.records?.length > 0) {
+      <label-value [label]="i18n.operatorGroup.records">
+        @for (r of group.records; track r; let last = $last) {
+          {{ r.name }}@if (!last) {
+          ,
+        }
+      }
+    </label-value>
+  }
+  @if (group.operations?.length > 0) {
+    <label-value [label]="i18n.operatorGroup.runOperations">
+      @for (op of group.operations; track op; let last = $last) {
+        {{ op.name }}@if (!last) {
+        ,
+      }
+    }
+  </label-value>
+}
+@if (group.brokering) {
+  <label-value [label]="i18n.operatorGroup.brokering" [value]="i18n.general.yes">
+  </label-value>
+}
+@if (visibleAccounts?.length > 0) {
+  <h2 class="mt-3 mb-0">
+    {{
+    (layout.ltsm$ | async)
+    ? i18n.operatorGroup.mobileTitle.accountAccess
+    : i18n.operatorGroup.title.accountAccess
+    }}
+  </h2>
+  @for (account of visibleAccounts; track account) {
+    @if (!singleAccount) {
+      <h3 class="mt-3 mb-0">
+        {{ account.accountType.name }}
+      </h3>
+    }
+    <label-value
+      [label]="i18n.operatorGroup.accountAccess"
+      [value]="userHelper.operatorGroupAccountAccess(account.access)">
+    </label-value>
+    @if (paymentsByAccount[account.accountType.id]?.length > 0) {
+      <label-value
+        [label]="i18n.operatorGroup.performPayments">
+        @for (pmt of paymentsByAccount[account.accountType.id]; track pmt; let last = $last) {
+          {{ pmt.paymentType.name
+          }}@if (pmt.requiresAuthorization) {
+          {{
+          i18n.operatorGroup.performPaymentsRequiresAuthorizationView
+          }}
+        }
+        @if (pmt.maxAmountPerDay) {
+          {{
+          i18n.operatorGroup.performPaymentsMaxAmountPerDayView(
+          pmt.maxAmountPerDay | currency : pmt.paymentType.currency
+          )
+          }}
+          }@if (!last) {
+          <br />
+        }
+      }
+    </label-value>
+  }
+  @if (authorizeByAccount[account.accountType.id]?.length > 0) {
+    <label-value
+      [label]="i18n.operatorGroup.authorizePayments">
+      @for (pmt of authorizeByAccount[account.accountType.id]; track pmt; let last = $last) {
+        {{ pmt.name }}@if (!last) {
+        ,
+      }
+    }
+  </label-value>
+}
+@if (account.notificationAmount?.min || account.notificationAmount?.max) {
+  <label-value
+    [label]="i18n.operatorGroup.paymentNotifications"
+            [value]="
+              format.formatRange({
+                min: account.notificationAmount.min | currency : account.accountType.currency,
+                max: account.notificationAmount.max | currency : account.accountType.currency
+              })
+            ">
+  </label-value>
+}
+}
+@if (hasGeneralAccountOperations()) {
+  @if (!singleAccount) {
+    <h3 class="mt-3 mb-0">
+      {{
+      (layout.ltsm$ | async)
+      ? i18n.operatorGroup.mobileTitle.generalAccount
+      : i18n.operatorGroup.title.generalAccount
+      }}
+    </h3>
+  }
+  @if (group.chargebackPayments) {
+    <label-value
+      [label]="i18n.operatorGroup.chargebackPayments"
+      [value]="i18n.general.yes">
+    </label-value>
+  }
+  @if (group.receivePayments) {
+    <label-value
+      [label]="i18n.operatorGroup.receivePayments"
+      [value]="i18n.general.yes">
+    </label-value>
+  }
+  @if (group.requestPayments) {
+    <label-value
+      [label]="i18n.operatorGroup.requestPayments"
+      [value]="i18n.general.yes">
+    </label-value>
+  }
+  @if (group.voucherTransactions) {
+    <label-value
+      [label]="i18n.operatorGroup.voucherTransactions"
+      [value]="i18n.general.yes">
+    </label-value>
+  }
+  @if (group.restrictPaymentsToUsers?.length > 0) {
+    <label-value
+      [label]="i18n.operatorGroup.restrictPaymentsToUsers">
+      @for (user of group.restrictPaymentsToUsers; track user; let last = $last) {
+        {{ user.display }}@if (!last) {
+        ,
+      }
+    }
+  </label-value>
+}
+}
+}
+</page-content>
+}
+</page-layout>

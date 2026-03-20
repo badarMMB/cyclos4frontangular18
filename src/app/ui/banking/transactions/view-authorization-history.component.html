@@ -1,0 +1,34 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.transaction.title.authorizationHistory"
+      [mobileHeading]="i18n.transaction.mobileTitle.authorizationHistory">
+      @if (transaction.transactionNumber) {
+        <label-value [label]="i18n.transaction.number">
+          {{ transaction.transactionNumber }}
+        </label-value>
+        <hr />
+      }
+      @for (auth of transaction.authorizations; track auth; let first = $first) {
+        @if (!first) {
+          <hr />
+        }
+        <label-value [label]="i18n.general.action">
+          {{ actionLabel(auth) }}
+        </label-value>
+        @if (auth.by) {
+          <label-value [label]="i18n.general.performedBy">
+            <user-link [user]="auth.by"></user-link>
+          </label-value>
+        }
+        <label-value [label]="i18n.general.date">
+          {{ auth.date | dateTime }}
+        </label-value>
+        @if (auth.comments) {
+          <label-value [label]="i18n.general.comments" [value]="auth.comments" valueFormat="break">
+          </label-value>
+        }
+      }
+    </page-content>
+  }
+</page-layout>

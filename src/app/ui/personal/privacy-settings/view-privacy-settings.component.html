@@ -1,0 +1,36 @@
+<page-layout>
+  <page-content
+    [heading]="i18n.privacySettings.title"
+    [mobileHeading]="i18n.privacySettings.mobileTitle"
+    [headingActions]="headingActions$ | async">
+    @if (data$ | async) {
+      <div>{{ i18n.privacySettings.information }}</div>
+      <div>{{ i18n.privacySettings.dataSubjectToControls }}</div>
+      <ul>
+        @for (field of fields(); track field) {
+          <li>{{ field }}</li>
+        }
+      </ul>
+      @if (data.user && !authHelper.isSelf(data.user)) {
+        <user-info [user]="data.user"></user-info>
+      }
+      <label-value [label]="i18n.general.enabled"> {{ data.enabled ? i18n.general.yes : i18n.general.no }}</label-value>
+      @if (data.enabled) {
+        <h2>{{ i18n.privacySettings.controlsSection }}</h2>
+        @for (control of data.availableControls; track control) {
+          <label-value [label]="control.name">
+            {{
+            control.fieldsAlwaysVisible || data.selectedControls.includes(control.id)
+            ? i18n.general.yes
+            : i18n.general.no
+            }}
+            @if (control.informationText) {
+              <br />
+              {{ control.informationText }}
+            }
+          </label-value>
+        }
+      }
+    }
+  </page-content>
+</page-layout>

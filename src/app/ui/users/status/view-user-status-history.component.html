@@ -1,0 +1,34 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="operator ? i18n.userStatus.title.historyOperator : i18n.userStatus.title.historyUser"
+      [mobileHeading]="operator ? i18n.userStatus.mobileTitle.historyOperator : i18n.userStatus.mobileTitle.historyUser">
+      <user-info [user]="data.user"></user-info>
+    </page-content>
+    <results-layout [results]="data.history">
+      <mobile-result *mobileResult="let row" [date]="row.period?.date">
+        <div class="cell-main">{{ i18n.general.status }}: {{ userHelper.userStatus(row.status) }}</div>
+        @if (row.by) {
+          <div class="cell-text">{{ i18n.general.performedBy }}: {{ row.by.display }}</div>
+        }
+      </mobile-result>
+      <table *resultTable class="table table-hover">
+        <thead>
+          <th>{{ i18n.general.date }}</th>
+          <th>{{ i18n.general.status }}</th>
+          <th>{{ i18n.general.performedBy }}</th>
+        </thead>
+        <tbody>
+          @for (row of data.history; track row) {
+            <tr>
+              <td>{{ row.period?.begin | date }}</td>
+              <td>{{ userHelper.userStatus(row.status) }}</td>
+              <td>{{ row.by?.display }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>
+

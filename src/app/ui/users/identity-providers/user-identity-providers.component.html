@@ -1,0 +1,74 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content [heading]="title" [mobileHeading]="mobileTitle">
+      @if (data.user && !self) {
+        <user-info [user]="data.user"></user-info>
+        <hr />
+      }
+      @if (data.identityProviders.length > 0) {
+        @for (uip of data.identityProviders; track uip; let first = $first) {
+          @if (!first) {
+            <hr class="mt-4" />
+          }
+          <div class="row no-gutters">
+            <div class="col-4 col-xs-3 col-md-2">
+              @if (layout.gtxxs$ | async) {
+                <avatar
+                  class="ml-2 mr-5 management"
+                  [size]="64"
+                  iconSize="64px"
+                  [image]="uip.identityProvider.image"
+                  [icon]="SvgIcon.PersonBadge">
+                </avatar>
+              }
+            </div>
+            <div class="col-8 col-xs-9 col-md-7">
+              <h2 class="border-0 mb-3" [ngClass]="{ 'mt-0': first }">
+                {{ uip.identityProvider.name }}
+              </h2>
+              <div class="mt-2">
+                @if (uip.linkDate) {
+                  <div>
+                    {{ i18n.identityProvider.connectedOn(uip.linkDate | dateTime) }}
+                  </div>
+                }
+                @if (uip.status !== 'linked') {
+                  <div>
+                    {{ i18n.identityProvider.disconnected }}
+                  </div>
+                }
+                @if (uip.name) {
+                  <div>
+                    {{ uip.name }}
+                  </div>
+                }
+                @if (uip.email) {
+                  <div>
+                    {{ uip.email }}
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="col-12 col-md-3 mt-3 mt-md-0">
+              @for (action of actions(uip); track action; let last = $last) {
+                <action-button
+                  class="d-block ml-auto"
+                  [ngClass]="{ 'mb-3': !last }"
+                  (action)="action.onClick()"
+                  [label]="action.label">
+                </action-button>
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        {{ i18n.identityProvider.noResults }}
+      }
+    </page-content>
+  }
+</page-layout>
+
+
+<ng-template #noResults>
+  {{ i18n.identityProvider.noResults }}
+</ng-template>

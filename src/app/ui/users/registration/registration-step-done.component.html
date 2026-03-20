@@ -1,0 +1,7 @@
+<p [innerHTML]="messageHtml | trust"></p>
+
+<!-- For public registration with active users, show the principals information -->
+@if (login.user == null && result.status == 'active') {
+  <p [innerHTML]="principalsHtml | trust"></p>
+  <p>{{ passwordsMessage }}</p>
+}

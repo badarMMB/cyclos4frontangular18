@@ -1,0 +1,108 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content mode="filters" [heading]="i18n.connectedUser.title" [mobileHeading]="i18n.connectedUser.mobileTitle">
+      <div [formGroup]="form" class="filters-form filters-form-separator">
+        <div class="row">
+          @if (data.channels?.length > 1) {
+            <div class="col-12 col-md-6">
+              <multi-selection-field formControlName="channels" [label]="i18n.connectedUser.channel">
+                @for (channel of data.channels; track channel) {
+                  <field-option
+                    [value]="channel.id"
+                    [internalName]="channel.internalName"
+                    [id]="channel.id"
+                    [text]="channel.name">
+                  </field-option>
+                }
+              </multi-selection-field>
+            </div>
+          }
+          @if (data.roles?.length > 1) {
+            <div class="col-12 col-md-6">
+              <multi-selection-field formControlName="roles" [label]="i18n.connectedUser.showConnected">
+                @for (role of data.roles; track role) {
+                  <field-option [value]="role" [text]="showConnectedLabel(role)">
+                  </field-option>
+                }
+              </multi-selection-field>
+            </div>
+          }
+          <div class="col-12 col-md-6">
+            <user-field formControlName="user" [label]="i18n.general.user"> </user-field>
+          </div>
+        </div>
+      </div>
+    </page-content>
+    <results-layout
+      resultType="list"
+      [results]="results$ | async"
+      (update)="update($event)"
+      [onClick]="onClick"
+      [rendering$]="rendering$">
+      <mobile-result *mobileResult="let row" [avatarImage]="row.user?.image" [avatarIcon]="SvgIcon.Person">
+        <div class="d-flex">
+          <div>
+            <div class="cell-main">
+              {{ row.user.display }}
+            </div>
+            <div class="cell-cell-date">
+              {{ row.creationDate | dateTime }}
+            </div>
+            <div class="cell-text">
+              {{ row.channel.name }}
+            </div>
+          </div>
+          <div class="ml-auto">
+            @if (canDisconnect(row)) {
+              <button
+                type="button"
+                class="btn btn-icon"
+                (click)="disconnect(row); $event.stopPropagation(); $event.preventDefault()">
+                <icon [icon]="SvgIcon.Logout2"></icon>
+              </button>
+            }
+          </div>
+        </div>
+      </mobile-result>
+      <table *resultTable class="table table-hover cursor-pointer">
+        <thead>
+          <th class="avatar"></th>
+          <th>{{ i18n.general.user }}</th>
+          <th>{{ i18n.connectedUser.channel }}</th>
+          <th>{{ i18n.connectedUser.loggedInAt }}</th>
+          <th>{{ i18n.connectedUser.ipAddress }}</th>
+          <th class="actions"></th>
+        </thead>
+        <tbody>
+          @for (row of (results$ | async)?.results; track row) {
+            <tr>
+              <td
+                class="avatar"
+                [ngClass]="{
+                  'pb-0': layout.xxs$ | async,
+                  'border-0': layout.xxs$ | async
+                }">
+                <avatar [image]="row.user?.image" [tooltip]="row.user?.display"></avatar>
+              </td>
+              <td>{{ row.user.display }}</td>
+              <td>{{ row.channel.name }}</td>
+              <td>{{ row.creationDate | dateTime }}</td>
+              <td>{{ row.remoteAddress }}</td>
+              <td class="actions">
+                @if (canDisconnect(row)) {
+                  <button
+                    type="button"
+                    [tooltip]="i18n.connectedUser.disconnect"
+                    class="btn btn-icon"
+                    (click)="disconnect(row); $event.stopPropagation()">
+                    <icon [icon]="SvgIcon.Logout2"></icon>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>

@@ -1,0 +1,30 @@
+<label class="label-value-label" [attr.for]="forId">
+  <span>{{ label }}@if (required) {
+    <span class="required-marker">&nbsp;*</span>
+  }</span>
+</label>
+<div class="label-value-container">
+  <div class="d-flex label-value-value">
+    @if (value != null && valueFormat == 'plain') {
+      {{ value }}
+    }
+    @if (value != null && valueFormat == 'break') {
+      <div class="break-nl">{{ value }}</div>
+    }
+    @if (value != null && valueFormat == 'html') {
+      <div [innerHTML]="value | trust"></div>
+    }
+    @if (value == null) {
+      <ng-content></ng-content>
+    }
+  </div>
+  @if (informationText) {
+    <information-text class="informationText" [informationText]="informationText">
+    </information-text>
+  }
+  @if (extraCell) {
+    <div [ngClass]="{ 'flex-grow-0': informationText }" class="label-value-extra">
+      <ng-container *ngTemplateOutlet="extraCell"></ng-container>
+    </div>
+  }
+</div>

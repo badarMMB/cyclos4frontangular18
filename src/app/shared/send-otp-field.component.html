@@ -1,0 +1,26 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  @if (fieldOptions?.length === 0) {
+    <div>
+      {{ i18n.password.otp.noMediums }}
+    </div>
+  } @else {
+    <radio-group-field #radio [formControl]="radioControl" asColumn [fieldOptions]="fieldOptions"> </radio-group-field>
+    <field-errors [control]="formControl"></field-errors>
+  }
+}
+
+<ng-template #widget>
+  @if (fieldOptions?.length === 0) {
+    <div>
+      {{ i18n.password.otp.noMediums }}
+    </div>
+  } @else {
+    <radio-group-field #radio [formControl]="radioControl" asColumn [fieldOptions]="fieldOptions"> </radio-group-field>
+    <field-errors [control]="formControl"></field-errors>
+  }
+</ng-template>
+

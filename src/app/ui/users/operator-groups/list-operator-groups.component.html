@@ -1,0 +1,40 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [mode]="self ? 'empty' : 'normal'"
+      [heading]="i18n.operatorGroup.title.list"
+      [mobileHeading]="i18n.operatorGroup.mobileTitle.list"
+      [headingActions]="headingActions$ | async">
+      @if (!self) {
+        <user-info [user]="data.user"></user-info>
+      }
+    </page-content>
+    <results-layout [results]="data.operatorGroups" [toLink]="toLink">
+      <mobile-result *mobileResult="let row">
+        <div class="cell-main">{{ row.name }}</div>
+      </mobile-result>
+      <table *resultTable class="table table-hover table-no-header cursor-pointer">
+        <tbody>
+          @for (row of data.operatorGroups; track row) {
+            <tr (click)="router.navigate(path(row))">
+              <td>
+                <a [routerLink]="path(row)">
+                  {{ row.name }}
+                </a>
+              </td>
+              <td class="actions">
+                <button
+                  type="button"
+                  [tooltip]="i18n.general.removeTooltip(row.name)"
+                  class="btn btn-icon"
+                  (click)="remove(row); $event.stopPropagation()">
+                  <icon [icon]="SvgIcon.Trash"></icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>

@@ -1,0 +1,6 @@
+<a class="inline-block w-100" href="#" (click)="showAgreement($event)">
+  {{ agreement.name }}
+  @if (!ignoreRequired && agreement.required) {
+    <span class="required-marker">&nbsp;*</span>
+  }
+</a>

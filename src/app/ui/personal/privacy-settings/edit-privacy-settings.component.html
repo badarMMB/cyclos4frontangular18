@@ -1,0 +1,35 @@
+<page-layout>
+  <page-content
+    [heading]="i18n.privacySettings.title"
+    [mobileHeading]="i18n.privacySettings.mobileTitle"
+    [headingActions]="headingActions$ | async">
+    @if (data$ | async) {
+      <ng-container [formGroup]="form">
+        <div>{{ i18n.privacySettings.information }}</div>
+        <div>{{ i18n.privacySettings.dataSubjectToControls }}</div>
+        <ul>
+          @for (field of fields(); track field) {
+            <li>{{ field }}</li>
+          }
+        </ul>
+        @if (data.user && !authHelper.isSelf(data.user)) {
+          <user-info [user]="data.user"></user-info>
+        }
+        <boolean-field #enabled [formControlName]="'enabled'" [label]="i18n.general.enabled"></boolean-field>
+        @if (enabled.value) {
+          <h2>{{ i18n.privacySettings.controlsSection }}</h2>
+          @for (control of data.availableControls; track control) {
+            <boolean-field
+              [formControlName]="control.id"
+              [label]="control.name"
+              [text]="control.informationText">
+            </boolean-field>
+          }
+        }
+        <actions>
+          <action-button [label]="i18n.general.save" (action)="save()" [disabled]="requesting$ | async"></action-button>
+        </actions>
+      </ng-container>
+    }
+  </page-content>
+</page-layout>

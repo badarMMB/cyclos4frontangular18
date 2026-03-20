@@ -1,0 +1,51 @@
+@if (label) {
+  <label-value
+    [formField]="self"
+    labelPosition="sideForced"
+    maximizeLabel
+    [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <div
+    class="custom-control d-flex align-content-center p-0"
+    [ngClass]="{
+      'custom-checkbox': !switch,
+      'custom-switch': switch
+    }">
+    <input
+      #checkbox
+      type="checkbox"
+      [name]="name"
+      class="custom-control-input"
+      [id]="id"
+      (click)="onClick.emit($event)"
+      (keyup.enter)="toggle(); onClick.emit($event)"
+      [formControl]="formControl"
+      [checked]="isTrue(value)" />
+    <label class="custom-control-label" [for]="id">{{ text }}</label>
+  </div>
+  <field-errors [control]="formControl"></field-errors>
+}
+
+<ng-template #widget>
+  <div
+    class="custom-control d-flex align-content-center p-0"
+    [ngClass]="{
+      'custom-checkbox': !switch,
+      'custom-switch': switch
+    }">
+    <input
+      #checkbox
+      type="checkbox"
+      [name]="name"
+      class="custom-control-input"
+      [id]="id"
+      (click)="onClick.emit($event)"
+      (keyup.enter)="toggle(); onClick.emit($event)"
+      [formControl]="formControl"
+      [checked]="isTrue(value)" />
+    <label class="custom-control-label" [for]="id">{{ text }}</label>
+  </div>
+  <field-errors [control]="formControl"></field-errors>
+</ng-template>

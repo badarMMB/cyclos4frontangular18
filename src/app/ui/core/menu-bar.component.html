@@ -1,0 +1,14 @@
+@if (roots$ | async; as roots) {
+  @if (density(roots, layout.breakpointChanges$ | async); as dens) {
+    <nav
+      class="navbar shadow-sm"
+      [ngClass]="{
+        'full-width': uiLayout.fullWidth$ | async,
+        dense: dens === 'dense'
+      }">
+      <div class="navbar-container container-lg justify-content-start">
+        <menus [roots]="roots" [menuType]="MenuType.BAR" [activeMenu]="activeMenu" [density]="dens"></menus>
+      </div>
+    </nav>
+  }
+}

@@ -1,0 +1,65 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [mode]="!self || showFilters ? 'filters' : 'emptyFilters'"
+      [heading]="i18n.account.title.accountsSummary"
+      [mobileHeading]="i18n.account.mobileTitle.accountsSummary">
+      @if (!self) {
+        <user-info [user]="data.user"></user-info>
+      }
+      @if (showFilters) {
+        <div [formGroup]="form" class="filters-form filters-form-separator border-bottom">
+          <div class="row filters-row">
+            <div class="col-12 col-md-6">
+              <input-field labelPosition="side" formControlName="keywords" [label]="i18n.general.keywords"></input-field>
+            </div>
+            @if (currencyOptions.length > 1) {
+              <div class="col-12 col-md-6">
+                <single-selection-field
+                  labelPosition="side"
+                  [emptyOption]="i18n.general.notApplied"
+                  formControlName="currency"
+                  [label]="i18n.general.currency"
+                  [fieldOptions]="currencyOptions">
+                </single-selection-field>
+              </div>
+            }
+            @if (anyHasBalance) {
+              <div class="col-12 col-md-6">
+                <boolean-field labelPosition="side" formControlName="nonZeroBalance" [label]="i18n.account.nonZeroBalance">
+                </boolean-field>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </page-content>
+    <results-layout [results]="results$ | async" [toLink]="toLink">
+      <mobile-result *mobileResult="let row">
+        <div class="d-flex">
+          <div>
+            <div class="cell-main">{{ row.type.name }}</div>
+            <div class="cell-text">{{ i18n.account.balance }}: {{ row.status.balance | currency : row.currency }}</div>
+          </div>
+        </div>
+      </mobile-result>
+      <table *resultTable class="table table-hover cursor-pointer">
+        <thead>
+          <th>{{ i18n.account.account }}</th>
+          <th class="text-right">{{ i18n.account.balance }}</th>
+        </thead>
+        <tbody>
+          @for (row of (results$ | async).results; track row) {
+            <tr
+              (click)="router.navigate(path(row.type)); $event.stopPropagation()">
+              <td>{{ row.type.name }}</td>
+              <td class="text-right">
+                {{ row.status.balance | currency : row.currency }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>

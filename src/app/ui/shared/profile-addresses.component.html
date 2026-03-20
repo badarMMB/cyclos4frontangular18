@@ -1,0 +1,38 @@
+@if (addresses?.length === 1) {
+  <!-- Single address -->
+  <hr />
+  <div class="d-flex flex-column flex-sm-row">
+    <div class="flex-grow-1">
+      <h2 class="border-0">
+        {{ i18n.address.address }}
+      </h2>
+      <ng-container *ngTemplateOutlet="addressDetails; context: { $implicit: addresses[0] }"> </ng-container>
+    </div>
+    @if (locatedAddresses?.length === 1) {
+      <div class="pt-1">
+        <static-map [address]="locatedAddresses[0]" [width]="singleMapWidth(layout.breakpointChanges$ | async)">
+        </static-map>
+      </div>
+    }
+  </div>
+}
+@if (locatedAddresses?.length > 1) {
+  <!-- Multiple addresses -->
+  <div #mapContainer class="map-container"></div>
+  <div class="row no-gutters">
+    @for (address of addresses; track address) {
+      <div class="col-12 col-sm-6 col-md-4">
+        <ng-container *ngTemplateOutlet="addressDetails; context: { $implicit: address }"> </ng-container>
+      </div>
+    }
+  </div>
+}
+
+<ng-template #addressDetails let-address>
+  @if (addresses.length > 1) {
+    <h3 class="mt-3">
+      {{ address.name }}
+    </h3>
+  }
+  <address-details-with-custom-fields [address]="address"> </address-details-with-custom-fields>
+</ng-template>

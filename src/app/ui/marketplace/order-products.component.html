@@ -1,0 +1,93 @@
+@if ((data$ | async) && data.length > 0) {
+  <table class="table table-hover">
+    <thead>
+      <th class="no-border" width="13%">{{ i18n.ad.number }}</th>
+      <th class="no-border" width="13%" [ngStyle]="{ 'max-width': '130px' }">
+        {{ i18n.ad.product }}
+      </th>
+      <th class="no-border text-right" width="13%">{{ i18n.ad.basePrice }}</th>
+      <th class="no-border text-right" width="13%">{{ i18n.ad.discount }}</th>
+      <th class="no-border text-right" width="13%">{{ i18n.ad.price }}</th>
+      <th class="no-border text-right" width="13%">{{ i18n.ad.quantity }}</th>
+      <th class="no-border text-right ellipsis" [ngStyle]="{ 'max-width': '130px' }">
+        {{ i18n.transaction.amount }}
+      </th>
+      <th class="actions"></th>
+    </thead>
+    <tbody>
+      @for (row of data; track row) {
+        <tr>
+          <td>{{ row.product.productNumber }}</td>
+          <td class="link" [ngStyle]="{ 'max-width': '130px' }" (click)="navigate(row)">
+            <span class="ellipsis-clamp-2">{{ row.product.name }}</span>
+          </td>
+          <td class="text-right">
+            {{ row.product.price | currency : currency }}
+          </td>
+          <td class="text-right">
+            <decimal-field [formControl]="form.controls[discount(row)]" [scale]="2"> </decimal-field>
+          </td>
+          <td class="text-right">
+            <decimal-field [formControl]="form.controls[price(row)]" [scale]="currency.decimalDigits"> </decimal-field>
+          </td>
+          <td class="text-right">
+            <decimal-field
+              [formControl]="form.controls[quantity(row)]"
+              [minRange]="row.product.allowDecimalQuantity ? null : 1"
+              [maxRange]="row.product.allowDecimalQuantity ? null : 10"
+              [customValueLabel]="i18n.ad.customQuantity"
+              [scale]="row.product.allowDecimalQuantity ? 2 : 0">
+            </decimal-field>
+          </td>
+          <td class="text-right ellipsis" [ngStyle]="{ 'max-width': '130px' }">
+            @if ((form.valueChanges | async) || row.totalPrice) {
+              {{ rowTotal(row) | currency : currency }}
+            }
+          </td>
+          <td class="actions actions-multiple">
+            <button type="button" [tooltip]="i18n.general.remove" class="btn btn-icon" (click)="remove(row)">
+              <icon [icon]="SvgIcon.Trash"></icon>
+            </button>
+          </td>
+        </tr>
+      }
+      <tr class="no-hover">
+        <td class="table-head-color" [attr.colspan]="4">
+          {{ i18n.ad.subtotal }}
+        </td>
+        <td class="table-head-color text-right ellipsis" [attr.colspan]="3">
+          @if ((form.valueChanges | async) || data) {
+            {{ subtotal | currency : currency }}
+          }
+        </td>
+        <td></td>
+      </tr>
+      <tr class="no-hover">
+        <td [attr.colspan]="4">
+          @if (deliveryMethod$ | async) {
+            {{ i18n.ad.deliveryMethod + ': ' + (deliveryMethod.name || '') }}
+          }
+        </td>
+        <td class="text-right ellipsis" [attr.colspan]="3">
+          @if (deliveryMethod$ | async) {
+            {{ deliveryMethod.price ? (deliveryMethod.price | currency : currency) : i18n.general.notSet }}
+          }
+        </td>
+        <td></td>
+      </tr>
+      <tr class="totalAmount no-hover">
+        <td class="border-bottom-0 label label-value-label" [attr.colspan]="4">
+          {{ i18n.ad.total }}
+        </td>
+        <td class="border-bottom-0 text-right label-value-value ellipsis" [attr.colspan]="3">
+          @if ((deliveryMethod$ | async) || (form.valueChanges | async) || data) {
+            {{ total | currency : currency }}
+          }
+        </td>
+        <td class="border-bottom-0"></td>
+      </tr>
+    </tbody>
+  </table>
+} @else {
+  <div>{{ i18n.ad.itemsNone }}</div>
+}

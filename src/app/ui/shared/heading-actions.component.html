@@ -1,0 +1,73 @@
+@if ((visibleActions$ | async)?.length > 0) {
+  <!-- We have actions. They may be grouped or not -->
+  @if (groupActions$ | async) {
+    <div
+      class="heading-actions"
+      dropdown
+      placement="bottom right"
+      #dropdown="bs-dropdown"
+      (onShown)="onShown(dropdown)"
+      (onHidden)="onHidden()">
+      <button
+        type="button"
+        dropdownToggle
+        id="heading-action-toggle"
+        class="heading-action heading-action-dropdown"
+      [ngClass]="{
+        'dropdown-toggle': layout.gtxxs$ | async
+      }"
+        (click)="blurIfClick('heading-action-toggle', $event)">
+        @if (layout.xxs$ | async) {
+          <icon [icon]="SvgIcon.ThreeDotsVertical" class="mx-2"></icon>
+        } @else {
+          <div class="action-label">
+            {{ i18n.general.actions }}
+          </div>
+        }
+      </button>
+      <div
+        class="heading-actions-menu dropdown-menu dropdown-menu-right"
+        *dropdownMenu
+        role="listbox"
+        id="heading-actions-menu"
+        attr.aria-labelledby="id"
+        (click)="$event.preventDefault(); $event.stopPropagation()">
+        @for (action of visibleActions$.value; track action; let first = $first; let i = $index) {
+          <a
+            #actionLink
+            tabindex="0"
+            class="heading-action-option"
+            [ngClass]="'heading-action-' + i"
+            href="#"
+            (click)="dropdown.hide(); clickAction(action, actionLink); $event.stopPropagation(); $event.preventDefault()">
+            <icon size="1.5rem" [icon]="action.icon"></icon>
+            <div class="heading-action-option-text">{{ action.label }}</div>
+          </a>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- When we group actions or we're on mobile, show the gray buttons -->
+    @if ((groupActions$ | async) || (layout.ltsm$ | async)) {
+      <div class="d-flex heading-actions">
+        @for (action of visibleActions$.value; track action) {
+          <button
+            #actionButton
+            type="button"
+            class="heading-action heading-action-with-icon d-flex"
+            (click)="clickAction(action, actionButton)">
+            <icon size="1.3rem" [icon]="action.icon"></icon>
+            <div class="action-label">{{ action.label }}</div>
+          </button>
+        }
+      </div>
+    } @else {
+      <!-- Show separated buttons -->
+      <div class="heading-actions-plain-buttons">
+        @for (action of visibleActions$.value; track action) {
+          <heading-action-button [action]="action"></heading-action-button>
+        }
+      </div>
+    }
+  }
+}

@@ -1,0 +1,50 @@
+<ng-container [formGroup]="form">
+  <label-value [label]="i18n.voucher.originAccount" kind="fieldView">
+    {{ data.account.type.name }}
+  </label-value>
+  @if (data.minimumTimeToRedeem) {
+    <label-value kind="fieldView" [label]="i18n.voucher.buy.minTimeToRedeem">
+      {{ i18n.voucher.buy.minTimeToRedeemAfterBuy(format.formatTimeInterval(data.minimumTimeToRedeem)) }}
+    </label-value>
+  }
+  @if (data.expirationDate) {
+    <label-value kind="fieldView" [label]="i18n.general.expirationDate">
+      {{ data.expirationDate | date }}
+    </label-value>
+  }
+  @if (data.redeemOnWeekDays) {
+    <label-value kind="fieldView" [label]="i18n.voucher.redeem.onDays">
+      {{ format.formatWeekDays(data.redeemOnWeekDays) || i18n.voucher.redeem.onDaysAny }}
+    </label-value>
+  }
+  @if (data.account.status.availableBalance) {
+    <label-value [label]="i18n.account.availableBalance" kind="fieldView">
+      {{ data.account.status.availableBalance | currency : currency }}
+    </label-value>
+  }
+  <input-field type="number" formControlName="count" required fieldSize="small" [label]="i18n.voucher.numberOfVouchers">
+</input-field>
+@if (showAmount) {
+  <decimal-field
+    formControlName="amount"
+    required
+    [label]="i18n.voucher.amountPerVoucher"
+    [prefix]="currency.prefix"
+    [suffix]="currency.suffix"
+    [scale]="currency.decimalDigits">
+  </decimal-field>
+}
+@if (showUser) {
+  <user-field
+    #user
+    formControlName="user"
+    [label]="i18n.general.user"
+  [allowContacts]="false"></user-field>
+}
+@for (cf of data.voucherCustomFields; track cf) {
+  <custom-field-input
+    [field]="cf"
+    [formControl]="form.controls.voucherCustomValues.get(cf.internalName)">
+  </custom-field-input>
+}
+</ng-container>

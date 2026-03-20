@@ -1,0 +1,37 @@
+@if (singleLine) {
+  <radio-group-field [formControl]="control">
+    @for (group of groups; track group) {
+      <field-option
+        [value]="group.internalName || group.id"
+        [id]="group.id"
+        [internalName]="group.internalName"
+        [text]="group.name">
+      </field-option>
+    }
+  </radio-group-field>
+} @else {
+  @for (group of groups; track group) {
+    <div class="row mb-2">
+      <div class="col-12 col-6 col-sm-8">
+        <div class="custom-control custom-radio">
+          <input
+            type="radio"
+            [formControl]="control"
+            class="custom-control-input"
+            [id]="'group_' + group.id"
+            [value]="group.internalName || group.id" />
+          <label class="custom-control-label" [for]="'group_' + group.id">
+            <div class="ml-1">
+              {{ group.name }}
+              @if (group.description) {
+                <div class="text-muted mt-1 mb-3">
+                  {{ group.description }}
+                </div>
+              }
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  }
+}

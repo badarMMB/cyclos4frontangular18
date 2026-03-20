@@ -1,0 +1,142 @@
+@if (image && (layout.ltsm$ | async)) {
+  <div class="image d-flex justify-content-center mt-2 mb-4">
+    <avatar-lightbox size="160" imageSize="200" [image]="image"> </avatar-lightbox>
+  </div>
+}
+
+<div class="d-flex flex-row-reverse">
+  @if (image && (layout.gtxs$ | async)) {
+    <div class="image ml-4 mb-3">
+      <avatar-lightbox [size]="image ? 200 : 128" iconSize="128px" [image]="image"></avatar-lightbox>
+    </div>
+  }
+  <div class="flex-grow-1 mb-ls">
+    @if (group) {
+      <label-value [label]="i18n.user.group" [value]="group.name"> </label-value>
+    }
+    @if (!empty(name)) {
+      <label-value [label]="data.nameLabel || i18n.user.name" [value]="name"> </label-value>
+    }
+    @if (!empty(username)) {
+      <label-value [label]="i18n.user.username" [value]="username"></label-value>
+    }
+    @if (!empty(email)) {
+      <label-value [label]="i18n.user.email" [value]="email"></label-value>
+    }
+    @for (cf of customFields; track cf) {
+      <label-value [label]="cf.name" valueFormat="component">
+        <format-field-value
+          [fields]="customFields"
+          [fieldName]="cf.internalName"
+          [object]="user"
+          [images]="customImages"
+        [files]="customFiles"></format-field-value>
+      </label-value>
+    }
+    @if (!empty(mobile)) {
+      <label-value [label]="i18n.phone.mobile" [value]="mobile"></label-value>
+    }
+    @if (!empty(landLine)) {
+      <label-value [label]="i18n.user.phoneAddLandLine" [value]="landLine"></label-value>
+    }
+    @if (address) {
+      <label-value [label]="i18n.address.address" valueFormat="component">
+        <address-details-with-custom-fields [address]="address"> </address-details-with-custom-fields>
+      </label-value>
+    }
+  </div>
+</div>
+
+<ng-container [formGroup]="form">
+  @for (pt of data.passwordTypes; track pt; let i = $index) {
+    <h2>{{ pt.name }}</h2>
+    <ng-container [formGroup]="passwordForm(i)">
+      @if (pt.description) {
+        <div class="mb-2">{{ pt.description }}</div>
+      }
+      @if (login.user) {
+        <boolean-field
+          formControlName="defined"
+        [label]="i18n.user.registration.passwordAssign"></boolean-field>
+      }
+      @if (passwordForm(i).get('defined').value) {
+        <input-field
+          required
+          formControlName="value"
+          type="password"
+          autocomplete="new-password"
+          [label]="pt.name"
+          [maxLength]="pt.maxLength">
+      </input-field>
+      @if (layout.gtxs$ | async) {
+        <label-value label=" ">
+          <password-hints [passwordType]="pt" [control]="passwordForm(i).controls.value"> </password-hints>
+        </label-value>
+      }
+      @if (layout.ltsm$ | async) {
+        <password-hints [passwordType]="pt" [control]="passwordForm(i).controls.value">
+        </password-hints>
+      }
+      <input-field
+        required
+        formControlName="confirmationValue"
+        type="password"
+        autocomplete="new-password"
+        [label]="i18n.user.passwordConfirmation(pt.name)">
+    </input-field>
+    @if (pt.canForceChange) {
+      <boolean-field
+        formControlName="forceChange"
+        [label]="i18n.user.registration.passwordForceChange">
+      </boolean-field>
+    }
+  }
+</ng-container>
+}
+
+@if (!login.user) {
+  <!-- The following are only for public registration -->
+  @if (data.securityQuestions?.length > 0) {
+    <h2>{{ i18n.securityQuestion.question }}</h2>
+    <div class="mb-2">
+      {{ i18n.user.securityQuestionMessage }}
+    </div>
+    <single-selection-field
+      formControlName="securityQuestion"
+      [label]="i18n.securityQuestion.question"
+      [required]="data.requireSecurityQuestion"
+      [emptyOption]="i18n.user.securityQuestionEmpty">
+      @for (q of data.securityQuestions; track q) {
+        <field-option [value]="q.internalName" [text]="q.name"> </field-option>
+      }
+    </single-selection-field>
+    @if (!empty(form.get('securityQuestion').valueChanges | async)) {
+      <input-field
+        #securityAnswer
+        formControlName="securityAnswer"
+        required
+        [label]="i18n.securityQuestion.answer">
+    </input-field>
+  }
+}
+@if (data.agreements?.length > 0 || data.captchaInput) {
+  <h2>
+    {{ i18n.user.title.registrationConfirmation }}
+  </h2>
+  @if (data.agreements?.length > 0) {
+    <div>
+      <div class="mb-3">{{ i18n.pendingAgreements.preface }}</div>
+      <accept-agreements [agreements]="data.agreements" formControlName="acceptAgreements"></accept-agreements>
+    </div>
+  }
+  @if (data.captchaInput) {
+    <div [ngClass]="{ 'mt-3': data.agreements?.length > 0 }">
+      <div class="mb-3">{{ i18n.user.captcha }}</div>
+      <div class="mb-3">
+        <captcha [captchaInput]="data.captchaInput" [form]="form.get('captcha')"></captcha>
+      </div>
+    </div>
+  }
+}
+}
+</ng-container>

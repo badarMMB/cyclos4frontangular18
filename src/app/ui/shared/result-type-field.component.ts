@@ -1,0 +1,119 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Host,
+  Injector,
+  Input,
+  OnInit,
+  Optional,
+  Output,
+  SkipSelf
+} from '@angular/core';
+import { ControlContainer, UntypedFormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { LayoutService } from 'app/core/layout.service';
+import { ArrowLeft, ArrowsHorizontal } from 'app/core/shortcut.service';
+import { SvgIcon } from 'app/core/svg-icon';
+import { BaseControlComponent } from 'app/shared/base-control.component';
+import { focus } from 'app/shared/helper';
+import { MapsService } from 'app/ui/core/maps.service';
+import { ResultType } from 'app/ui/shared/result-type';
+import { TooltipDirective } from 'ngx-bootstrap/tooltip';
+import { Subscription } from 'rxjs';
+
+/**
+ * Renders a widget for a result type field
+ */
+@Component({
+  selector: 'result-type-field',
+  templateUrl: 'result-type-field.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: ResultTypeFieldComponent, multi: true }]
+})
+export class ResultTypeFieldComponent extends BaseControlComponent<ResultType> implements OnInit {
+  @Input() name: string;
+  @Input() required: boolean;
+  @Input() placeholder: string;
+  @Input() focused: boolean;
+  @Input() privacyControl: UntypedFormControl;
+
+  @Input() allowedResultTypes: ResultType[];
+
+  @Output() change: EventEmitter<string> = new EventEmitter();
+  @Output() blur: EventEmitter<string> = new EventEmitter();
+
+  private resultTypeSubs = new Map<ResultType, Subscription>();
+
+  constructor(
+    injector: Injector,
+    @Optional() @Host() @SkipSelf() controlContainer: ControlContainer,
+    public layout: LayoutService,
+    private maps: MapsService
+  ) {
+    super(injector, controlContainer);
+  }
+
+  ngOnInit() {
+    super.ngOnInit();
+
+    const mapIndex = this.allowedResultTypes.indexOf(ResultType.MAP);
+    if (!this.maps.enabled && mapIndex !== -1) {
+      // If maps would be allowed but is not enabled by configuration, remove it
+      this.allowedResultTypes.splice(mapIndex, 1);
+    }
+  }
+
+  icon(resultType: ResultType): SvgIcon {
+    switch (resultType) {
+      case ResultType.CATEGORIES:
+        return SvgIcon.LayoutThreeColumns;
+      case ResultType.TILES:
+        return SvgIcon.Grid;
+      case ResultType.LIST:
+        return SvgIcon.GridList;
+      case ResultType.MAP:
+        return SvgIcon.GeoAlt;
+    }
+  }
+
+  tooltip(resultType: ResultType): String {
+    switch (resultType) {
+      case ResultType.CATEGORIES:
+        return this.i18n.general.categoriesView;
+      case ResultType.TILES:
+        return this.i18n.general.tiledView;
+      case ResultType.LIST:
+        return this.i18n.general.listView;
+      case ResultType.MAP:
+        return this.i18n.general.map;
+    }
+  }
+
+  onFocus(pop: TooltipDirective, resultType: ResultType) {
+    pop.show();
+    const element = this.element;
+    const currentEl = element.getElementsByClassName(`resultType-${resultType}`).item(0);
+    if (document.activeElement !== currentEl) {
+      return;
+    }
+    const sub = this.shortcut.subscribe(ArrowsHorizontal, event => {
+      let index = this.allowedResultTypes.indexOf(resultType) + (event.key === ArrowLeft ? -1 : 1);
+      index = Math.min(Math.max(0, index), this.allowedResultTypes.length - 1);
+      const newResultType = this.allowedResultTypes[index];
+      const toFocus = element.getElementsByClassName(`resultType-${newResultType}`);
+      if (toFocus.length > 0) {
+        focus(toFocus.item(0), true);
+      }
+    });
+    this.resultTypeSubs.set(resultType, sub);
+  }
+
+  onBlur(pop: TooltipDirective, resultType: ResultType) {
+    pop.hide();
+    const sub = this.resultTypeSubs.get(resultType);
+    if (sub) {
+      sub.unsubscribe();
+      this.resultTypeSubs.delete(resultType);
+    }
+  }
+}

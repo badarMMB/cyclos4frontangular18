@@ -1,0 +1,86 @@
+@for (field of configuration.enabledFields; track field) {
+  <ng-container [formGroup]="addressForm">
+    @if (field === 'country') {
+      @if (!addressForm.controls[field].disabled || addressForm.controls[field].value) {
+        <single-selection-field
+          [id]="idPrefix + field + idSuffix"
+          formControlName="country"
+          [label]="getLabel(field)"
+          [required]="isRequired(field, addressForm.controls[field])">
+          @for (country of countriesResolve.data | async; track country) {
+            <field-option [value]="country.code" [text]="country.name">
+            </field-option>
+          }
+        </single-selection-field>
+      }
+    } @else {
+      @if (!addressForm.controls[field].disabled || addressForm.controls[field].value) {
+        <input-field
+          [id]="idPrefix + field + idSuffix"
+          [formControlName]="field"
+          [label]="getLabel(field)"
+        [required]="isRequired(field, addressForm.controls[field])"></input-field>
+      }
+    }
+  </ng-container>
+}
+@if (!ignoreContactFields && profileConfiguration.contactInfoEnabled) {
+  <ng-container
+    [formGroup]="addressForm.get('contactInfo')">
+  @if (addressForm.get('contactInfo').get('email'); as emailControl) {
+    @if (!emailControl.disabled || emailControl.value) {
+      <input-field
+        [id]="idPrefix + 'email' + idSuffix"
+        formControlName="email"
+        [label]="i18n.user.email">
+    </input-field>
+  }
+}
+@if (addressForm.get('contactInfo').get('mobilePhone'); as mobilePhoneControl) {
+  @if (!mobilePhoneControl.disabled || mobilePhoneControl.value) {
+    <input-field
+      [id]="idPrefix + 'mobilePhone' + idSuffix"
+      formControlName="mobilePhone"
+      [label]="i18n.phone.mobile">
+  </input-field>
+}
+}
+@if (addressForm.get('contactInfo').get('landLinePhone'); as landLinePhoneControl) {
+  @if (!landLinePhoneControl.disabled || landLinePhoneControl.value) {
+    <input-field
+      [id]="idPrefix + 'landLinePhone' + idSuffix"
+      formControlName="landLinePhone"
+      [label]="i18n.phone.landLine">
+  </input-field>
+}
+}
+@if (
+  profileConfiguration.phoneConfiguration?.extensionEnabled &&
+  addressForm.get('contactInfo').get('landLineExtension'); as landLineExtensionsControl
+  ) {
+  @if (!landLineExtensionsControl.disabled || landLineExtensionsControl.value) {
+    <input-field
+      [id]="idPrefix + 'landLineExtension' + idSuffix"
+      formControlName="landLineExtension"
+      [label]="i18n.phone.extension">
+  </input-field>
+}
+}
+@for (cf of profileConfiguration.contactInfoFields; track cf) {
+  @if (addressForm.get('contactInfo').get('customValues').get(cf.internalName); as fieldControl) {
+    @if (!fieldControl.disabled || fieldControl.value) {
+      <custom-field-input
+        [field]="cf"
+        [formControl]="fieldControl"
+        [binaryValues]="binaryValues">
+      </custom-field-input>
+    }
+  }
+}
+</ng-container>
+}
+@if (managePrivacy) {
+  <label-value [label]="i18n.field.privacy.name" kind="field">
+    <field-privacy [control]="addressForm.get('hidden')" justifyStart> </field-privacy>
+  </label-value>
+}

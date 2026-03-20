@@ -1,0 +1,111 @@
+@if (!self) {
+  <user-info [user]="data.user"></user-info>
+  <hr />
+}
+
+<div class="d-flex flex-grow-1 flex-column" [formGroup]="form">
+  <div [ngClass]="{ 'd-flex flex-row-reverse justify-content-between': (layout.gtsm$ | async) && data.type.image }">
+    @if (data.type.image) {
+      <div
+        class="image d-flex justify-content-center mt-2 mb-4"
+        [ngClass]="{ 'flex-grow-1': !data.type.voucherDescription }">
+        <avatar-lightbox size="160" imageSize="200" [image]="data.type.image"> </avatar-lightbox>
+      </div>
+    }
+    @if (data.type.voucherDescription) {
+      <div class="break-nl">{{ data.type.voucherDescription }}</div>
+    }
+  </div>
+  @if (data.type.image) {
+    <hr class="mt-3" />
+  }
+  <label-value [label]="i18n.voucher.voucher" [value]="data.type.voucherTitle" kind="fieldView"> </label-value>
+
+  @if (data.type.allowPartialRedeems && balance) {
+    <label-value
+      [label]="i18n.voucher.redeem.voucherBalance"
+      [value]="balance | currency : data.type.configuration.currency"
+      kind="fieldView">
+    </label-value>
+  }
+  @if (data.type.configuration.currency; as currency) {
+    @if (amountAsField) {
+      <decimal-field
+        formControlName="amount"
+        focused
+        required
+      [label]="
+        !topUpData && data.type.allowPartialRedeems
+          ? i18n.voucher.redeem.amountToRedeem
+          : i18n.voucher.transaction.amount
+      "
+        [prefix]="currency.prefix"
+        [suffix]="currency.suffix"
+        [scale]="currency.decimalDigits">
+      </decimal-field>
+    } @else {
+      <label-value [label]="i18n.transaction.amount" [value]="fixedAmount | currency : currency" kind="fieldView">
+      </label-value>
+    }
+  }
+
+  @if (topUpData?.isActivation) {
+    @if (sendByOptions.length === 0) {
+      <label-value
+        [label]="i18n.voucher.topUp.sendPinBy"
+        [value]="sendByOptions[0].text"
+        kind="fieldView">
+      </label-value>
+    } @else {
+      <radio-group-field
+        [formControl]="sendMedium"
+        [label]="pinIsSent ? i18n.voucher.topUp.sendPinBy : i18n.voucher.topUp.sendNotificationsBy"
+        [fieldOptions]="sendByOptions">
+      </radio-group-field>
+    }
+    @switch ((sendMedium.valueChanges | async) || sendMedium.value) {
+      @case ('email') {
+        <input-field [label]="i18n.user.email" formControlName="email" required> </input-field>
+      }
+      @case ('sms') {
+        <input-field [label]="i18n.phone.mobile" formControlName="mobilePhone" required>
+      </input-field>
+    }
+  }
+  @if (topUpData?.pinOnActivation === VoucherPinOnActivationEnum.INPUT) {
+    @if ((sendMedium.value || (sendMedium.valueChanges | async)) !== 'off') {
+      <boolean-field
+        [formControl]="manualPin"
+        [label]="i18n.voucher.topUp.manualPin">
+      </boolean-field>
+    }
+    @if (manualPin.value || (manualPin.valueChanges | async)) {
+      <label-value kind="field" [label]="i18n.voucher.topUp.pin" required fieldSize="small">
+        <password-input disableAutocomplete formControlName="pin" placeholder="" [passwordInput]="topUpData.pinInput">
+        </password-input>
+      </label-value>
+      <label-value kind="field" [label]="i18n.voucher.topUp.pinConfirm" required fieldSize="small">
+        <password-input
+          disableAutocomplete
+          formControlName="pinConfirmation"
+          placeholder=""
+          [passwordInput]="topUpData.pinInput">
+        </password-input>
+      </label-value>
+    }
+  }
+  @for (cf of resolveCustomFields(); track cf) {
+    <custom-field-input
+      [field]="cf"
+      [formControl]="form.controls.voucherCustomValues.get(cf.internalName)">
+    </custom-field-input>
+  }
+}
+
+@for (cf of data.paymentCustomFields; track cf) {
+  <custom-field-input
+    [field]="cf"
+    [formControl]="form.controls.paymentCustomValues.get(cf.internalName)">
+  </custom-field-input>
+}
+</div>

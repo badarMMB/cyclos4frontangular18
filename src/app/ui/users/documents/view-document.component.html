@@ -1,0 +1,74 @@
+<page-layout [ready]="data$ | async">
+  <page-content
+    [heading]="i18n.document.title.view"
+    [mobileHeading]="i18n.document.mobileTitle.view"
+    [headingActions]="headingActions$ | async">
+    @if (data) {
+      @if (data.user) {
+        <label-value [label]="i18n.general.user" kind="fieldView" labelPosition="side">
+          <user-link [user]="data.user"></user-link>
+        </label-value>
+      }
+      <label-value [label]="i18n.general.name">
+        {{ data.name }}
+      </label-value>
+      @if (!empty(data.internalName)) {
+        <label-value [label]="i18n.general.internalName">
+          {{ data.internalName }}
+        </label-value>
+      }
+      @if (!empty(data.description)) {
+        <label-value [label]="i18n.general.description">
+          {{ data.description }}
+        </label-value>
+      }
+      @if (data.category) {
+        <label-value ng [label]="i18n.general.category">
+          {{ data.category.name }}
+        </label-value>
+      }
+      <label-value [label]="i18n.document.enable">
+        {{ format.formatBoolean(data.enabled) }}
+      </label-value>
+      @if (data.publiclyAccessible) {
+        <label-value [label]="i18n.document.publiclyAccessible">
+          {{ format.formatBoolean(data.publiclyAccessible) }}
+        </label-value>
+      }
+      @if (data.downloadUrl) {
+        <label-value [label]="i18n.general.downloadUrl">
+          {{ data.downloadUrl }}
+        </label-value>
+      }
+      @if (data.userVisible) {
+        <label-value [label]="i18n.document.userVisible">
+          {{ format.formatBoolean(data.userVisible) }}
+        </label-value>
+      }
+      @if (data.brokerVisible) {
+        <label-value [label]="i18n.document.brokerVisible">
+          {{ format.formatBoolean(data.brokerVisible) }}
+        </label-value>
+      }
+      @if (data.brokerVisible) {
+        <label-value [label]="i18n.document.brokerManageable">
+          {{ format.formatBoolean(data.brokerManageable) }}
+        </label-value>
+      }
+      @if (data.file) {
+        <label-value [label]="i18n.document.document">
+          {{ data.file.name }}
+        </label-value>
+      }
+    }
+    <actions>
+      @if (data.file) {
+        <action-button
+          (action)="download()"
+          [disabled]="requesting$ | async"
+          [label]="i18n.general.download">
+        </action-button>
+      }
+    </actions>
+  </page-content>
+</page-layout>

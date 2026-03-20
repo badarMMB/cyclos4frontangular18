@@ -1,0 +1,30 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.transaction.title.paymentConfirmation"
+      [mobileHeading]="i18n.transaction.mobileTitle.paymentConfirmation"
+      [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+      last>
+      <accept-payment-request-confirm
+        class="flex-grow-1 d-flex flex-column"
+        [transaction]="transactionKey"
+        [preview]="data"
+        [confirmationPassword]="confirmationPassword"
+        (showSubmit)="showSubmit$.next($event)"
+        [form]="form"
+        (confirmed)="perform($event)"
+        [showPaymentType]="true">
+      </accept-payment-request-confirm>
+      <actions forceRow>
+        @if (showSubmit$ | async) {
+          <action-button
+            [disabled]="!canConfirm || (requesting$ | async)"
+            (action)="perform()"
+          [label]="i18n.general.confirm"></action-button>
+        } @else {
+          &nbsp;
+        }
+      </actions>
+    </page-content>
+  }
+</page-layout>

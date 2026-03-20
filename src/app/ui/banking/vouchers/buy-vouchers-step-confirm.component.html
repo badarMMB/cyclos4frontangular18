@@ -1,0 +1,76 @@
+@if (preview.user && !authHelper.isSelf(preview.user)) {
+  <user-info [user]="preview.user"> </user-info>
+}
+<!-- description + image -->
+<label-value [label]="i18n.voucher.voucher">
+  {{ preview.type.voucherTitle }}
+</label-value>
+@if (buyVoucher.count === 1) {
+  <label-value [label]="i18n.transaction.amount">
+    {{ buyVoucher.amount | currency : preview.type.configuration.currency }}
+  </label-value>
+} @else {
+  <label-value [label]="i18n.voucher.numberOfVouchers">
+    {{ buyVoucher.count }}
+  </label-value>
+  <label-value [label]="i18n.voucher.amountPerVoucher">
+    {{ buyVoucher.amount | currency : preview.type.configuration.currency }}
+  </label-value>
+  <label-value [label]="i18n.voucher.totalAmount">
+    {{ preview.totalAmount | currency : preview.type.configuration.currency }}
+  </label-value>
+}
+@if (preview.type.gift === 'choose') {
+  <label-value
+    kind="fieldView"
+    [label]="i18n.voucher.buy.usage"
+    [value]="buyVoucher.gift ? i18n.voucher.buy.usageGift : i18n.voucher.buy.usageSelf">
+  </label-value>
+}
+@if (preview.type.gift === 'never') {
+  <label-value
+    kind="fieldView"
+    [label]="i18n.voucher.buy.usage"
+    [value]="i18n.voucher.buy.usageAlwaysSelf">
+  </label-value>
+}
+<!-- payment fields -->
+@for (cf of paymentCustomFields; track cf) {
+  <label-value
+    [hidden]="!fieldHelper.hasValue(cf.internalName, buyVoucher.paymentCustomValues)"
+    [label]="cf.name"
+    [labelPosition]="labelOnTop(layout.ltsm$ | async, cf) ? 'top' : 'auto'">
+    <format-field-value
+      [customValues]="buyVoucher.paymentCustomValues"
+      [fields]="paymentCustomFields"
+      [fieldName]="cf.internalName">
+    </format-field-value>
+  </label-value>
+}
+<!-- custom fields -->
+@for (cf of voucherCustomFields; track cf) {
+  <label-value
+    [hidden]="!fieldHelper.hasValue(cf.internalName, buyVoucher.voucherCustomValues)"
+    [label]="cf.name"
+    [labelPosition]="labelOnTop(layout.ltsm$ | async, cf) ? 'top' : 'auto'">
+    <format-field-value
+      [customValues]="buyVoucher.voucherCustomValues"
+      [fields]="voucherCustomFields"
+      [fieldName]="cf.internalName">
+    </format-field-value>
+  </label-value>
+}
+
+@if (preview.confirmationPasswordInput) {
+  @if (layout.gtxxs$ | async) {
+    <hr />
+  }
+  <confirmation-password
+    focused
+    [formControl]="form.get('confirmationPassword')"
+    [passwordInput]="preview.confirmationPasswordInput"
+    [createDeviceConfirmation]="createDeviceConfirmation"
+    (showSubmit)="showSubmit.emit($event)"
+    (confirmed)="confirmed.emit($event)">
+  </confirmation-password>
+}

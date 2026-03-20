@@ -1,0 +1,13 @@
+@if (hasLink) {
+  <a
+    [routerLink]="link"
+    [attr.tabindex]="tabindex < 0 ? 0 : -1"
+    (click)="click.emit($event)">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </a>
+} @else {
+  <ng-content></ng-content>
+}
+<ng-template #content>
+  <ng-content></ng-content>
+</ng-template>

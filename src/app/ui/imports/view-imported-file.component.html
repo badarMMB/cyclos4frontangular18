@@ -1,0 +1,147 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      last
+      mode="viewForm"
+      [heading]="title"
+      [mobileHeading]="mobileTitle"
+      [headingActions]="headingActions$ | async">
+      <div class="d-flex flex-grow-1 flex-column">
+        @if (file.status === ImportedFileStatusEnum.READY) {
+          <alert type="info">
+            <div [innerHTML]="i18n.imports.information.ready | trust"></div>
+          </alert>
+        }
+        @if (file.user && !isSelf) {
+          <user-info [user]="file.user"></user-info>
+        }
+        @if (kind) {
+          <label-value [label]="i18n.imports.kind.label" [value]="kind"> </label-value>
+        }
+        <label-value [label]="i18n.general.status">
+          {{ importsHelper.fileStatusLabel(file.status) }}
+        </label-value>
+        @if (showProgressBar && (progressValue$ | async); as progress) {
+          <label-value [label]="i18n.general.progress">
+            <div class="progress">
+              <div
+                class="progress-bar"
+                role="progressbar"
+                [ngStyle]="{ width: progress + '%' }"
+                [attr.aria-valuenow]="progress"
+                aria-valuemin="0"
+                aria-valuemax="100">
+                {{ progress }}%
+              </div>
+            </div>
+          </label-value>
+        }
+        @if (file.errorMessage) {
+          <label-value
+            [label]="i18n.general.errorMessage"
+            [value]="file.errorMessage"
+            valueFormat="break">
+          </label-value>
+        }
+        @if (file.ignoredFields?.length > 0) {
+          <label-value
+            [label]="i18n.imports.ignoredFields"
+            [value]="file.ignoredFields.join(', ')"
+            valueFormat="break">
+          </label-value>
+        }
+        @if (file.by) {
+          <label-value [label]="i18n.general.by">
+            <user-link [user]="file.by"></user-link>
+          </label-value>
+        }
+        <label-value [label]="i18n.imports.creationDate">
+          {{ file.creationDate | date }}
+        </label-value>
+        @if (file.processingDate) {
+          <label-value [label]="i18n.imports.processingDate">
+            {{ file.processingDate | date }}
+          </label-value>
+        }
+        @if (archiveValue) {
+          <label-value [label]="i18n.imports.archivingDate" [value]="archiveValue"> </label-value>
+        }
+        @if (file.description) {
+          <label-value
+            [label]="i18n.general.description"
+            [value]="file.description"
+          valueFormat="break"></label-value>
+        }
+        @if (file.currency) {
+          <label-value [label]="i18n.general.currency" [value]="file.currency.name"></label-value>
+        }
+        @if (file.sendNotifications != null) {
+          <label-value
+            [label]="i18n.imports.sendNotifications"
+          [value]="format.formatBoolean(file.sendNotifications)"></label-value>
+        }
+        @if (file.recordType) {
+          <label-value [label]="i18n.general.type" [value]="file.recordType.name"></label-value>
+        }
+        @if (file.useGroupFromFile != null) {
+          <label-value
+            [label]="i18n.imports.useGroupFromFile"
+          [value]="format.formatBoolean(file.useGroupFromFile)"></label-value>
+        }
+        @if (file.group) {
+          <label-value
+            [label]="file.useGroupFromFile ? i18n.imports.defaultGroup : i18n.user.group"
+          [value]="file.group.name"></label-value>
+        }
+        @if (file.sendActivationEmail != null) {
+          <label-value
+            [label]="i18n.imports.sendActivationEmail"
+            [value]="format.formatBoolean(file.sendActivationEmail)">
+          </label-value>
+        }
+        @if (file.paymentType) {
+          <label-value
+            [label]="i18n.transaction.type"
+          [value]="file.paymentType.name"></label-value>
+        }
+        @if (file.voucherType) {
+          <label-value
+            [label]="i18n.voucher.voucher"
+          [value]="file.voucherType.voucherTitle"></label-value>
+        }
+        @if (file.useAmountFromFile != null) {
+          <label-value
+            [label]="i18n.imports.useAmountFromFile"
+            [value]="format.formatBoolean(file.useAmountFromFile)">
+          </label-value>
+        }
+        @if (file.amount) {
+          <label-value
+            [label]="file.useAmountFromFile ? i18n.imports.defaultAmount : i18n.transaction.amount"
+            [value]="file.amount | currency : file.voucherType.configuration.currency">
+          </label-value>
+        }
+        @if (file.sendMessage) {
+          <label-value
+            [label]="i18n.voucher.send.message"
+            [value]="file.sendMessage"
+          valueFormat="break"></label-value>
+        }
+        @if (progress$ | async; as progress) {
+          @if (showValidation) {
+            <h2 class="border-0 mb-2">{{ i18n.imports.section.validation }}</h2>
+            <label-value [label]="i18n.imports.lineStatus.ready" [value]="progress.linesReady"> </label-value>
+            <label-value [label]="i18n.imports.lineStatus.skipped" [value]="progress.linesSkipped"> </label-value>
+            <label-value [label]="i18n.imports.lineStatus.validationError" [value]="progress.linesValidationError">
+            </label-value>
+          }
+          @if (showImport) {
+            <h2 class="border-0 mb-2">{{ i18n.imports.section.import }}</h2>
+            <label-value [label]="i18n.imports.lineStatus.imported" [value]="progress.linesImported"> </label-value>
+            <label-value [label]="i18n.imports.lineStatus.importError" [value]="progress.linesImportError"> </label-value>
+          }
+        }
+      </div>
+    </page-content>
+  }
+</page-layout>

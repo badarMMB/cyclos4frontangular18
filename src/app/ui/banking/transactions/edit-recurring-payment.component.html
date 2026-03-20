@@ -1,0 +1,89 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.transaction.title.editRecurringPayment"
+      [mobileHeading]="i18n.transaction.mobileTitle.editRecurringPayment"
+      [headingActions]="headingActions$ | async">
+      @if (transaction.transactionNumber) {
+        <label-value [label]="i18n.transaction.number">
+          {{ transaction.transactionNumber }}
+        </label-value>
+      }
+      <label-value [label]="i18n.transaction.amount">
+        {{ transaction.amount | currency : transaction.currency }}
+      </label-value>
+      @if (transaction.from) {
+        <label-value [label]="i18n.transaction.from">
+          @if (transaction.from.user) {
+            <user-link [user]="transaction.from.user"></user-link>
+          } @else {
+            {{ transaction.from.type.name }}
+          }
+        </label-value>
+      }
+      @if (transaction.from?.number) {
+        <label-value [label]="i18n.transaction.fromAccount">
+          {{ transaction.from.number }}
+        </label-value>
+      }
+      @if (transaction.to) {
+        <label-value [label]="i18n.transaction.to">
+          @if (transaction.to.user) {
+            <user-link [user]="transaction.to.user"></user-link>
+          } @else {
+            {{ transaction.to.type.name }}
+          }
+        </label-value>
+      }
+      @if (transaction.to?.number) {
+        <label-value [label]="i18n.transaction.toAccount">
+          {{ transaction.to.number }}
+        </label-value>
+      }
+      <label-value [label]="i18n.transaction.type">
+        {{ transaction.type.name }}
+      </label-value>
+      <hr />
+      <ng-container [formGroup]="form">
+        <radio-group-field formControlName="firstOccurrenceIsNow" [label]="i18n.transaction.firstOccurrence">
+          <field-option [value]="true" [text]="i18n.general.now"> </field-option>
+          <field-option [value]="false" [text]="i18n.general.futureDate"> </field-option>
+        </radio-group-field>
+        @if (form.value.firstOccurrenceIsNow === false) {
+          <date-field
+            formControlName="firstOccurrenceDate"
+            minDate="tomorrow"
+            required
+            minDate="tomorrow"
+            maxDate="future5"
+            [label]="i18n.transaction.firstOccurrenceDate">
+          </date-field>
+        }
+        <radio-group-field formControlName="repeatUntilCanceled" [label]="i18n.transaction.repeatUntil">
+          <field-option [value]="true" [text]="i18n.transaction.repeatUntilManual"></field-option>
+          <field-option [value]="false" [text]="i18n.transaction.repeatUntilFixed"></field-option>
+        </radio-group-field>
+        @if (form.value.repeatUntilCanceled === false) {
+          <input-field
+            type="number"
+            fieldSize="small"
+            numbersOnly
+            formControlName="occurrencesCount"
+            required
+            [label]="i18n.transaction.occurrencesCount">
+        </input-field>
+      }
+      <time-interval-field
+        fieldSize="small"
+        formControlName="occurrenceInterval"
+        [label]="i18n.transaction.occurrenceInterval"
+        required>
+      </time-interval-field>
+    </ng-container>
+    <actions forceRow>
+      <action-button [disabled]="requesting$ | async" (action)="save()" [label]="i18n.general.submit">
+      </action-button>
+    </actions>
+  </page-content>
+}
+</page-layout>

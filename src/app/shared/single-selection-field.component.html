@@ -1,0 +1,144 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <div
+    class="w-100"
+    dropdown
+    #dropdown="bs-dropdown"
+    (onShown)="onShown()"
+    (onHidden)="onHidden(); toggleButton.focus()">
+    <button
+      #toggleButton
+      dropdownToggle
+      [id]="id"
+      type="button"
+      class="form-control text-left custom-select w-100"
+      [title]="display$ | async"
+      [attr.aria-controls]="dropdownMenuId"
+      [ngClass]="{
+        'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+      }">
+      <div class="w-100 mw-100 text-truncate pr-3" [innerHTML]="display$ | async | trust"></div>
+    </button>
+    <div
+      #dropDownMenu
+      class="dropdown-menu"
+      *dropdownMenu
+      [ngClass]="dropdownOnRight ? 'dropdown-menu-right' : null"
+      role="listbox"
+      style="visibility: hidden"
+      [attr.id]="dropdownMenuId"
+      attr.aria-labelledby="id"
+      (click)="$event.preventDefault(); $event.stopPropagation()">
+      @if (emptyLabel != null) {
+        <a
+          role="option"
+          class="select-option mt-1"
+          [id]="id + '_'"
+          tabindex="0"
+          href="#"
+          [ngClass]="{ selected: value == null || value === '' }"
+          (click)="select(null); $event.preventDefault()"
+          >{{ emptyLabel }}</a
+          >
+        }
+        @for (category of categories | async; track category; let firstCat = $first) {
+          @if (category.name) {
+            <div class="pl-2 font-weight-bold" [ngClass]="{ 'mt-3': !firstCat }">
+              {{ category.name }}
+            </div>
+          }
+          @for (option of category.options | async; track option; let firstOpt = $first) {
+            <a
+              tabindex="0"
+              href="#"
+              class="select-option"
+              [class]="resolveStyle(option, !!category.name)"
+              [id]="id + '_' + option.value"
+          [ngClass]="{
+            'mt-1': emptyLabel != null || !(firstCat && firstOpt),
+            'pl-3': category.name,
+            selected: isSelected(option)
+          }"
+              (click)="select(option); $event.preventDefault()">
+              {{ option.text }}
+            </a>
+          }
+        }
+      </div>
+    </div>
+    <field-errors [control]="formControl"></field-errors>
+  }
+
+  <ng-template #widget>
+    <div
+      class="w-100"
+      dropdown
+      #dropdown="bs-dropdown"
+      (onShown)="onShown()"
+      (onHidden)="onHidden(); toggleButton.focus()">
+      <button
+        #toggleButton
+        dropdownToggle
+        [id]="id"
+        type="button"
+        class="form-control text-left custom-select w-100"
+        [title]="display$ | async"
+        [attr.aria-controls]="dropdownMenuId"
+      [ngClass]="{
+        'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+      }">
+        <div class="w-100 mw-100 text-truncate pr-3" [innerHTML]="display$ | async | trust"></div>
+      </button>
+
+      <div
+        #dropDownMenu
+        class="dropdown-menu"
+        *dropdownMenu
+        [ngClass]="dropdownOnRight ? 'dropdown-menu-right' : null"
+        role="listbox"
+        style="visibility: hidden"
+        [attr.id]="dropdownMenuId"
+        attr.aria-labelledby="id"
+        (click)="$event.preventDefault(); $event.stopPropagation()">
+        @if (emptyLabel != null) {
+          <a
+            role="option"
+            class="select-option mt-1"
+            [id]="id + '_'"
+            tabindex="0"
+            href="#"
+            [ngClass]="{ selected: value == null || value === '' }"
+            (click)="select(null); $event.preventDefault()"
+            >{{ emptyLabel }}</a
+            >
+          }
+          @for (category of categories | async; track category; let firstCat = $first) {
+            @if (category.name) {
+              <div class="pl-2 font-weight-bold" [ngClass]="{ 'mt-3': !firstCat }">
+                {{ category.name }}
+              </div>
+            }
+            @for (option of category.options | async; track option; let firstOpt = $first) {
+              <a
+                tabindex="0"
+                href="#"
+                class="select-option"
+                [class]="resolveStyle(option, !!category.name)"
+                [id]="id + '_' + option.value"
+          [ngClass]="{
+            'mt-1': emptyLabel != null || !(firstCat && firstOpt),
+            'pl-3': category.name,
+            selected: isSelected(option)
+          }"
+                (click)="select(option); $event.preventDefault()">
+                {{ option.text }}
+              </a>
+            }
+          }
+        </div>
+      </div>
+      <field-errors [control]="formControl"></field-errors>
+    </ng-template>

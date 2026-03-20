@@ -1,0 +1,21 @@
+@if (allowedResultTypes?.length > 0) {
+  <div class="btn-group" btnRadioGroup [formControl]="formControl">
+    @for (resultType of allowedResultTypes; track resultType) {
+      <label
+        #button
+        class="btn btn-icon"
+        [ngClass]="['focusable', 'resultType-' + resultType]"
+        [tooltip]="tooltip(resultType)"
+        triggers=""
+        (focus)="onFocus(pop, resultType)"
+        #pop="bs-tooltip"
+        (blur)="onBlur(pop, resultType)"
+        [btnRadio]="resultType"
+        tabindex="0"
+        role="button"
+        (click)="pop.hide()">
+        <icon size="1.2rem" [icon]="icon(resultType)"></icon>
+      </label>
+    }
+  </div>
+}

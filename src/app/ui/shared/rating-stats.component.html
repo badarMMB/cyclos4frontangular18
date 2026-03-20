@@ -1,0 +1,11 @@
+@if (textLeft) {
+  <span class="ellipsis mr-2"> {{ textLeft }} </span>
+}
+<div [tooltip]="resolveLevelLabel()" class="stars" [class]="resolveStyle()">
+  @for (level of [1, 2, 3, 4, 5]; track level) {
+    <icon class="icon" [icon]="resolveIcon(level)"> </icon>
+  }
+</div>
+@if (textRight) {
+  <span class="ellipsis ml-2"> {{ textRight }} </span>
+}

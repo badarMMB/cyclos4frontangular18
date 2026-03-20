@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/consent",
+    "types": []
+  },
+  "files": [
+    "consent/main.ts"
+  ],
+  "include": [
+    "*.d.ts"
+  ]
+}

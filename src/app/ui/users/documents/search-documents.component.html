@@ -1,0 +1,128 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="filters"
+      [heading]="i18n.document.title.search"
+      [mobileHeading]="i18n.document.mobileTitle.search"
+      [headingActions]="headingActions$ | async">
+      <div [formGroup]="form" class="filters-form filters-form-separator">
+        <div class="row">
+          @if (!authHelper.isSelf(data.user)) {
+            <div class="col-12 col-md-6">
+              <label-value [label]="i18n.general.user" kind="fieldView">
+                <user-link [user]="data.user"></user-link>
+              </label-value>
+            </div>
+            @if (layout.gtsm$) {
+              <div class="col-12 col-md-6"></div>
+            }
+          }
+          <div class="col-12 col-md-6">
+            <input-field formControlName="keywords" [label]="i18n.general.keywords" fieldSize="full"></input-field>
+          </div>
+        </div>
+      </div>
+    </page-content>
+    <results-layout resultType="list" [results]="results$ | async" [rendering$]="rendering$" (update)="update($event)">
+      <mobile-result *mobileResult="let row">
+        <div class="d-flex">
+          <div>
+            <label-value [label]="i18n.general.name" labelPosition="above">
+              {{ row.name }}
+            </label-value>
+            <label-value [label]="i18n.general.description" labelPosition="above">
+              {{ row.description }}
+            </label-value>
+          </div>
+          <div class="ml-auto text-right d-flex flex-column">
+            @if (isStatic(row.kind)) {
+              <button
+                type="button"
+                [tooltip]="i18n.general.view"
+                class="btn btn-icon"
+                (click)="navigateToView(row); $event.stopPropagation(); $event.preventDefault()">
+                <icon [icon]="SvgIcon.Pencil"></icon>
+              </button>
+            }
+            @if (isStatic(row.kind)) {
+              <button
+                type="button"
+                [tooltip]="i18n.general.download"
+                class="btn btn-icon mt-2"
+                (click)="download(row); $event.stopPropagation()">
+                <icon [icon]="SvgIcon.Download"></icon>
+              </button>
+            }
+            @if (!isStatic(row.kind)) {
+              <button
+                type="button"
+                [tooltip]="i18n.document.process"
+                class="btn btn-icon"
+                (click)="router.navigate(process(row)); $event.stopPropagation(); $event.preventDefault()">
+                <icon [icon]="SvgIcon.FileEarmarkText"></icon>
+              </button>
+            }
+            @if (isUserKind(row)) {
+              <button
+                type="button"
+                [tooltip]="i18n.general.remove"
+                class="btn btn-icon mt-2"
+                (click)="remove(row); $event.stopPropagation(); $event.preventDefault()">
+                <icon [icon]="SvgIcon.Trash"></icon>
+              </button>
+            }
+          </div>
+        </div>
+      </mobile-result>
+      <table *resultTable class="table table-hover cursor-pointer">
+        <thead>
+          <th>{{ i18n.general.name }}</th>
+          <th>{{ i18n.general.description }}</th>
+          <th class="actions"></th>
+        </thead>
+        <tbody>
+          @for (row of (results$ | async)?.results; track row) {
+            <tr
+            (click)="
+              isStatic(row.kind) ? navigateToView(row) : router.navigate(process(row));
+              $event.stopPropagation();
+              $event.preventDefault()
+            ">
+              <td width="20%">{{ row.name }}</td>
+              <td>{{ row.description }}</td>
+              <td class="actions actions-multiple">
+                @if (isStatic(row.kind)) {
+                  <button
+                    type="button"
+                    [tooltip]="i18n.general.download"
+                    class="btn btn-icon"
+                    (click)="download(row); $event.stopPropagation()">
+                    <icon [icon]="SvgIcon.Download"></icon>
+                  </button>
+                }
+                @if (!isStatic(row.kind)) {
+                  <button
+                    type="button"
+                    [tooltip]="i18n.document.process"
+                    class="btn btn-icon"
+                    (click)="router.navigate(process(row)); $event.stopPropagation(); $event.preventDefault()">
+                    <icon [icon]="SvgIcon.FileEarmarkText"></icon>
+                  </button>
+                }
+                @if (data.canManageIndividual && isUserKind(row)) {
+                  <button
+                    type="button"
+                    [tooltip]="i18n.general.remove"
+                    class="btn btn-icon ml-2"
+                    (click)="remove(row); $event.stopPropagation(); $event.preventDefault()">
+                    <icon [icon]="SvgIcon.Trash"></icon>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>

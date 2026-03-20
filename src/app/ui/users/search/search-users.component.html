@@ -1,0 +1,282 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="filters"
+      [heading]="heading"
+      [mobileHeading]="mobileHeading"
+      [headingActions]="headingActions$ | async">
+      <form [formGroup]="form" class="filters-form filters-form-separator border-bottom">
+        <div class="row">
+          @if (!self && broker) {
+            <div class="col-12 col-md-6">
+              <label-value [label]="i18n.general.user">
+                <user-link [user]="broker"></user-link>
+              </label-value>
+            </div>
+          }
+          @if ((layout.gtsm$ | async) && !self && broker) {
+            <div class="col-md-6"></div>
+          }
+          @if (data.allowKeywords) {
+            <div class="col-12 col-md-6">
+              <input-field formControlName="keywords" [label]="i18n.general.keywords"></input-field>
+            </div>
+          }
+          @if (layout.gtxxs$ | async) {
+            @if (data.groups?.length > 1) {
+              <div class="col-12 col-md-6">
+                <multi-selection-field
+                  hierarchyProperty="groupSet"
+                  formControlName="groups"
+                  [label]="i18n.user.groupFilter">
+                  @for (group of data.groups; track group) {
+                    <field-option
+                      [value]="ApiHelper.internalNameOrId(group)"
+                      [internalName]="group.internalName"
+                      [id]="group.id"
+                      [text]="group.name"
+                      [parent]="group.groupSet">
+                    </field-option>
+                  }
+                </multi-selection-field>
+              </div>
+            }
+            @for (f of fieldsInBasicSearch; track f) {
+              <div class="col-12 col-md-6">
+                @if (!f.id) {
+                  <basic-profile-field-filter
+                    [field]="f"
+                    [formControl]="form.get('profileFields').get(f.field)">
+                  </basic-profile-field-filter>
+                }
+                @if (f.id) {
+                  <custom-field-filter [field]="f" [formControl]="form.get('profileFields').get(f.internalName)">
+                  </custom-field-filter>
+                }
+              </div>
+            }
+            @if (moreFilters$ | async) {
+              @if (data.searchByDistanceData && !pendingSearch) {
+                <div class="col-12 col-md-6">
+                  <distance-selection-field
+                    [data]="data.searchByDistanceData"
+                    formControlName="distanceFilter"
+                    [label]="i18n.general.distanceFilter">
+                  </distance-selection-field>
+                </div>
+              }
+              @if (byManager && data.products?.length > 1) {
+                <div class="col-12 col-md-6">
+                  <multi-selection-field
+                    formControlName="products"
+                    [emptyLabel]="i18n.general.notApplied"
+                    [label]="i18n.user.assignedProducts">
+                    @for (prod of data.products; track prod) {
+                      <field-option
+                        [value]="ApiHelper.internalNameOrId(prod)"
+                        [internalName]="prod.internalName"
+                        [id]="prod.id"
+                        [text]="prod.name">
+                      </field-option>
+                    }
+                  </multi-selection-field>
+                </div>
+              }
+              @if (byManager && data.agreements?.length > 1) {
+                <div class="col-12 col-md-6">
+                  <multi-selection-field
+                    formControlName="acceptedAgreements"
+                    [emptyLabel]="i18n.general.notApplied"
+                    [label]="i18n.user.acceptedAgreements">
+                    @for (agr of data.agreements; track agr) {
+                      <field-option
+                        [value]="ApiHelper.internalNameOrId(agr)"
+                        [internalName]="agr.internalName"
+                        [id]="agr.id"
+                        [text]="agr.name">
+                      </field-option>
+                    }
+                  </multi-selection-field>
+                </div>
+              }
+              @if (byManager && data.agreements?.length > 1) {
+                <div class="col-12 col-md-6">
+                  <multi-selection-field
+                    formControlName="notAcceptedAgreements"
+                    [emptyLabel]="i18n.general.notApplied"
+                    [label]="i18n.user.notAcceptedAgreements">
+                    @for (agr of data.agreements; track agr) {
+                      <field-option
+                        [value]="ApiHelper.internalNameOrId(agr)"
+                        [internalName]="agr.internalName"
+                        [id]="agr.id"
+                        [text]="agr.name">
+                      </field-option>
+                    }
+                  </multi-selection-field>
+                </div>
+              }
+              <!-- Statuses -->
+              @if (byManager && !pendingSearch) {
+                <div class="col-12 col-md-6">
+                  <multi-selection-field
+                    formControlName="statuses"
+                    [label]="i18n.general.status"
+                    [fieldOptions]="statusOptions"
+                    [emptyLabel]="i18n.user.statusEmptyLabel">
+                  </multi-selection-field>
+                </div>
+              }
+              <!-- Invited by -->
+              @if (byManager) {
+                <div class="col-12 col-md-6">
+                  <user-field
+                    formControlName="invitedBy"
+                    [label]="i18n.user.invitedBy"
+                    [allowSelf]="true"
+                [filters]="{
+                  includeGlobal: true
+                }">
+                  </user-field>
+                </div>
+              }
+              <!-- Invited by me -->
+              @if (!byManager && dataForFrontendHolder.auth?.permissions?.invite?.send) {
+                <div class="col-12 col-md-6">
+                  <boolean-field formControlName="invitedByMe" [label]="i18n.user.invitedByMe"> </boolean-field>
+                </div>
+              }
+              <!-- Creation date -->
+              @if (byManager) {
+                <div class="row no-gutters col-12">
+                  <div class="col-12 col-md-6">
+                    <date-field
+                      formControlName="beginCreationPeriod"
+                      [label]="i18n.user.creationBegin"
+                      minDate="past100"
+                      maxDate="todayEnd"
+                      fieldSize="full"
+                      class>
+                    </date-field>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <date-field
+                      formControlName="endCreationPeriod"
+                      [label]="i18n.user.creationEnd"
+                      minDate="past100"
+                      maxDate="todayEnd"
+                      fieldSize="full">
+                    </date-field>
+                  </div>
+                </div>
+              }
+              <!-- Activation date -->
+              @if (byManager) {
+                <div class="row no-gutters col-12">
+                  <div class="col-12 col-md-6">
+                    <date-field
+                      formControlName="beginActivationPeriod"
+                      [label]="i18n.user.beginUserActivationDate"
+                      minDate="past100"
+                      maxDate="todayEnd"
+                      fieldSize="full"
+                      class>
+                    </date-field>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <date-field
+                      formControlName="endActivationPeriod"
+                      [label]="i18n.user.endUserActivationDate"
+                      minDate="past100"
+                      maxDate="todayEnd"
+                      fieldSize="full">
+                    </date-field>
+                  </div>
+                </div>
+              }
+              <!-- Last login date -->
+              @if (byManager) {
+                <div class="row no-gutters col-12">
+                  <div class="col-12 col-md-6">
+                    <date-field
+                      formControlName="beginLastLoginPeriod"
+                      [label]="i18n.user.beginLastLoginDate"
+                      minDate="past100"
+                      maxDate="todayEnd"
+                      fieldSize="full"
+                      class>
+                    </date-field>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <date-field
+                      formControlName="endLastLoginPeriod"
+                      [label]="i18n.user.endLastLoginDate"
+                      minDate="past100"
+                      maxDate="todayEnd"
+                      fieldSize="full">
+                    </date-field>
+                  </div>
+                </div>
+              }
+              @if (byManager) {
+                <div class="col-12 col-md-6">
+                  <user-field
+                    formControlName="brokers"
+                    [label]="i18n.general.usersOfBroker"
+                    [filters]="userSearchFilters()"
+                    [allowContacts]="false">
+                  </user-field>
+                </div>
+              }
+              @for (f of fieldsInAdvancedSearch; track f) {
+                <div class="col-12 col-md-6">
+                  @if (!f.id) {
+                    <basic-profile-field-filter
+                      [field]="f"
+                      [formControl]="form.get('profileFields').get(f.field)">
+                    </basic-profile-field-filter>
+                  }
+                  @if (f.id) {
+                    <custom-field-filter
+                      [field]="f"
+                      [formControl]="form.get('profileFields').get(f.internalName)">
+                    </custom-field-filter>
+                  }
+                </div>
+              }
+            }
+          }
+        </div>
+      </form>
+      @if ((allowedResultTypes$ | async).length > 1) {
+        <div class="row filters-row">
+          <div class="col-12 col-xs-7 col-md-9">
+            <result-type-field [allowedResultTypes]="allowedResultTypes$ | async" [formControl]="resultTypeControl">
+            </result-type-field>
+          </div>
+          @if ((layout.gtxxs$ | async) && (resultType$ | async) !== 'map') {
+            <div class="col-12 col-xs-5 col-md-3">
+              <single-selection-field
+                [formControl]="form.get('orderBy')"
+                [display]="i18n.general.orderBy"
+                [emptyOption]="i18n.general.orderByRelevance">
+                <field-option value="alphabeticallyAsc" [text]="i18n.user.orderBy.alphabeticallyAsc"></field-option>
+                <field-option value="alphabeticallyDesc" [text]="i18n.user.orderBy.alphabeticallyDesc"> </field-option>
+              </single-selection-field>
+            </div>
+          }
+        </div>
+      }
+    </page-content>
+    <users-results
+      [results]="results$ | async"
+      [rendering$]="rendering$"
+      [data]="data$ | async"
+      [resultType]="resultType$ | async"
+      [referencePoint]="((form.valueChanges | async) || form.value).distanceFilter"
+      (update)="update($event)"
+      [removeAction]="removeAction">
+    </users-results>
+  }
+</page-layout>
+

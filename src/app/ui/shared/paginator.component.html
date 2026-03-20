@@ -1,0 +1,62 @@
+@if (results) {
+  <div
+    class="d-flex flex-column flex-sm-row justify-content-between align-items-center"
+    [formGroup]="form">
+    @if (results.hasTotalCount) {
+      <div class="mb-3 mb-sm-0 w-100 text-center">
+        {{
+        i18n.general.results.withTotal({
+        first: results.firstItem,
+        last: results.lastItem,
+        total: results.totalCount
+        })
+        }}
+      </div>
+    } @else {
+      <div class="mb-3 mb-sm-0 w-100 text-center">
+        {{
+        i18n.general.results.noTotal({
+        first: results.firstItem,
+        last: results.lastItem
+        })
+        }}
+      </div>
+    }
+    @if (layout.xxs$ | async) {
+      <div class="row no-gutters w-100">
+        <div class="col-6 px-2">
+          @if (results.page > 0) {
+            <action-button
+              outline
+              (action)="nextOrPrevious(false)"
+              [label]="i18n.general.results.previousXxs">
+            </action-button>
+          }
+        </div>
+        <div class="col-6 px-2">
+          @if (results.hasNext) {
+            <action-button (action)="nextOrPrevious(true)" [label]="i18n.general.results.nextXxs">
+            </action-button>
+          }
+        </div>
+      </div>
+    }
+    @if (layout.gtxxs$ | async) {
+      <div class="mt-2 mt-xs-0">
+        @if (layout.gtxxs$ | async) {
+          <pagination
+            [totalItems]="totalCount"
+            [itemsPerPage]="results.pageSize"
+            [maxSize]="maxSize(layout.breakpointChanges$ | async)"
+            formControlName="pageNumber"
+            [rotate]="true"
+            [boundaryLinks]="results.hasTotalCount && (layout.gtxs$ | async)"
+            previousText="&lsaquo;"
+            nextText="&rsaquo;"
+            firstText="&laquo;"
+          lastText="&raquo;"></pagination>
+        }
+      </div>
+    }
+  </div>
+}

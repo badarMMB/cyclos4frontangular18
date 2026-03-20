@@ -1,0 +1,22 @@
+@if (initialized$ | async) {
+  <div class="card">
+    <div class="system">
+      <img
+        class="system-image"
+        [src]="data.applicationLogo.url"
+        [alt]="data.applicationName"
+        [tooltip]="data.applicationName" />
+    </div>
+    <div class="title">{{ i18n.unsubscribe.title }}</div>
+    @switch (state.step$ | async) {
+      @case ('form') {
+        <unsubscribe-form></unsubscribe-form>
+      }
+      @case ('done') {
+        <unsubscribe-done></unsubscribe-done>
+      }
+    }
+  </div>
+} @else {
+  <spinner></spinner>
+}

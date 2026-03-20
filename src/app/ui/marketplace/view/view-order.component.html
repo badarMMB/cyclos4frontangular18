@@ -1,0 +1,141 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="viewForm"
+      [heading]="i18n.ad.title.order"
+      [mobileHeading]="i18n.ad.mobileTitle.order"
+      [headingActions]="headingActions$ | async">
+      @if (data.image && (layout.ltsm$ | async)) {
+        <div class="d-flex justify-content-center mt-2 mb-4">
+          <avatar-lightbox [roundBorders]="false" [zoom]="false" size="140" [image]="data.image"></avatar-lightbox>
+        </div>
+      }
+      <div class="d-flex flex-row-reverse">
+        @if (data.image && (layout.gtxs$ | async)) {
+          <div class="image ml-4">
+            <avatar-lightbox [roundBorders]="false" [zoom]="false" size="140" [image]="data.image"> </avatar-lightbox>
+          </div>
+        }
+        <div class="d-flex flex-grow-1 flex-column">
+          <label-value [label]="i18n.ad.order">
+            {{ data.number }}
+          </label-value>
+          <label-value [label]="i18n.general.date">
+            {{ data.creationDate | dateTime }}
+          </label-value>
+          <label-value [label]="i18n.general.status">
+            {{ resolveStatusLabel() }}
+          </label-value>
+          @if (!seller) {
+            <label-value [label]="i18n.ad.seller">
+              <user-link [user]="data.seller"></user-link>
+            </label-value>
+          }
+          @if (!buyer) {
+            <label-value [label]="i18n.ad.buyer">
+              <user-link [user]="data.buyer"></user-link>
+            </label-value>
+          }
+          @if (data.remarks) {
+            <label-value [label]="i18n.ad.remarks">
+              {{ data.remarks }}
+            </label-value>
+          }
+        </div>
+      </div>
+      <h2 class="mt-4 mb-2">{{ i18n.ad.products }}</h2>
+      <table class="table table-hover small-height">
+        <thead>
+          @if (layout.gtxs$ | async) {
+            <th class="no-border">
+              {{ i18n.ad.number }}
+            </th>
+          }
+          <th class="no-border">{{ i18n.ad.product }}</th>
+          <th class="no-border">{{ i18n.ad.quantity }}</th>
+          @if (layout.gtxs$ | async) {
+            <th class="no-border text-right">
+              {{ i18n.ad.unitPrice }}
+            </th>
+          }
+          <th class="no-border text-right">{{ i18n.transaction.amount }}</th>
+        </thead>
+        <tbody>
+          @for (row of data.items; track row) {
+            <tr (click)="router.navigate(path(row))" class="cursor-pointer">
+              @if (layout.gtxs$ | async) {
+                <td>{{ row.product.productNumber }}</td>
+              }
+              <td class="link">{{ row.product.name }}</td>
+              <td>{{ format.formatAsNumber(row.quantity, row.product.allowDecimalQuantity ? 2 : 0) }}</td>
+              @if (layout.gtxs$ | async) {
+                <td class="text-right">
+                  {{ row.price | currency : data.currency }}
+                </td>
+              }
+              <td class="text-right">
+                {{ row.totalPrice | currency : data.currency }}
+              </td>
+            </tr>
+          }
+          <tr class="no-hover">
+            <td class="table-head-color" [attr.colspan]="(layout.gtxs$ | async) ? 4 : 2">
+              {{ i18n.ad.subtotal }}
+            </td>
+            <td class="table-head-color text-right">
+              {{ subtotal | currency : data.currency }}
+            </td>
+          </tr>
+          <tr class="no-hover">
+            <td [attr.colspan]="(layout.gtxs$ | async) ? 4 : 2">
+              {{ i18n.ad.deliveryMethod + ': ' + resolveDeliveryLabel() }}
+            </td>
+            <td class="text-right">
+              {{ data.deliveryMethod.price | currency : data.currency }}
+            </td>
+          </tr>
+          <tr class="totalAmount no-hover">
+            <td class="border-bottom-0 label label-value-label" [attr.colspan]="(layout.gtxs$ | async) ? 4 : 2">
+              {{ i18n.ad.total }}
+            </td>
+            <td class="border-bottom-0 text-right label-value-value">
+              {{ data.totalPrice | currency : data.currency }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <h2 class="mb-2">{{ i18n.ad.deliveryInformation }}</h2>
+      @if (data.deliveryMethod.minTime) {
+        <label-value [label]="i18n.ad.minDeliveryTime">
+          {{ format.formatTimeInterval(data.deliveryMethod.minTime) }}
+        </label-value>
+      }
+      @if (data.deliveryMethod.maxTime) {
+        <label-value [label]="i18n.ad.maxDeliveryTime">
+          {{ format.formatTimeInterval(data.deliveryMethod.maxTime) }}
+        </label-value>
+      }
+      @if (data.deliveryMethod.price) {
+        <label-value [label]="i18n.ad.price">
+          {{ data.deliveryMethod.price | currency : data.currency }}
+        </label-value>
+      }
+      @if (hasAddressFields) {
+        <label-value [label]="i18n.ad.deliveryAddress" class="align-items-baseline">
+          <address-details [address]="data.deliveryAddress"></address-details>
+        </label-value>
+      }
+      @if (remarks || canSetRemarks) {
+        <h2 class="mb-2">{{ i18n.ad.remarks }}</h2>
+      }
+      @if (remarks) {
+        <label class="any-label-value">{{ remarks }}</label>
+      }
+      @if (canSetRemarks) {
+        <div [ngClass]="{ 'mt-4': remarks }" [formGroup]="form">
+          <textarea-field formControlName="remarks"></textarea-field>
+        </div>
+      }
+    </page-content>
+  }
+</page-layout>

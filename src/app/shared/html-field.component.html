@@ -1,0 +1,135 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <div class="wrapper">
+    <div class="toolbar">
+      @for (group of actions; track group) {
+        <div class="toolbar-group">
+          @for (action of group; track action) {
+            @if (action.widget === 'select') {
+              <select
+                [id]="action.fieldId"
+                class="form-control custom-select"
+                [tooltip]="action.tooltip"
+                (change)="run(action)">
+                @for (value of values(action); track value) {
+                  <option [value]="value.value">
+                    {{ value.label }}
+                  </option>
+                }
+              </select>
+            }
+            @if (action.widget === 'button') {
+              <button
+                type="button"
+                [id]="action.fieldId"
+                class="btn btn-icon"
+                (click)="run(action)"
+                [tooltip]="action.tooltip">
+                <icon [icon]="action.icon"></icon>
+              </button>
+            }
+          }
+        </div>
+      }
+      <div class="toolbar-group flex-grow-1 d-flex justify-content-end">
+        <button
+          type="button"
+          [id]="id + '_toggleSource'"
+          class="btn btn-icon"
+          [ngClass]="{ active: source$ | async }"
+          (click)="toggleSource()"
+          [tooltip]="i18n.field.html.source">
+          <icon [icon]="SvgIcon.Code"></icon>
+        </button>
+      </div>
+    </div>
+    <div
+      [ngClass]="{ 'd-none': source$ | async }"
+      class="editor"
+      #editor
+      [attr.contenteditable]="!disabled"
+      [id]="id + '_editor'"
+      (click)="updateToolbarState()"
+      (keydown)="updateToolbarState()"
+    (input)="formControl.setValue(editor.innerHTML)"></div>
+    <textarea
+      [id]="id + '_source'"
+      class="form-control source"
+      [ngClass]="{
+        'd-none': (source$ | async) === false,
+        'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+      }"
+      [formControl]="formControl">
+    </textarea>
+    <field-errors [control]="formControl"></field-errors>
+  </div>
+}
+
+<ng-template #widget>
+  <div class="wrapper">
+    <div class="toolbar">
+      @for (group of actions; track group) {
+        <div class="toolbar-group">
+          @for (action of group; track action) {
+            @if (action.widget === 'select') {
+              <select
+                [id]="action.fieldId"
+                class="form-control custom-select"
+                [tooltip]="action.tooltip"
+                (change)="run(action)">
+                @for (value of values(action); track value) {
+                  <option [value]="value.value">
+                    {{ value.label }}
+                  </option>
+                }
+              </select>
+            }
+            @if (action.widget === 'button') {
+              <button
+                type="button"
+                [id]="action.fieldId"
+                class="btn btn-icon"
+                (click)="run(action)"
+                [tooltip]="action.tooltip">
+                <icon [icon]="action.icon"></icon>
+              </button>
+            }
+          }
+        </div>
+      }
+      <div class="toolbar-group flex-grow-1 d-flex justify-content-end">
+        <button
+          type="button"
+          [id]="id + '_toggleSource'"
+          class="btn btn-icon"
+          [ngClass]="{ active: source$ | async }"
+          (click)="toggleSource()"
+          [tooltip]="i18n.field.html.source">
+          <icon [icon]="SvgIcon.Code"></icon>
+        </button>
+      </div>
+    </div>
+    <div
+      [ngClass]="{ 'd-none': source$ | async }"
+      class="editor"
+      #editor
+      [attr.contenteditable]="!disabled"
+      [id]="id + '_editor'"
+      (click)="updateToolbarState()"
+      (keydown)="updateToolbarState()"
+    (input)="formControl.setValue(editor.innerHTML)"></div>
+    <textarea
+      [id]="id + '_source'"
+      class="form-control source"
+      [ngClass]="{
+        'd-none': (source$ | async) === false,
+        'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
+      }"
+      [formControl]="formControl">
+    </textarea>
+    <field-errors [control]="formControl"></field-errors>
+  </div>
+</ng-template>

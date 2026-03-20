@@ -1,0 +1,38 @@
+@if (title) {
+  <div class="mobile-result-container cell-main pb-0">{{ title }}</div>
+}
+<div class="mobile-result-container">
+  @if (hasAvatar) {
+    <div class="avatar">
+      <avatar [image]="avatarImage" [icon]="avatarIcon" [roundBorders]="avatarRoundBorders"> </avatar>
+    </div>
+  }
+  <div class="mobile-result-content">
+    @if (amount || date || topLeft || topRight) {
+      <div class="cell-date-amount">
+        @if (topRight) {
+          <div class="cell-top-right">
+            {{ topRight }}
+          </div>
+        }
+        @if (amount) {
+          <div class="cell-amount" [ngClass]="amountClass">
+            {{ amount | currency : currency : forceSign }}
+          </div>
+        }
+        @if (date) {
+          <div class="cell-date">
+            {{ date | date }}
+          </div>
+        }
+        @if (topLeft) {
+          <div class="cell-top-left">
+            {{ topLeft }}
+          </div>
+        }
+      </div>
+      <div class="clearfix"></div>
+    }
+    <ng-content></ng-content>
+  </div>
+</div>

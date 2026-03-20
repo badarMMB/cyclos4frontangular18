@@ -1,0 +1,27 @@
+@if (data$ | async) {
+  @if (page.layout === FrontendContentLayoutEnum.FULL) {
+    @if (page.type === 'iframe') {
+      <div
+        class="flex-grow-1 d-flex flex-column"
+      [innerHTML]="page.content | trust"></div>
+    } @else {
+      <div class="custom-content-container" [innerHTML]="page.content | trust"></div>
+    }
+  }
+  @if (page.layout !== FrontendContentLayoutEnum.FULL) {
+    <page-layout>
+      <page-content [heading]="page.title || page.name" [mobileHeading]="page.name" last [mode]="cardMode">
+        @if (page.type === 'iframe') {
+          <div
+            class="flex-grow-1 d-flex flex-column"
+          [innerHTML]="page.content | trust"></div>
+        } @else {
+          <div class="custom-content-container" [innerHTML]="page.content | trust"></div>
+        }
+      </page-content>
+    </page-layout>
+  }
+}
+<ng-template #content>
+  <div class="custom-content-container" [innerHTML]="page.content | trust"></div>
+</ng-template>

@@ -1,0 +1,16 @@
+﻿<div class="map-users-wrapper">
+  @if (isEditMode) {
+    <div class="map-users-toolbar">
+      <button type="button" class="btn btn-primary btn-sm" (click)="saveToField()">Enregistrer</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="refreshGeoServer()">
+        Rafraichir GeoServer
+      </button>
+    </div>
+  }
+
+  <div #mapContainer class="map-users-map"></div>
+
+  @if (!isEditMode) {
+    <div class="map-users-banner">Mode consultation - carte en lecture seule</div>
+  }
+</div>

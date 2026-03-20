@@ -1,0 +1,88 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.ad.title.adInterests"
+      [mobileHeading]="i18n.ad.mobileTitle.adInterests"
+      [headingActions]="headingActions$ | async"
+      [mode]="!self ? 'normal' : 'empty'">
+      @if (!self) {
+        <user-info [user]="data.user"></user-info>
+      }
+    </page-content>
+    <results-layout [results]="data.adInterests" [toLink]="toLink">
+      <mobile-result *mobileResult="let row">
+        <div class="d-flex flex-row">
+          <div class="w-80">
+            <div class="cell-main">{{ row.name }}</div>
+            @if ((row.keywords || []).length > 0) {
+              <div class="cell-text">{{ (row.keywords || []).join(', ') }}</div>
+            }
+            @if (row.category) {
+              <div class="cell-text">{{ row.category?.name }}</div>
+            }
+            @if (row.adUser) {
+              <div class="cell-text">{{ row.adUser?.display }}</div>
+            }
+          </div>
+          @if (data.canEdit) {
+            <div class="ml-auto">
+              <button
+                type="button"
+                [tooltip]="i18n.general.remove"
+                class="btn btn-icon"
+                (click)="remove(row); $event.stopPropagation(); $event.preventDefault()">
+                <icon [icon]="SvgIcon.Trash"></icon>
+              </button>
+            </div>
+          }
+        </div>
+      </mobile-result>
+      <table *resultTable class="table table-hover cursor-pointer">
+        <thead>
+          <th>{{ i18n.general.name }}</th>
+          @if (keywords) {
+            <th>{{ i18n.general.keywords }}</th>
+          }
+          @if (category) {
+            <th>{{ i18n.general.category }}</th>
+          }
+          @if (user) {
+            <th>{{ i18n.ad.owner }}</th>
+          }
+          @if (data.canEdit) {
+            <th class="actions"></th>
+          }
+        </thead>
+        <tbody>
+          @for (row of data.adInterests; track row) {
+            <tr (click)="router.navigate(viewPath(row))">
+              <td>
+                {{ row.name }}
+              </td>
+              @if (keywords) {
+                <td>{{ (row.keywords || []).join(', ') }}</td>
+              }
+              @if (category) {
+                <td>{{ row.category?.name }}</td>
+              }
+              @if (user) {
+                <td>{{ row.adUser?.display }}</td>
+              }
+              @if (data.canEdit) {
+                <td class="actions">
+                  <button
+                    type="button"
+                    [tooltip]="i18n.general.remove"
+                    class="btn btn-icon"
+                    (click)="remove(row); $event.stopPropagation()">
+                    <icon [icon]="SvgIcon.Trash"></icon>
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>

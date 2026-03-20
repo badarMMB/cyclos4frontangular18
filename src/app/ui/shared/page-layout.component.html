@@ -1,0 +1,40 @@
+<div
+  class="page-layout"
+  [ngClass]="{
+    'has-left-area': leftAreaVisible$ | async,
+    'justify-content-center': (leftAreaVisible$ | async) === false
+  }">
+  @if (leftAreaVisible$ | async) {
+    <div class="side-area">
+      @if ((loggingOut$ | async) === false) {
+        @if ((login.user$ | async) && (menu.activeMenu$ | async)) {
+          <side-menu> </side-menu>
+        }
+        @for (banner of uiLayout.banners$ | async; track banner; let first = $first) {
+          <banner
+            [banner]="banner"
+            [firstInLayout]="first && (leftMenuVisible$ | async) === false">
+          </banner>
+        }
+      }
+    </div>
+  }
+
+  <div
+    #contentArea
+    class="content-area d-flex flex-column"
+    [ngClass]="{
+      'content-area-small': size === 'small',
+      'content-area-medium': (leftAreaVisible$ | async) ? false : size === 'medium',
+      'content-area-large': (leftAreaVisible$ | async) ? false : size === 'large'
+    }">
+    @if (ready) {
+      <ng-content></ng-content>
+    } @else {
+      <page-content [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'">
+        <spinner></spinner>
+      </page-content>
+    }
+  </div>
+</div>
+

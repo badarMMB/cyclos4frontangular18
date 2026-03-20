@@ -1,0 +1,31 @@
+<label-value [label]="i18n.voucher.voucher">
+  {{ voucher.type.voucherTitle }}
+</label-value>
+<label-value [label]="i18n.voucher.token">
+  {{ voucher.token }}
+</label-value>
+@if (voucher.creationType === VoucherCreationTypeEnum.SENT) {
+  <label-value [label]="i18n.voucher.sentToEmail">
+    {{ voucher.email }}
+  </label-value>
+}
+@if (voucher.amount) {
+  <label-value [label]="i18n.transaction.amount">
+    {{ voucher.amount | currency : voucher.type.configuration.currency }}
+  </label-value>
+}
+@if (voucher.balance) {
+  <label-value [label]="i18n.voucher.balance">
+    {{ voucher.balance | currency : voucher.type.configuration.currency }}
+  </label-value>
+}
+@if (voucher.status) {
+  <label-value [label]="i18n.general.status">
+    {{ apiI18n.voucherStatus(voucher.status) }}
+  </label-value>
+}
+@if (voucher.status === 'open') {
+  <label-value [label]="i18n.general.expirationDate">
+    {{ voucher.expirationDate | dateTime }}
+  </label-value>
+}

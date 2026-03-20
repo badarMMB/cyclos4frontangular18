@@ -1,0 +1,157 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "cli": {
+        "analytics": false
+    },
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "ui": {
+            "root": "",
+            "sourceRoot": "src",
+            "projectType": "application",
+            "prefix": "ui",
+            "schematics": {
+                "@schematics/angular:component": {
+                    "style": "scss",
+                    "skipTests": true
+                },
+                "@schematics/angular:class": {
+                    "skipTests": true
+                },
+                "@schematics/angular:directive": {
+                    "skipTests": true
+                },
+                "@schematics/angular:guard": {
+                    "skipTests": true
+                },
+                "@schematics/angular:module": {
+                    
+                },
+                "@schematics/angular:pipe": {
+                    "skipTests": true
+                },
+                "@schematics/angular:service": {
+                    "skipTests": true
+                }
+            },
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-angular:application",
+                    "options": {
+                        "outputHashing": "all",
+                        "outputPath": {
+                          "base": "dist/ui"
+                        },
+                        "index": "src/ui/index.html",
+                        "polyfills": [
+                            "zone.js",
+                            "configurable-date-input-polyfill"
+                        ],
+                        "tsConfig": "src/tsconfig.ui.json",
+                        "assets": [
+                            "src/i18n",
+                            "src/svg",
+                            "src/fonts",
+                            {
+                                "input": "node_modules/leaflet/dist/images",
+                                "glob": "*",
+                                "output": "/assets/leaflet"
+                            },
+                            {
+                                "input": "node_modules/leaflet-draw/dist/images",
+                                "glob": "*",
+                                "output": "/assets/leaflet-draw"
+                            },
+                            {
+                                "input": "node_modules/qr-scanner",
+                                "glob": "qr-scanner-worker.min.*",
+                                "output": "/"
+                            },
+                            {
+                                "input": "node_modules/upup/dist",
+                                "glob": "*",
+                                "output": "/"
+                            }
+                        ],
+                        "styles": [
+                            "node_modules/leaflet/dist/leaflet.css",
+                            "node_modules/leaflet-draw/dist/leaflet.draw.css",
+                            "src/styles.scss"
+                        ],
+                        "allowedCommonJsDependencies": [
+                            "hammerjs",
+                            "js-cookie",
+                            "b64-to-blob",
+                            "downloadjs",
+                            "autosize",
+                            "lscache",
+                            "qrcode",
+                            "leaflet",
+                            "leaflet-draw"
+                        ],
+                        "extractLicenses": false,
+                        "sourceMap": true,
+                        "optimization": false,
+                        "namedChunks": true,
+                        "browser": "src/ui/main.ts",
+                        "stylePreprocessorOptions": {
+                          "includePaths": [
+                            "."
+                          ]
+                        }
+                    },
+                    "configurations": {
+                        "production": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                }
+                            ],
+                            "optimization": {
+                                "scripts": true,
+                                "styles": {
+                                    "minify": true,
+                                    "inlineCritical": false
+                                },
+                                "fonts": false
+                            },
+                            "sourceMap": false,
+                            "extractLicenses": true
+                        }
+                    },
+                    "defaultConfiguration": ""
+                },
+                "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "options": {
+                      "buildTarget": "ui:build"
+                    },
+                    "configurations": {
+                        "production": {
+                          "buildTarget": "ui:build:production"
+                        }
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-devkit/build-angular:tslint",
+                    "options": {
+                        "tsConfig": [
+                            "src/tsconfig.ui.json"
+                        ],
+                        "exclude": [
+                            "**/node_modules/**"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

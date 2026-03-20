@@ -1,0 +1,76 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.agreements.title.history"
+      [mobileHeading]="i18n.agreements.mobileTitle.history"
+      [mode]="self ? 'empty' : 'normal'">
+      @if (!self) {
+        <user-info [user]="data.user"></user-info>
+      }
+    </page-content>
+    <results-layout [results]="data.history" [onClick]="showAgreement">
+      <mobile-result *mobileResult="let row">
+        <div>
+          <div class="cell-text float-left">
+            {{ row.date | date }}
+          </div>
+          <div class="cell-main float-right">
+            @if (!row.accepted) {
+              <del>
+                {{ row.agreement.name }}
+              </del>
+            } @else {
+              {{ row.agreement.name }}
+            }
+            <ng-template #accepted>
+              {{ row.agreement.name }}
+            </ng-template>
+          </div>
+        </div>
+      </mobile-result>
+      <table *resultTable class="table table-hover">
+        <thead>
+          <th>{{ i18n.general.date }}</th>
+          <th>{{ i18n.agreements.agreement }}</th>
+          @if (hasAccepted) {
+            <th>{{ i18n.agreements.accepted }}</th>
+          }
+          @if (hasRemoteAddress) {
+            <th class="align-center">
+              {{ i18n.general.remoteAddress }}
+            </th>
+          }
+          <th class="actions"></th>
+        </thead>
+        <tbody>
+          @for (row of data.history; track row) {
+            <tr [ngClass]="{ 'cursor-pointer': row.accepted }">
+              <td>{{ row.date | dateTime }}</td>
+              <td>{{ row.agreement.name }}</td>
+              @if (hasAccepted) {
+                <td>{{ row.accepted | boolean }}</td>
+              }
+              @if (hasRemoteAddress) {
+                <td class="align-center">
+                  {{ row.remoteAddress }}
+                </td>
+              }
+              <td class="actions">
+                @if (row.accepted) {
+                  <button
+                    type="button"
+                    [tooltip]="i18n.general.view"
+                    class="btn btn-icon"
+                    (click)="showAgreement(row)">
+                    <icon [icon]="SvgIcon.Search"></icon>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>
+

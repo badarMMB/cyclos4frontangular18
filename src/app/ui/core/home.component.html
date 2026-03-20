@@ -1,0 +1,23 @@
+@if (data$ | async) {
+  @if (data.content.layout !== FrontendContentLayoutEnum.FULL) {
+    <page-content
+      [heading]="data.content.title"
+      [mobileHeading]="data.content.title"
+      last
+      hideBack
+      [mode]="data.content.layout === FrontendContentLayoutEnum.CARD_TIGHT ? 'tight' : 'normal'">
+      <div class="custom-content-container" [innerHTML]="data.content.content | trust"></div>
+    </page-content>
+  }
+  @if (data.content.layout === FrontendContentLayoutEnum.FULL) {
+    <div
+      class="custom-content-container"
+    [innerHTML]="data.content.content | trust"></div>
+  }
+} @else {
+  <spinner></spinner>
+}
+
+<ng-template #spinner>
+  <spinner></spinner>
+</ng-template>

@@ -1,0 +1,68 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="create ? i18n.record.title['new'](data.type.name) : i18n.record.title.edit(data.type.name)"
+    [mobileHeading]="
+      create ? i18n.record.mobileTitle['new'](data.type.name) : i18n.record.mobileTitle.edit(data.type.name)
+    ">
+      @if (data.user && !authHelper.isSelf(data.user)) {
+        <user-info [user]="data.user"></user-info>
+        <hr />
+      }
+      <div [formGroup]="form" [ngClass]="{ 'mr-n3': columnLayout }">
+        @if (data.type.informationText) {
+          <rich-text-container [value]="data.type.informationText"> </rich-text-container>
+          @if (data.fields) {
+            <hr class="border-0" />
+          }
+        }
+        @if (fieldsWithoutSection.length > 0) {
+          <h2
+        [ngClass]="{
+          'mb-0': labelPosition === 'above',
+          'mb-2': labelPosition !== 'above',
+          'border-top-0': !data.type.informationText
+        }">
+            {{ i18n.record.fields }}
+          </h2>
+        }
+        @for (cf of fieldsWithoutSection; track cf) {
+          <custom-field-input
+            [labelPosition]="labelPosition"
+            [field]="cf"
+            [formControl]="form.get('customValues').get(cf.internalName)"
+            [class]="resolveColumnClass(cf)"
+            [binaryValues]="binaryValues">
+          </custom-field-input>
+        }
+        @for (key of fieldsWithSection.keys(); track key; let first = $first) {
+          <h2
+          [ngClass]="{
+            'mb-0': labelPosition === 'above',
+            'mb-2': labelPosition !== 'above',
+            'mt-4': fieldsWithoutSection.length > 0,
+            'border-top-0': first && fieldsWithoutSection.length == 0
+          }">
+            {{ key.name }}
+          </h2>
+          @if (key.informationText) {
+            <rich-text-container class="mb-2" [value]="key.informationText">
+            </rich-text-container>
+          }
+          @for (cf of fieldsWithSection.get(key); track cf) {
+            <custom-field-input
+              [labelPosition]="labelPosition"
+              [field]="cf"
+              [formControl]="form.get('customValues').get(cf.internalName)"
+              [class]="resolveColumnClass(cf)"
+              [binaryValues]="binaryValues">
+            </custom-field-input>
+          }
+        }
+      </div>
+      <actions>
+        <action-button [disabled]="requesting$ | async" (action)="save()" [label]="i18n.general.save"> </action-button>
+      </actions>
+    </page-content>
+  }
+</page-layout>

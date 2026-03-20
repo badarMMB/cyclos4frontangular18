@@ -1,0 +1,57 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <input
+    #inputField
+    class="d-none"
+    type="file"
+    (change)="filesSelected(inputField.files)"
+    [accept]="accept"
+    [multiple]="maxFiles > 1" />
+  <div class="d-flex flex-wrap">
+    @if (!disabled) {
+      <button
+        type="button"
+        class="btn btn-icon d-flex align-content-center flex-grow-0 mr-3"
+        [tooltip]="i18n.field.file.upload"
+        (click)="inputField.click()">
+        <icon [icon]="SvgIcon.Upload"></icon>
+      </button>
+    }
+    @for (file of files; track file) {
+      <div class="flex-grow-0 mr-3 d-flex align-items-center">
+        {{ file.name }} ({{ format.formatFileSize(file.size) }})
+      </div>
+    }
+  </div>
+  <field-errors [control]="formControl"></field-errors>
+}
+
+<ng-template #widget>
+  <input
+    #inputField
+    class="d-none"
+    type="file"
+    (change)="filesSelected(inputField.files)"
+    [accept]="accept"
+    [multiple]="maxFiles > 1" />
+  <div class="d-flex flex-wrap">
+    @if (!disabled) {
+      <button
+        type="button"
+        class="btn btn-icon d-flex align-content-center flex-grow-0 mr-3"
+        [tooltip]="i18n.field.file.upload"
+        (click)="inputField.click()">
+        <icon [icon]="SvgIcon.Upload"></icon>
+      </button>
+    }
+    @for (file of files; track file) {
+      <div class="flex-grow-0 mr-3 d-flex align-items-center">
+        {{ file.name }} ({{ format.formatFileSize(file.size) }})
+      </div>
+    }
+  </div>
+  <field-errors [control]="formControl"></field-errors>
+</ng-template>

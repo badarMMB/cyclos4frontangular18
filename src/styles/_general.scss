@@ -1,0 +1,290 @@
+@import 'src/definitions';
+
+:root {
+  --theme-color: #{$theme-color};
+  --theme-color-dark: #{$theme-color-dark};
+  --primary-dark: #{$primary-dark};
+  --body-color: #{$body-color};
+  --body-color-dark: #{$body-color-dark};
+  --border-color: #{$border-color};
+  --border-color-dark: #{$border-color-dark};
+  --text-muted: #{$text-muted};
+  --text-muted-dark: #{$text-muted-dark};
+  // Will be updated dynamically
+  --window-width: "1000px";
+}
+
+b,
+strong {
+  font-weight: $font-weight-bold;
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+.window-width {
+  width: var(--window-width);
+}
+
+.no-gutters {
+  margin-right: 0;
+  margin-left: 0;
+
+  >.col,
+  >[class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  >.col-form-label {
+    padding-right: 0.5rem;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+.cursor-move {
+  cursor: move !important;
+}
+
+.cursor-default {
+  cursor: default !important;
+}
+
+.break-nl {
+  white-space: pre-wrap;
+}
+
+hr {
+  width: 100%;
+  display: block;
+  border-color: $border-color;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: $zindex-modal-backdrop;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ellipsis,
+.single-line {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.single-line {
+  max-height: 1.4em;
+}
+
+.ellipsis-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging> :not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-preview {
+  z-index: 10000 !important;
+}
+
+body.dark {
+  hr {
+    border-color: $border-color-dark;
+  }
+
+  pre {
+    color: $body-color-dark;
+  }
+}
+
+/* Margins / paddings according to the layout spacer */
+.my-ls,
+.mt-ls {
+  margin-top: $layout-spacer-xxs !important;
+}
+
+.my-ls,
+.mb-ls {
+  margin-bottom: $layout-spacer-xxs !important;
+}
+
+.mx-ls,
+.ml-ls {
+  margin-left: $layout-spacer-xxs !important;
+}
+
+.mx-ls,
+.mr-ls {
+  margin-right: $layout-spacer-xxs !important;
+}
+
+.py-ls,
+.pt-ls {
+  padding-top: $layout-spacer-xxs !important;
+}
+
+.py-ls,
+.pb-ls {
+  padding-bottom: $layout-spacer-xxs !important;
+}
+
+.px-ls,
+.pl-ls {
+  padding-left: $layout-spacer-xxs !important;
+}
+
+.px-ls,
+.pr-ls {
+  padding-right: $layout-spacer-xxs !important;
+}
+
+@include media-breakpoint-up(xs) {
+
+  .my-ls,
+  .mt-ls {
+    margin-top: $layout-spacer-xs !important;
+  }
+
+  .my-ls,
+  .mb-ls {
+    margin-bottom: $layout-spacer-xs !important;
+  }
+
+  .mx-ls,
+  .ml-ls {
+    margin-left: $layout-spacer-xs !important;
+  }
+
+  .mx-ls,
+  .mr-ls {
+    margin-right: $layout-spacer-xs !important;
+  }
+
+  .py-ls,
+  .pt-ls {
+    padding-top: $layout-spacer-xs !important;
+  }
+
+  .py-ls,
+  .pb-ls {
+    padding-bottom: $layout-spacer-xs !important;
+  }
+
+  .px-ls,
+  .pl-ls {
+    padding-left: $layout-spacer-xs !important;
+  }
+
+  .px-ls,
+  .pr-ls {
+    padding-right: $layout-spacer-xs !important;
+  }
+}
+
+@include media-breakpoint-up(sm) {
+
+  .my-ls,
+  .mt-ls {
+    margin-top: $layout-spacer !important;
+  }
+
+  .my-ls,
+  .mb-ls {
+    margin-bottom: $layout-spacer !important;
+  }
+
+  .mx-ls,
+  .ml-ls {
+    margin-left: $layout-spacer !important;
+  }
+
+  .mx-ls,
+  .mr-ls {
+    margin-right: $layout-spacer !important;
+  }
+
+  .py-ls,
+  .pt-ls {
+    padding-top: $layout-spacer !important;
+  }
+
+  .py-ls,
+  .pb-ls {
+    padding-bottom: $layout-spacer !important;
+  }
+
+  .px-ls,
+  .pl-ls {
+    padding-left: $layout-spacer !important;
+  }
+
+  .px-ls,
+  .pr-ls {
+    padding-right: $layout-spacer !important;
+  }
+}
+
+.focusable {
+
+  // This is only to mark anchors in the page that can receive focus, but shouldn't get any hightlight
+  &:focus {
+    outline: none;
+  }
+}
+
+.data-item {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+@media print {
+  body {
+    background-color: transparent !important;
+    padding-top: 1cm;
+  }
+
+  .avatar-container.round-borders {
+    border-radius: 0 !important;
+  }
+
+  hr {
+    border-color: black !important;
+  }
+
+  ngx-gallery {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .ngx-gallery-icon {
+    display: none !important;
+  }
+
+  .ngx-gallery-thumbnail {
+    border: none !important;
+  }
+}

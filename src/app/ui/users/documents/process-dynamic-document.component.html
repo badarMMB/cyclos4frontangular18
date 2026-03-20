@@ -1,0 +1,30 @@
+<page-layout [ready]="data$ | async">
+  @switch (step$ | async) {
+    @case ('form') {
+      <page-content [heading]="data.document.name" [mobileHeading]="data.document.name">
+        @for (cf of formFields; track cf; let first = $first) {
+          <custom-field-input
+            [field]="cf"
+            [formControl]="formControl(cf.internalName)"
+            [focused]="first"
+            [labelPosition]="'auto'">
+          </custom-field-input>
+        }
+        <actions>
+          <action-button (action)="process()" [disabled]="requesting$ | async" [label]="i18n.general.submit">
+          </action-button>
+        </actions>
+      </page-content>
+    }
+    @case ('preview') {
+      <page-content
+        [heading]="data.document.name"
+        [mobileHeading]="data.document.name"
+        printContentOnly
+        [headingActions]="headingActions$ | async"
+        last>
+        <div [innerHTML]="result | trust"></div>
+      </page-content>
+    }
+  }
+</page-layout>

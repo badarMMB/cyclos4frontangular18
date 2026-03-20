@@ -1,0 +1,140 @@
+<page-layout [ready]="data$ | async">
+  @switch (step$ | async) {
+    @case ('voucher-type') {
+      <voucher-type-selection
+        [heading]="i18n.imports.title.importNewVouchersSend"
+        [mobileHeading]="i18n.imports.mobileTitle.importNewVouchersSend"
+        [categories]="data.dataForSend.categories"
+        [types]="data.dataForSend.types"
+        [user]="data.user"
+        (typeSelected)="onVoucherTypeSelected($event)">
+      </voucher-type-selection>
+    }
+    @case ('form') {
+      <page-content
+        last
+        [heading]="i18n.imports.title.importNew"
+        [mobileHeading]="i18n.imports.mobileTitle.importNew"
+        [headingActions]="headingActions$ | async">
+        @if (data.kind === ImportedFileKind.USER_SEND_VOUCHERS) {
+          <alert type="info">
+            <div [innerHTML]="i18n.imports.information.userSendVouchers(data.separator) | trust"></div>
+          </alert>
+        }
+        <div class="d-flex flex-grow-1 flex-column" [formGroup]="form">
+          @if (data.user && !isSelf) {
+            <user-info [user]="data.user"></user-info>
+          }
+          <label-value
+            [label]="i18n.imports.kind.label"
+            kind="fieldView"
+          [value]="importsHelper.kindLabel(data.kind)"></label-value>
+          <file-field [label]="i18n.imports.file" [formControl]="fileControl" required> </file-field>
+          <textarea-field formControlName="description" [label]="i18n.general.description"></textarea-field>
+          @if (data.kind === ImportedFileKind.ADS) {
+            <single-selection-field
+              [label]="i18n.general.currency"
+              formControlName="currency"
+              required>
+              @for (currency of data.currencies; track currency) {
+                <field-option
+                  [value]="currency.id"
+                  [id]="currency.id"
+                  [internalName]="currency.internalName"
+                  [text]="currency.name">
+                </field-option>
+              }
+            </single-selection-field>
+          }
+          @if (data.kind === ImportedFileKind.PAYMENTS) {
+            <boolean-field
+              [label]="i18n.imports.sendNotifications"
+            formControlName="sendNotifications"></boolean-field>
+          }
+          @if (data.kind === ImportedFileKind.RECORDS) {
+            <single-selection-field
+              [label]="i18n.general.type"
+              formControlName="recordType"
+              required>
+              @for (type of data.recordTypes; track type) {
+                <field-option
+                  [value]="type.id"
+                  [id]="type.id"
+                  [internalName]="type.internalName"
+                  [text]="type.name">
+                </field-option>
+              }
+            </single-selection-field>
+          }
+          @if (data.kind === ImportedFileKind.USERS) {
+            <boolean-field [label]="i18n.imports.useGroupFromFile" formControlName="useGroupFromFile"></boolean-field>
+            <single-selection-field
+              formControlName="group"
+              [label]="form.controls['useGroupFromFile'].value ? i18n.imports.defaultGroup : i18n.user.group"
+              [required]="!form.controls['useGroupFromFile'].value">
+              @for (group of data.groups; track group) {
+                <field-option
+                  [value]="group.id"
+                  [id]="group.id"
+                  [internalName]="group.internalName"
+                  [text]="group.name">
+                </field-option>
+              }
+            </single-selection-field>
+            <boolean-field [label]="i18n.imports.sendActivationEmail" formControlName="sendActivationEmail"></boolean-field>
+          }
+          @if (data.kind === ImportedFileKind.USER_PAYMENTS) {
+            <single-selection-field
+              formControlName="paymentType"
+              [label]="i18n.transaction.type"
+              required>
+              @for (type of data.paymentTypes; track type) {
+                <field-option
+                  [value]="type.id"
+                  [id]="type.id"
+                  [internalName]="type.internalName"
+                  [text]="type.name">
+                </field-option>
+              }
+            </single-selection-field>
+          }
+          @if (data.kind === ImportedFileKind.USER_SEND_VOUCHERS) {
+            <label-value
+              kind="fieldView"
+              [label]="i18n.voucher.voucher"
+            [value]="(voucherType$ | async)?.voucherDescription"></label-value>
+            <boolean-field formControlName="useAmountFromFile" [label]="i18n.imports.useAmountFromFile"></boolean-field>
+            <label-value
+              kind="field"
+              [label]="(useAmountFromFile$ | async) ? i18n.imports.defaultAmount : i18n.transaction.amount"
+              [required]="(useAmountFromFile$ | async) === false"
+              fieldSize="medium">
+              <decimal-field
+                formControlName="amount"
+                [prefix]="(voucherType$ | async)?.configuration?.currency?.prefix"
+                [suffix]="(voucherType$ | async)?.configuration?.currency?.suffix">
+              </decimal-field>
+            </label-value>
+            <textarea-field formControlName="sendMessage" [label]="i18n.voucher.send.message"></textarea-field>
+          }
+          @if (data.confirmationPasswordInput) {
+            <hr />
+            <confirmation-password
+              [formControl]="confirmationPasswordControl"
+              [passwordInput]="data.confirmationPasswordInput"
+              [createDeviceConfirmation]="createDeviceConfirmation"
+              (showSubmit)="showSubmit$.next($event)"
+              (confirmed)="submit($event)">
+            </confirmation-password>
+          }
+          @if (showSubmit$ | async) {
+            <actions>
+              <action-button [disabled]="requesting$ | async" (action)="submit()" [label]="i18n.general.submit">
+              </action-button>
+            </actions>
+          }
+        </div>
+      </page-content>
+    }
+  }
+</page-layout>

@@ -1,0 +1,38 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="viewForm"
+      [heading]="i18n.ad.title.adInterests"
+      [mobileHeading]="i18n.ad.mobileTitle.adInterests"
+      [headingActions]="headingActions$ | async">
+      @if (!self) {
+        <label-value [label]="i18n.general.user">
+          <user-link [user]="data.user"></user-link>
+        </label-value>
+      }
+      <label-value [label]="i18n.general.name" [value]="data.name"> </label-value>
+      <h2>{{ i18n.ad.matchFields }}</h2>
+      @if (!empty(data.keywords)) {
+        <label-value [label]="i18n.general.keywords" [value]="data.keywords.join(', ')">
+        </label-value>
+      }
+      @if (data.kind) {
+        <label-value [label]="i18n.general.type" [value]="resolveKindLabel()"> </label-value>
+      }
+      @if (data.category) {
+        <label-value [label]="i18n.general.category" [value]="data.category.name"> </label-value>
+      }
+      @if (data.adUser) {
+        <label-value [label]="i18n.general.by">
+          <user-link [user]="data.adUser"></user-link>
+        </label-value>
+      }
+      @if (data.minPrice || data.maxPrice) {
+        <label-value
+          [label]="i18n.ad.price"
+          [value]="format.formatRange({ min: data.minPrice, max: data.maxPrice }, data.currency)">
+        </label-value>
+      }
+    </page-content>
+  }
+</page-layout>

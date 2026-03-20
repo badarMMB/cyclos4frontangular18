@@ -1,0 +1,63 @@
+@if (initialized$ | async) {
+  <svg
+    version="1.2"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    aria-labelledby="title"
+    role="img"
+    [attr.viewBox]="'0 0 ' + width + ' ' + height">
+    <g class="axes">
+      <line class="x-axis" [attr.x1]="xMin" [attr.x2]="xMax" [attr.y1]="yMax" [attr.y2]="yMax"></line>
+      <line class="y-axis" [attr.x1]="xMin" [attr.x2]="xMin" [attr.y1]="yMin" [attr.y2]="yMax"></line>
+    </g>
+    <g class="ticks">
+      @for (x of xPoints; track x) {
+        <line
+          class="x-tick"
+          [attr.x1]="x"
+          [attr.x2]="x"
+          [attr.y1]="yMax"
+        [attr.y2]="yMax + 10"></line>
+      }
+      @for (y of yPoints; track y) {
+        <line
+          class="y-tick"
+          [attr.x1]="xMin"
+          [attr.x2]="xMin - 10"
+          [attr.y1]="y"
+        [attr.y2]="y"></line>
+      }
+    </g>
+    <g class="grid y-grid">
+      <line x1="90" x2="705" y1="370" y2="370"></line>
+    </g>
+    <g class="labels x-labels">
+      @for (label of xLabels; track label; let index = $index) {
+        <text
+          [attr.x]="xPoints[index]"
+          text-anchor="middle"
+          dominant-baseline="end"
+          [attr.y]="yMax + 22">
+          {{ label }}
+        </text>
+      }
+    </g>
+    <g class="labels y-labels">
+      @for (label of yLabels; track label; let index = $index) {
+        <text
+          [attr.x]="xMin - 12"
+          [attr.y]="yPoints[yPoints.length - index - 1]"
+          text-anchor="end"
+          dominant-baseline="middle">
+          {{ label }}
+        </text>
+      }
+    </g>
+    <g class="data">
+      <polyline [attr.points]="linePoints" />
+      @for (d of data; track d) {
+        <circle [attr.cx]="d.x" [attr.cy]="d.y" r="4" [tooltip]="d.date + ': ' + d.formattedValue" />
+      }
+    </g>
+  </svg>
+}

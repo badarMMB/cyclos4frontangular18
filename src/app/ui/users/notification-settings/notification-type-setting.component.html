@@ -1,0 +1,59 @@
+<div class="d-flex flex-wrap flex-xs-nowrap" [ngClass]="'has-buttons-' + buttonCount" [formGroup]="form">
+  @if (adminType && !options) {
+    <single-selection-field
+      class="flex-grow-1"
+      [emptyOption]="false"
+      formControlName="internal"
+      [disabled]="disabled">
+      <field-option [value]="true" [text]="i18n.general.enabled"> </field-option>
+      <field-option [value]="false" [text]="i18n.general.disabled"> </field-option>
+    </single-selection-field>
+  }
+  @if (adminType && options) {
+    <multi-selection-field
+      class="flex-grow-1"
+      [formControl]="multiSelectionControl"
+      [fieldOptions]="options"
+      [disabled]="disabled">
+    </multi-selection-field>
+  }
+  @if (adminType) {
+    <div class="d-xs-none"></div>
+  }
+  @if (!adminType) {
+    <button-toggle
+      [onIcon]="SvgIcon.Bell"
+      [offIcon]="SvgIcon.BellSlash"
+      [iconTooltip]="i18n.notificationSettings.internalNotification"
+      formControlName="internal"
+      [readOnly]="disabled">
+    </button-toggle>
+  }
+  @if (setting.email != null) {
+    <button-toggle
+      [onIcon]="SvgIcon.Envelope"
+      [offIcon]="SvgIcon.EnvelopeSlash"
+      [iconTooltip]="i18n.general.sendMedium.email"
+      formControlName="email"
+      [readOnly]="disabled">
+    </button-toggle>
+  }
+  @if (setting.sms != null) {
+    <button-toggle
+      [onIcon]="SvgIcon.ChatLeftText"
+      [offIcon]="SvgIcon.ChatLeftTextSlash"
+      [iconTooltip]="i18n.general.sendMedium.sms"
+      formControlName="sms"
+      [readOnly]="disabled">
+    </button-toggle>
+  }
+  @if (setting.app != null) {
+    <button-toggle
+      [onIcon]="SvgIcon.Phone"
+      [offIcon]="SvgIcon.PhoneSlash"
+      [iconTooltip]="i18n.general.sendMedium.app"
+      formControlName="app"
+      [readOnly]="disabled">
+    </button-toggle>
+  }
+</div>

@@ -1,0 +1,163 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="filters"
+      [heading]="i18n.voucher.title.search"
+      [mobileHeading]="i18n.voucher.mobileTitle.search"
+      [headingActions]="headingActions$ | async">
+      <div [formGroup]="form" class="filters-form filters-form-separator">
+        <div class="row">
+          @if (data.user && !self) {
+            <div class="col-12 col-md-6">
+              <label-value [label]="i18n.general.user" kind="fieldView">
+                <user-link [user]="data.user"></user-link>
+              </label-value>
+            </div>
+            @if (layout.gtsm$) {
+              <div class="col-12 col-md-6"></div>
+            }
+          }
+          @if (data.types?.length > 0) {
+            <div class="col-12 col-md-6">
+              <multi-selection-field
+                formControlName="types"
+                [emptyLabel]="i18n.general.notApplied"
+                [label]="i18n.general.type">
+                @for (type of data.types; track type) {
+                  <field-option
+                    [value]="type.id"
+                    [internalName]="type.internalName"
+                    [id]="type.id"
+                    [text]="type.name">
+                  </field-option>
+                }
+              </multi-selection-field>
+            </div>
+          }
+          <div class="col-12 col-md-6">
+            <multi-selection-field
+              formControlName="statuses"
+              [emptyLabel]="i18n.general.notApplied"
+              [label]="i18n.general.status"
+              [fieldOptions]="statusOptions">
+            </multi-selection-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <input-field formControlName="token" [label]="i18n.voucher.token" [mask]="data.mask"> </input-field>
+          </div>
+          @if (data.canBuy && data.canSend) {
+            <div class="col-12">
+              <radio-group-field
+                formControlName="creationType"
+                [asColumn]="layout.ltsm$ | async"
+                [label]="i18n.voucher.creationType.userLabel"
+                [fieldOptions]="creationTypeOptions">
+              </radio-group-field>
+            </div>
+          }
+          @if (moreFilters$ | async) {
+            <div class="w-100"></div>
+            <div class="col-12 col-md-6">
+              <date-field
+                formControlName="beginCreationDate"
+                [label]="i18n.voucher.beginCreationDate"
+                minDate="past100"
+                maxDate="todayEnd"
+                fieldSize="full">
+              </date-field>
+            </div>
+            <div class="col-12 col-md-6">
+              <date-field
+                formControlName="endCreationDate"
+                [label]="i18n.voucher.endCreationDate"
+                minDate="past100"
+                maxDate="todayEnd"
+                fieldSize="full">
+              </date-field>
+            </div>
+            <div class="col-12 col-md-6">
+              <date-field
+                formControlName="beginExpirationDate"
+                [label]="i18n.voucher.beginExpirationDate"
+                minDate="past100"
+                maxDate="todayEnd"
+                fieldSize="full">
+              </date-field>
+            </div>
+            <div class="col-12 col-md-6">
+              <date-field
+                formControlName="endExpirationDate"
+                [label]="i18n.voucher.endExpirationDate"
+                minDate="past100"
+                maxDate="todayEnd"
+                fieldSize="full">
+              </date-field>
+            </div>
+            <div class="col-12 col-md-6">
+              <decimal-field formControlName="minAmount" [label]="i18n.ad.minPrice" fieldSize="full"> </decimal-field>
+            </div>
+            <div class="col-12 col-md-6">
+              <decimal-field formControlName="maxAmount" [label]="i18n.ad.maxPrice" fieldSize="full"> </decimal-field>
+            </div>
+          }
+        </div>
+      </div>
+    </page-content>
+    <results-layout
+      resultType="list"
+      [results]="results$ | async"
+      [rendering$]="rendering$"
+      (update)="update($event)"
+      [toLink]="toLink">
+      <mobile-result
+        *mobileResult="let row"
+        [date]="row.creationDate"
+        [amount]="row.amount"
+        [amountColor]="false"
+        [avatarImage]="row.type.image"
+        [avatarIcon]="SvgIcon.Ticket"
+        [currency]="row.type.configuration.currency">
+        <div class="cell-text cell-main">
+          {{ row.type.voucherTitle }}
+        </div>
+      </mobile-result>
+      <table *resultTable class="table table-hover cursor-pointer">
+        <tbody>
+          <th class="avatar"></th>
+          <th>{{ i18n.voucher.voucher }}</th>
+          <th>{{ i18n.general.expirationDate }}</th>
+          <th>{{ i18n.general.status }}</th>
+          <th class="amount">{{ i18n.transaction.amount }}</th>
+          <th class="amount">{{ i18n.voucher.balance }}</th>
+          @for (row of (results$ | async)?.results; track row) {
+            <tr (click)="router.navigate(path(row))">
+              <td class="avatar">
+                <avatar [image]="row.type.image" [icon]="SvgIcon.Ticket"> </avatar>
+              </td>
+              <td>
+                <a [routerLink]="path(row)">{{ row.type.voucherTitle }}</a>
+              </td>
+              <td>
+                @if (row.status !== VoucherStatusEnum.REDEEMED) {
+                  <a [routerLink]="path(row)">{{
+                    row.expirationDate | dateTime
+                  }}</a>
+                }
+              </td>
+              <td>
+                <a [routerLink]="path(row)">{{ apiI18n.voucherStatus(row.status) }}</a>
+              </td>
+              <td class="amount">
+                <a [routerLink]="path(row)">{{ row.amount | currency : row.type.configuration.currency }}</a>
+              </td>
+              <td class="amount">
+                <a [routerLink]="path(row)">{{ row.balance | currency : row.type.configuration.currency }}</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>
+

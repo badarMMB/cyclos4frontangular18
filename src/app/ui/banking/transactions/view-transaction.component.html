@@ -1,0 +1,423 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      last
+      mode="viewForm"
+      [heading]="title"
+      [mobileHeading]="mobileTitle"
+      [headingActions]="headingActions$ | async">
+      @if (showDoneMessage()) {
+        <notification
+          class="mb-3"
+          [type]="resolveLastPaymentNotificationType()"
+          [icon]="resolveLastPaymentNotificationIcon()">
+          <div>{{ resolveLastPaymentNotificationMessage() }}</div>
+        </notification>
+      }
+      @if (transaction.transfer) {
+        <transfer-details
+          [transfer]="transaction.transfer"
+          [usersWhichCanAddToContacts]="transaction.usersWhichCanAddToContacts">
+        </transfer-details>
+      } @else {
+        <label-value [label]="i18n.general.status">
+          {{ status }}
+        </label-value>
+        @if (transaction.authorizationStatus === 'pending') {
+          <label-value [label]="i18n.transaction.awaitingAuthorizationBy">
+            {{ authorizer }}
+          </label-value>
+        }
+        <label-value [label]="i18n.transaction.amount">
+          {{ transaction.feesOnAuthorization?.mainAmount || transaction.amount | currency : transaction.currency }}
+        </label-value>
+        @if (
+          transaction.feesOnAuthorization &&
+          transaction.feesOnAuthorization.mainAmount != transaction.feesOnAuthorization.totalAmount
+          ) {
+          <label-value
+            [label]="i18n.transaction.totalAmount">
+            {{ transaction.feesOnAuthorization.totalAmount | currency : transaction.currency }}
+          </label-value>
+        }
+        @if (transaction.kind === 'recurringPayment') {
+          <label-value [label]="i18n.transaction.repeatUntil">
+            {{ transaction.occurrencesCount ? i18n.transaction.repeatUntilFixed : i18n.transaction.repeatUntilManual }}
+          </label-value>
+        }
+        @if (transaction.kind === 'recurringPayment' && transaction.occurrencesCount) {
+          <label-value
+            [label]="i18n.transaction.occurrencesCount">
+            {{ transaction.occurrencesCount }}
+          </label-value>
+        }
+        @if (transaction.kind === 'recurringPayment' && transaction.occurrenceInterval) {
+          <label-value
+            [label]="i18n.transaction.occurrenceInterval">
+            {{ format.formatTimeInterval(transaction.occurrenceInterval) }}
+          </label-value>
+        }
+        @if (transaction.nextOccurrenceDate) {
+          <label-value [label]="i18n.transaction.nextOccurrence">
+            {{ transaction.nextOccurrenceDate | date }}
+          </label-value>
+        }
+        @if (hasDueAmount) {
+          <label-value [label]="i18n.transaction.dueAmount">
+            {{ transaction.dueAmount | currency : transaction.currency }}
+          </label-value>
+        }
+        @if ((transaction.installments || []).length === 1) {
+          <label-value [label]="i18n.transaction.dueDate">
+            {{ transaction.installments[0].dueDate | date }}
+          </label-value>
+        }
+        @if (transaction.by) {
+          <label-value [label]="i18n.general.performedBy">
+            <user-link [user]="transaction.by"></user-link>
+          </label-value>
+        }
+        @if (transaction?.receivedBy) {
+          <label-value [label]="i18n.transaction.receivedBy">
+            <user-link [user]="transaction.receivedBy"></user-link>
+          </label-value>
+        }
+        <label-value [label]="i18n.general.date">
+          {{ transaction.date | dateTime }}
+        </label-value>
+        @if (transaction.expirationDate && !transaction.processDate) {
+          <label-value [label]="i18n.general.expirationDate">
+            {{ transaction.expirationDate | dateTime }}
+          </label-value>
+        }
+        @if (transaction.processDate) {
+          <label-value [label]="i18n.transaction.processDate">
+            {{ transaction.processDate | dateTime }}
+          </label-value>
+        }
+        <!-- Payment request - Scheduled -->
+        @if (
+          transaction.kind === 'paymentRequest' &&
+          transaction.paymentRequestStatus !== 'denied' &&
+          transaction.paymentRequestStatus !== 'processed'
+          ) {
+          @if (transaction.installmentsCount) {
+            <label-value [label]="i18n.transaction.installmentsCount">
+              {{ transaction.installmentsCount }}
+            </label-value>
+          }
+          @if (transaction.firstInstallmentIsImmediate != null) {
+            <label-value
+              [label]="i18n.transaction.firstInstallmentIsImmediate">
+              {{ transaction.firstInstallmentIsImmediate | boolean }}
+            </label-value>
+          }
+          <!-- Payment request - Recurring -->
+          @if (transaction.kind === 'paymentRequest' && transaction.scheduling === 'recurring') {
+            <label-value
+              [label]="i18n.transaction.repeatUntil">
+              {{
+              transaction.occurrencesCount
+              ? i18n.transaction.repeatUntilNumberOfOccurrences(transaction.occurrencesCount)
+              : i18n.transaction.repeatUntilManual
+              }}
+            </label-value>
+          }
+          @if (transaction.firstOccurrenceIsImmediate != null) {
+            <label-value [label]="i18n.transaction.firstOccurrence">
+              {{
+              transaction.firstOccurrenceIsImmediate
+              ? i18n.transaction.firstOccurrenceImmediate
+              : i18n.transaction.firstOccurrenceAfterInterval(format.formatTimeInterval(transaction.occurrenceInterval))
+              }}
+            </label-value>
+          }
+          @if (transaction.kind === 'paymentRequest' && transaction.occurrenceInterval) {
+            <label-value
+              [label]="i18n.transaction.occurrenceInterval">
+              {{ format.formatTimeInterval(transaction.occurrenceInterval) }}
+            </label-value>
+          }
+        }
+        <ng-container *ngTemplateOutlet="isPaymentRequest() ? transactionToOrSender : transactionFromOrReceiver">
+        </ng-container>
+        <ng-container *ngTemplateOutlet="isPaymentRequest() ? transactionFromOrReceiver : transactionToOrSender">
+        </ng-container>
+        <ng-template #transactionFromOrReceiver>
+          @if (transaction.fromName) {
+            <label-value
+              [label]="isPaymentRequest() ? i18n.transaction.receiver : i18n.transaction.from">
+              <user-link [user]="transaction.from?.user" [display]="transaction.fromName"></user-link>
+            </label-value>
+          } @else {
+            @if (transaction.from) {
+              <label-value
+                [label]="isPaymentRequest() ? i18n.transaction.receiver : i18n.transaction.from">
+                @if (transaction.from.user) {
+                  <user-link [user]="transaction.from.user"></user-link>
+                } @else {
+                  {{ transaction.from.type.name }}
+                }
+              </label-value>
+            }
+            @if (transaction.from?.number) {
+              <label-value [label]="i18n.transaction.fromAccount">
+                {{ transaction.from.number }}
+              </label-value>
+            }
+          }
+        </ng-template>
+        <ng-template #transactionToOrSender>
+          @if (transaction.toName) {
+            <label-value
+              [label]="isPaymentRequest() ? i18n.transaction.sender : i18n.transaction.to">
+              <user-link [user]="transaction.to?.user" [display]="transaction.toName"> </user-link>
+            </label-value>
+          } @else {
+            @if (transaction.to) {
+              <label-value [label]="isPaymentRequest() ? i18n.transaction.sender : i18n.transaction.to">
+                @if (transaction.to.user) {
+                  <user-link [user]="transaction.to.user"></user-link>
+                } @else {
+                  {{ transaction.to.type.name }}
+                }
+              </label-value>
+            }
+            @if (transaction.to?.number) {
+              <label-value [label]="i18n.transaction.toAccount">
+                {{ transaction.to.number }}
+              </label-value>
+            }
+          }
+        </ng-template>
+        @if (transaction.toPrincipalType) {
+          <label-value [label]="transaction.toPrincipalType.name">
+            {{ transaction.toPrincipalValue }}
+          </label-value>
+        }
+        <label-value [label]="i18n.transaction.type">
+          {{ transaction.type.name }}
+        </label-value>
+        @if (transaction.channel) {
+          <label-value [label]="i18n.transaction.channel">
+            {{ transaction.channel.name }}
+          </label-value>
+        }
+        @if (transaction.transactionNumber) {
+          <label-value [label]="i18n.transaction.number">
+            {{ transaction.transactionNumber }}
+          </label-value>
+        }
+        <!-- External payment, Ticket, Payment request -->
+        @if (transaction.transaction) {
+          <label-value [label]="i18n.transaction.generatedTransaction">
+            <a [routerLink]="bankingHelper.transactionPath(transaction.transaction)">
+              {{ transaction.transaction.display }}
+            </a>
+          </label-value>
+        }
+        @for (value of transaction.customValues; track value) {
+          <custom-field-value [fieldValue]="value"> </custom-field-value>
+        }
+        @if (transaction.description) {
+          <label-value
+            [label]="i18n.general.description"
+            [value]="transaction.description"
+            valueFormat="break">
+          </label-value>
+        }
+        @if (lastAuthComment) {
+          <label-value
+            [label]="i18n.transaction.authorizationComments"
+            [value]="lastAuthComment"
+            valueFormat="break">
+          </label-value>
+        }
+        @if (transaction.comments) {
+          <label-value
+            [label]="i18n.general.comments"
+            [value]="transaction.comments"
+            valueFormat="break">
+          </label-value>
+        }
+        @if ((transaction.installments || []).length > 1) {
+          <h2 class="border-0 mt-4">{{ i18n.transaction.installments }}</h2>
+          <table class="table table-hover">
+            @if (layout.gtxs$ | async) {
+              <thead>
+                <th>{{ i18n.transaction.installmentNumber }}</th>
+                <th>{{ i18n.transaction.dueDate }}</th>
+                <th>{{ i18n.general.status }}</th>
+                <th class="amount">{{ i18n.transaction.amount }}</th>
+                @if (hasActions) {
+                  <th class="actions"></th>
+                }
+              </thead>
+            }
+            <tbody>
+              @for (installment of transaction.installments; track installment) {
+                <tr
+                  [ngClass]="{ 'cursor-pointer': path(installment) }"
+                  (click)="path(installment) ? router.navigate(path(installment)) : null">
+                  <td>
+                    <maybe-link [link]="path(installment)">
+                      {{ installment.number }}
+                    </maybe-link>
+                  </td>
+                  <td>
+                    <maybe-link [link]="path(installment)">
+                      {{ installment.dueDate | date }}
+                    </maybe-link>
+                  </td>
+                  <td>
+                    <maybe-link [link]="path(installment)">
+                      {{ installmentStatus(installment.status) }}
+                    </maybe-link>
+                  </td>
+                  <td class="text-right">
+                    <maybe-link [link]="path(installment)">
+                      {{ installment.amount | currency : transaction.currency }}
+                    </maybe-link>
+                  </td>
+                  @if (hasActions) {
+                    <td class="actions actions-multiple">
+                      @if (installment.canProcess) {
+                        <button
+                          type="button"
+                          [tooltip]="i18n.transaction.processInstallment"
+                          class="btn btn-icon align-items-center"
+                          (click)="processInstallment(installment)">
+                          <icon [icon]="SvgIcon.Play"></icon>
+                        </button>
+                      }
+                      @if (installment.canSettle) {
+                        <button
+                          type="button"
+                          [tooltip]="i18n.transaction.settleInstallment"
+                          class="btn btn-icon align-items-center"
+                          [ngClass]="{ 'ml-2': installment.canProcess }"
+                          (click)="settleInstallment(installment)">
+                          <icon [icon]="SvgIcon.Check2"></icon>
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        @if (showNewPaymentButton()) {
+          <actions forceRow>
+            <action-button (action)="navigateToPerformNew()" [label]="i18n.transaction.doneNew"> </action-button>
+            @if (canAddReceiverToContacts$ | async) {
+              <action-button
+                outline
+                (action)="addReceiverToContacts()"
+                [label]="i18n.transaction.doneAddReceiverToContacts">
+              </action-button>
+            }
+          </actions>
+        }
+        @if ((transaction.occurrences || []).length > 0) {
+          <h2 class="border-0 mt-4">
+            {{ i18n.transaction.occurrences }}
+          </h2>
+          <table class="table table-hover cursor-pointer">
+            @if (layout.gtxs$ | async) {
+              <thead>
+                <th>{{ i18n.transaction.installmentNumber }}</th>
+                <th>{{ i18n.general.date }}</th>
+                <th>{{ i18n.general.status }}</th>
+                <th class="text-right">{{ i18n.transaction.amount }}</th>
+                @if (hasActions) {
+                  <th class="actions"></th>
+                }
+              </thead>
+            }
+            <tbody>
+              @for (occurrence of transaction.occurrences; track occurrence) {
+                <tr
+                  [ngClass]="{ 'cursor-pointer': path(occurrence) }"
+                  (click)="path(occurrence) ? router.navigate(path(occurrence)) : null">
+                  <td>
+                    <maybe-link [link]="path(occurrence)">
+                      {{ occurrence.number }}
+                    </maybe-link>
+                  </td>
+                  <td>
+                    <maybe-link [link]="path(occurrence)">
+                      {{ occurrence.dueDate | date }}
+                    </maybe-link>
+                  </td>
+                  <td>
+                    <maybe-link [link]="path(occurrence)">
+                      {{ installmentStatus(occurrence.status) }}
+                    </maybe-link>
+                  </td>
+                  <td class="text-right">
+                    <maybe-link [link]="path(occurrence)">
+                      {{ occurrence.amount | currency : transaction.currency }}
+                    </maybe-link>
+                  </td>
+                  @if (hasActions) {
+                    <td class="actions">
+                      @if (occurrence.canProcess) {
+                        <button
+                          type="button"
+                          [tooltip]="i18n.transaction.processFailedOccurrence"
+                          class="btn btn-icon align-items-center"
+                          (click)="processOccurrence(occurrence)">
+                          <icon [icon]="SvgIcon.Play"></icon>
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        @if (transaction.feesOnAuthorization?.fees?.length > 0) {
+          <h2 class="border-0 mt-4 mb-0">
+            {{ i18n.transaction.feesOnAuthorization }}
+          </h2>
+          @for (fee of transaction.feesOnAuthorization.fees; track fee) {
+            <h3>{{ fee.fee.name }}</h3>
+            <label-value [label]="i18n.transaction.amount">
+              {{ fee.amount | currency : fee.currency }}
+            </label-value>
+            <label-value [label]="i18n.transaction.type">
+              {{ fee.type.name }}
+            </label-value>
+            <label-value [label]="i18n.transaction.from">
+              @if (fee.from.user) {
+                <user-link [user]="fee.from.user"></user-link>
+              } @else {
+                {{ fee.from.type.name }}
+              }
+            </label-value>
+            @if (fee.from?.number) {
+              <label-value [label]="i18n.transaction.fromAccount">
+                {{ fee.from.number }}
+              </label-value>
+            }
+            <label-value [label]="i18n.transaction.to">
+              @if (fee.to.user) {
+                <user-link [user]="fee.to.user"> </user-link>
+              } @else {
+                {{ fee.to.type.name }}
+              }
+            </label-value>
+            @if (fee.to?.number) {
+              <label-value [label]="i18n.transaction.toAccount">
+                {{ fee.to.number }}
+              </label-value>
+            }
+          }
+        }
+      }
+    </page-content>
+  }
+</page-layout>
+

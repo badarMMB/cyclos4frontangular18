@@ -1,0 +1,235 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="filters"
+      [heading]="heading"
+      [mobileHeading]="mobileHeading"
+      [headingActions]="headingActions$ | async">
+      <div [formGroup]="form" class="filters-form">
+        <div class="row">
+          @if (data.user && !self) {
+            <div class="col-12 col-md-6">
+              <label-value [label]="i18n.general.user" kind="fieldView">
+                <user-link [user]="data.user"></user-link>
+              </label-value>
+            </div>
+            @if (layout.gtsm$) {
+              <div class="col-12 col-md-6"></div>
+            }
+          }
+          <div class="col-12 col-md-6">
+            <single-selection-field
+              formControlName="status"
+              [label]="i18n.general.status"
+              [fieldOptions]="statusOptions"
+              [emptyOption]="i18n.general.notApplied">
+            </single-selection-field>
+          </div>
+          @if (isPaymentRequest()) {
+            <div class="col-12 col-md-6">
+              <single-selection-field
+                formControlName="direction"
+                [label]="i18n.transaction.direction"
+                [emptyOption]="i18n.general.all">
+                <field-option value="credit" [text]="i18n.transaction.sent"> </field-option>
+                <field-option value="debit" [text]="i18n.transaction.received"> </field-option>
+              </single-selection-field>
+            </div>
+          }
+          @if (moreFilters$ | async) {
+            @if (hasTransactionNumber) {
+              <div class="col-12 col-md-6">
+                <input-field
+                  formControlName="transactionNumber"
+                  [mask]="transactionNumberPattern"
+                [label]="i18n.transaction.number"></input-field>
+              </div>
+            }
+            @if (data.accountTypes?.length > 1) {
+              <div class="col-12 col-md-6">
+                <single-selection-field
+                  formControlName="accountType"
+                  [label]="i18n.transaction.account"
+                  [emptyOption]="i18n.general.notApplied">
+                @for (at of data.accountTypes; track at) {
+                  <field-option [value]="at.id" [text]="at.name"></field-option>
+                }
+              </single-selection-field>
+            </div>
+          }
+          @if (usePreselectedPeriods && data.preselectedPeriods?.length > 0) {
+            <div class="col-12 col-md-6">
+              <single-selection-field formControlName="preselectedPeriod" [label]="i18n.general.period">
+                @for (period of data.preselectedPeriods; track period) {
+                  <field-option
+                    [id]="period['id']"
+                    [value]="period"
+                    [text]="period.name">
+                  </field-option>
+                }
+              </single-selection-field>
+            </div>
+          }
+          @if (
+            !usePreselectedPeriods || (form.value || (form.valueChanges | async))?.preselectedPeriod?.begin == null
+            ) {
+            <!-- Force a line break on sm and up -->
+            <div class="w-100 d-none d-sm-block"></div>
+            <div class="col-12 col-md-6">
+              <date-field
+                formControlName="periodBegin"
+                [label]="i18n.general.beginDate"
+                minDate="past5"
+                maxDate="today"
+                fieldSize="full">
+              </date-field>
+            </div>
+          }
+          @if (
+            !usePreselectedPeriods || (form.value || (form.valueChanges | async))?.preselectedPeriod?.end == null
+            ) {
+            <div
+              class="col-12 col-md-6">
+              <date-field
+                formControlName="periodEnd"
+                [label]="i18n.general.endDate"
+                minDate="past5"
+                maxDate="today"
+                fieldSize="full">
+              </date-field>
+            </div>
+          }
+          @if ((transferFilters$ | async).length > 0) {
+            <div class="col-12 col-md-6">
+              <single-selection-field
+                formControlName="transferFilter"
+                [label]="i18n.account.transferFilter"
+                [emptyOption]="i18n.general.notApplied">
+                @for (filter of transferFilters$.value; track filter) {
+                  <field-option
+                    [value]="filter"
+                    [id]="filter.id"
+                    [text]="filter.name">
+                  </field-option>
+                }
+              </single-selection-field>
+            </div>
+          }
+          <div class="col-12 col-md-6">
+            <user-field formControlName="user" [label]="i18n.general.user"> </user-field>
+          </div>
+          @for (f of fieldsInSearch; track f) {
+            <div class="col-12 col-md-6">
+              <custom-field-filter [field]="f" [formControl]="form.get('customFields').get(f.internalName)">
+              </custom-field-filter>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </page-content>
+  <results-layout
+    resultType="list"
+    [results]="results$ | async"
+    (update)="update($event)"
+    [toLink]="toLink"
+    [rendering$]="rendering$">
+    <mobile-result
+      *mobileResult="let row"
+      [avatarImage]="bankingHelper.avatarImage(row.related)"
+      [avatarIcon]="bankingHelper.avatarIcon(row.related)"
+      [date]="row.date"
+      [amount]="row.amount"
+      [currency]="currencies.get(row.currency)"
+      forceSign>
+      <div class="cell-text cell-main">
+        {{ isTicket() && hasTransactionNumber ? row.transactionNumber : bankingHelper.subjectName(row.related) }}
+      </div>
+    </mobile-result>
+    <table *resultTable class="table table-hover cursor-pointer">
+      <thead>
+        @if (!isExternalPayment() && !isTicket()) {
+          <th class="avatar"></th>
+        }
+        <th>{{ i18n.general.date }}</th>
+        @if (isTicket() && hasTransactionNumber) {
+          <th>{{ i18n.transaction.number }}</th>
+        }
+        @if (!isPaymentRequest() && !isTicket()) {
+          <th>
+            {{ isExternalPayment() ? i18n.transaction.to : i18n.transaction.fromTo }}
+          </th>
+        }
+        @if (isPaymentRequest()) {
+          <th>{{ i18n.transaction.senderOrReceiver }}</th>
+        }
+        @if (isPaymentRequest() || isExternalPayment() || isTicket()) {
+          <th>{{ i18n.general.status }}</th>
+        }
+        @if (!isExternalPayment() && !isTicket()) {
+          <th>{{ i18n.transaction.scheduling }}</th>
+        }
+        @for (field of fieldsInList; track field) {
+          <th>
+            {{ field.name }}
+          </th>
+        }
+        <th class="amount">{{ i18n.transaction.amount }}</th>
+      </thead>
+      <tbody>
+        @for (row of (results$ | async)?.results; track row) {
+          <tr (click)="router.navigate(bankingHelper.transactionPath(row))">
+            @if (!isExternalPayment() && !isTicket()) {
+              <td class="avatar">
+                <avatar [image]="bankingHelper.avatarImage(row.related)" [icon]="bankingHelper.avatarIcon(row.related)">
+                </avatar>
+              </td>
+            }
+            <td>
+              {{ row.date | date }}
+            </td>
+            @if (isTicket() && hasTransactionNumber) {
+              <td>{{ row.transactionNumber }}</td>
+            }
+            @if (!isTicket()) {
+              <td>
+                {{ isExternalPayment() ? row.toPrincipalValue : bankingHelper.subjectName(row.related) }}
+              </td>
+            }
+            @if (isPaymentRequest() || isExternalPayment() || isTicket()) {
+              <td>
+                {{ apiI18n.transactionStatus(row) }}
+              </td>
+            }
+            @if (!isExternalPayment() && !isTicket()) {
+              <td>
+                {{ bankingHelper.scheduling(row) }}
+              </td>
+            }
+            @for (field of fieldsInList; track field) {
+              <td>
+                <format-field-value
+                  [fields]="fieldsInList"
+                  [plainText]="true"
+                  [fieldName]="field.internalName"
+                  [object]="row">
+                </format-field-value>
+              </td>
+            }
+            <td
+              class="amount"
+              [ngClass]="{
+                'pb-0': layout.xxs$ | async,
+                positive: format.isPositive(row.amount),
+                negative: format.isNegative(row.amount)
+              }">
+              {{ row.amount | currency : currencies.get(row.currency) : true }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </results-layout>
+}
+</page-layout>
+

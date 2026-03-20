@@ -1,0 +1,32 @@
+@if (label) {
+  <label-value [formField]="self">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  <div class="optional-agreements">
+    @for (agreement of agreements; track agreement; let i = $index) {
+      <div class="d-flex mb-2">
+        <div>
+          <boolean-field [formControl]="agreementsControl.at(i)"> </boolean-field>
+        </div>
+        <agreement-link class="ml-2 flex-grow-1" [agreement]="agreement"> </agreement-link>
+      </div>
+    }
+  </div>
+  <field-errors [control]="formControl"></field-errors>
+}
+
+<ng-template #widget>
+  <div class="optional-agreements">
+    @for (agreement of agreements; track agreement; let i = $index) {
+      <div class="d-flex mb-2">
+        <div>
+          <boolean-field [formControl]="agreementsControl.at(i)"> </boolean-field>
+        </div>
+        <agreement-link class="ml-2 flex-grow-1" [agreement]="agreement"> </agreement-link>
+      </div>
+    }
+  </div>
+
+  <field-errors [control]="formControl"></field-errors>
+</ng-template>

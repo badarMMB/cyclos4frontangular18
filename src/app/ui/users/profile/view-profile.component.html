@@ -1,0 +1,532 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      last
+      mode="viewForm"
+      [heading]="title"
+      [mobileHeading]="mobileTitle"
+      [headingActions]="headingActions$ | async">
+      @if (showActions$ | async) {
+        <div class="row no-gutters">
+          @if (bankingActions.length > 0) {
+            <div class="col-12 col-sm-6">
+              <h2 class="border-0 mb-2">{{ i18n.user.profile.banking }}</h2>
+              @for (action of bankingActions; track action) {
+                <ng-container *ngTemplateOutlet="actionTpl; context: { $implicit: action }"> </ng-container>
+              }
+            </div>
+          }
+          @if (managementActions.length > 0) {
+            <div class="col-12 col-sm-6">
+              <h2 class="border-0 mb-2">{{ i18n.user.profile.management }}</h2>
+              @for (action of managementActions; track action) {
+                <ng-container *ngTemplateOutlet="actionTpl; context: { $implicit: action }"> </ng-container>
+              }
+            </div>
+          }
+        </div>
+        <hr />
+      }
+      @if (imageEnabled && user.image && (layout.ltsm$ | async)) {
+        <profile-images
+          [image]="user.image"
+          [additionalImages]="user.additionalImages">
+        </profile-images>
+      }
+      <float-labels>
+        @if (imageEnabled && (layout.gtxs$ | async)) {
+          <profile-images
+            [image]="user.image"
+            [additionalImages]="user.additionalImages"
+            [icon]="SvgIcon.PersonCircle"
+            class="float-right">
+          </profile-images>
+        }
+        @if (showOperatorOwner) {
+          <label-value [label]="i18n.user.operatorOwner">
+            <user-link [user]="user.user"></user-link>
+          </label-value>
+        }
+        @if (user.groupSet) {
+          <label-value [label]="i18n.user.groupSet" [value]="user.groupSet.name"></label-value>
+        }
+        @if (user.group) {
+          <label-value [label]="i18n.user.group" [value]="user.group.name"></label-value>
+        }
+        @if (user.status) {
+          <label-value
+            [label]="i18n.general.status"
+          [value]="userHelper.userStatus(user.status)"></label-value>
+        }
+        @if (user.name) {
+          <label-value [label]="data.nameLabel || i18n.user.name" [value]="user.name"> </label-value>
+        }
+        @if (user.username) {
+          <label-value [label]="i18n.user.username" [value]="user.username"></label-value>
+        }
+        @if (mainBroker) {
+          <label-value [label]="i18n.user.mainBroker">
+            <user-link [user]="mainBroker"></user-link>
+          </label-value>
+        }
+        @if (otherBrokers?.length > 0) {
+          <label-value [label]="i18n.user.otherBrokers">
+            @for (otherBroker of otherBrokers; track otherBroker; let last = $last) {
+              <user-link [user]="otherBroker" [ngClass]="{ 'mb-1': !last }"></user-link>
+            }
+          </label-value>
+        }
+        @if (user.registrationDate) {
+          <label-value
+            [label]="i18n.user.registrationDate"
+          [value]="user.registrationDate | date"></label-value>
+        }
+        @if (user.invitedBy) {
+          <label-value [label]="i18n.user.invitedBy">
+            <user-link [user]="user.invitedBy"></user-link>
+          </label-value>
+        }
+        @if (showActivationDate) {
+          <label-value
+            [label]="i18n.user.activationDate"
+          [value]="user.activationDate | date"></label-value>
+        }
+        @if (user.email) {
+          <label-value [label]="i18n.user.email">
+            <a [href]="'mailto:' + user.email" class="link-with-icon">
+              <icon [icon]="SvgIcon.Envelope"></icon>
+              <span>{{ user.email }}</span>
+            </a>
+          </label-value>
+        }
+        @if (data.emailPendingValidation) {
+          <label-value [label]="i18n.user.emailPending">
+            {{ data.emailPendingValidation }}
+          </label-value>
+        }
+        @if (mobilePhone) {
+          <label-value [label]="i18n.phone.mobile">
+            <a [href]="'tel:' + mobilePhone.normalizedNumber" class="link-with-icon">
+              <icon [icon]="SvgIcon.Phone"></icon>
+              <span>{{ mobilePhone.number }}</span>
+            </a>
+          </label-value>
+        }
+        @for (phone of mobilePhones; track phone) {
+          <label-value [label]="phone.name">
+            <a [href]="'tel:' + phone.normalizedNumber" class="link-with-icon">
+              <icon [icon]="SvgIcon.Phone"></icon>
+              <span>{{ phone.number }}</span>
+            </a>
+          </label-value>
+        }
+        @if (landLinePhone) {
+          <label-value [label]="i18n.phone.landLine">
+            <a [href]="'tel:' + landLinePhone.normalizedNumber" class="link-with-icon">
+              <icon [icon]="SvgIcon.Telephone"></icon>
+              <span>{{ landLinePhone.number }}</span>
+            </a>
+          </label-value>
+        }
+        @for (phone of landLinePhones; track phone) {
+          <label-value [label]="phone.name">
+            <a [href]="'tel:' + phone.normalizedNumber" class="link-with-icon">
+              <icon [icon]="SvgIcon.Telephone"></icon>
+              <span>{{ phone.number }}</span>
+            </a>
+          </label-value>
+        }
+        @for (value of fieldsWithoutSection; track value) {
+          <custom-field-value [fieldValue]="value"></custom-field-value>
+        }
+        @for (key of fieldsWithSection.keys(); track key) {
+          <h3>{{ key.name }}</h3>
+          @if (key.informationText) {
+            <div class="mb-2">
+              {{ key.informationText }}
+            </div>
+          }
+          @for (value of fieldsWithSection.get(key); track value) {
+            <custom-field-value [fieldValue]="value"></custom-field-value>
+          }
+        }
+        @if (
+          data.online ||
+          (data.lastLogin && !data.online) ||
+          (data.lastLogin == null && data.online != null) ||
+          data.references?.count > 0 ||
+          data.paymentFeedbacks?.count > 0
+          ) {
+          <h3
+            class="mb-1">
+            {{ i18n.user.activities }}
+          </h3>
+        }
+        @if (data.online) {
+          <label-value [label]="i18n.user.connectionStatus" [value]="i18n.user.connected">
+          </label-value>
+        }
+        @if (data.lastLogin && !data.online) {
+          <label-value
+            [label]="i18n.user.connectionStatus"
+            [value]="i18n.user.disconnectedStatus(format.formatAsDateTime(data.lastLogin))">
+          </label-value>
+        }
+        @if (data.lastLogin == null && data.online != null) {
+          <label-value
+            [label]="i18n.user.connectionStatus"
+            [value]="i18n.user.neverLogged">
+          </label-value>
+        }
+        @if (data.references?.count > 0) {
+          <label-value [label]="i18n.user.profile.references">
+            <a [routerLink]="referencesPath()">
+              @if (data.references.count > 0) {
+                <rating-stats
+                  [score]="data.references.score"
+            [textRight]="
+              data.references.count > 1
+                ? i18n.reference.count.multi(data.references.count)
+                : i18n.reference.count.single
+            ">
+                </rating-stats>
+              }
+            </a>
+          </label-value>
+        }
+        @if (data.paymentFeedbacks?.count > 0) {
+          <label-value [label]="i18n.user.profile.feedbacks">
+            <a [routerLink]="feedbackPath()">
+              @if (data.paymentFeedbacks.count > 0) {
+                <rating-stats
+                  [score]="data.paymentFeedbacks.score"
+            [textRight]="
+              data.paymentFeedbacks.count > 1
+                ? i18n.feedback.count.multi(data.paymentFeedbacks.count)
+                : i18n.feedback.count.single
+            ">
+                </rating-stats>
+              }
+            </a>
+          </label-value>
+        }
+        @if (!isProjectProfile) {
+          @for (acc of data.accounts || []; track acc) {
+            @if (acc.status) {
+              <h3>{{ i18n.account.accountInformation(acc.type.name) }}</h3>
+              @if (acc.status.balance || acc.status.availableBalance) {
+                <label-value [label]="i18n.account.balance">
+                  @if (acc.status.balance) {
+                    {{ i18n.user.profile.balance(format.formatAsCurrency(acc.currency, acc.status.balance)) }}
+                  }
+                  @if (acc.status.availableBalance) {
+                    @if (acc.status.balance) {
+                      <br />
+                    }
+                    {{
+                    i18n.user.profile.availableBalance(format.formatAsCurrency(acc.currency, acc.status.availableBalance))
+                    }}
+                  }
+                </label-value>
+              }
+              @if (acc.status.transactionsAllTime) {
+                <label-value [label]="i18n.user.profile.activityInPeriod">
+                  {{ i18n.user.profile.transactions(acc.status.transactionsInPeriod) }}<br />
+                  {{ i18n.user.profile.totalReceived(format.formatAsCurrency(acc.currency, acc.status.receivedInPeriod))
+                  }}<br />
+                  {{ i18n.user.profile.totalPaid(format.formatAsCurrency(acc.currency, acc.status.paidInPeriod)) }}<br />
+                </label-value>
+                <label-value [label]="i18n.user.profile.activityAllTime">
+                  {{ i18n.user.profile.transactions(acc.status.transactionsAllTime) }}<br />
+                  {{ i18n.user.profile.totalReceived(format.formatAsCurrency(acc.currency, acc.status.receivedAllTime))
+                  }}<br />
+                  {{ i18n.user.profile.totalPaid(format.formatAsCurrency(acc.currency, acc.status.paidAllTime)) }}<br />
+                </label-value>
+              }
+            }
+          }
+        }
+      </float-labels>
+      @if (isProjectProfile) {
+        <div class="container funding-container">
+          <div class="main-card">
+            <h1>📊 Progression du Financement Global</h1>
+
+            <div class="global-amounts">
+              <div class="amount-item">
+                <span class="amount-label">💰 Total Collecté</span>
+                @let totalCollectedParts = budgetAmountParts(totalCollected, displayCurrency);
+                <span class="amount-value amount-collected amount-parts">
+                  @if (totalCollectedParts.prefix) {
+                    <span class="currency-prefix">{{ totalCollectedParts.prefix }}</span>
+                  }
+                  <span class="amount-number">{{ totalCollectedParts.value }}</span>
+                  @if (totalCollectedParts.suffix) {
+                    <span class="currency-suffix">{{ totalCollectedParts.suffix }}</span>
+                  }
+                </span>
+              </div>
+              <div class="amount-item amount-item-right">
+                <span class="amount-label">🎯 Objectif Total</span>
+                @let totalGoalParts = budgetAmountParts(totalGoal, displayCurrency);
+                <span class="amount-value amount-needed amount-parts">
+                  @if (totalGoalParts.prefix) {
+                    <span class="currency-prefix">{{ totalGoalParts.prefix }}</span>
+                  }
+                  <span class="amount-number">{{ totalGoalParts.value }}</span>
+                  @if (totalGoalParts.suffix) {
+                    <span class="currency-suffix">{{ totalGoalParts.suffix }}</span>
+                  }
+                </span>
+              </div>
+            </div>
+
+            <div class="total-bar">
+              <div class="total-fill" [style.width.%]="globalPercent">
+                <span>{{ globalPercentText }}</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="lines-title">📋 Lignes budgétaires</div>
+
+            <div class="budget-buttons">
+              @for (acc of projectAccounts; track acc.id; let index = $index) {
+                  @let collectedParts = compactBudgetAmountParts(accountCollected(acc), acc.currency);
+                  @let goalParts = compactBudgetAmountParts(accountGoal(acc), acc.currency);
+                  <button type="button" class="budget-btn" (click)="openModal(acc)">
+                    <div class="budget-btn-header">
+                      <span class="budget-btn-icon">{{ budgetIcon(acc) }}</span>
+                      <div class="budget-btn-title">
+                        <span class="budget-btn-label" [class.complete]="isAccountComplete(acc)">
+                          {{ budgetLabel(index) }}
+                        </span>
+                        {{ acc.type.name }}
+                      </div>
+                    </div>
+
+                    <div class="budget-btn-progress">
+                      <div class="budget-amount">
+                        <span class="budget-amount-icon">💰</span>
+                        <span class="budget-amount-collected budget-amount-text">
+                          @if (collectedParts.prefix) {
+                            <span class="currency-prefix">{{ collectedParts.prefix }}</span>
+                          }
+                          <span class="amount-number">{{ collectedParts.value }}</span>
+                          @if (collectedParts.suffix) {
+                            <span class="currency-suffix">{{ collectedParts.suffix }}</span>
+                          }
+                        </span>
+                      </div>
+                      <div class="budget-amount">
+                        <span class="budget-amount-icon">🎯</span>
+                        <span class="budget-amount-needed budget-amount-text">
+                          @if (goalParts.prefix) {
+                            <span class="currency-prefix">{{ goalParts.prefix }}</span>
+                          }
+                          <span class="amount-number">{{ goalParts.value }}</span>
+                          @if (goalParts.suffix) {
+                            <span class="currency-suffix">{{ goalParts.suffix }}</span>
+                          }
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="budget-btn-bar">
+                      <div
+                        class="budget-btn-fill"
+                        [class.complete]="isAccountComplete(acc)"
+                        [style.width.%]="accountPercentWidth(acc)">
+                      </div>
+                      <div class="budget-btn-percentage">{{ accountPercentText(acc) }}</div>
+                    </div>
+                  </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      <div class="d-flex flex-grow-1 flex-column">
+        <profile-addresses [addresses]="user.addresses"></profile-addresses>
+        <!-- Contact infos -->
+        @if (user.contactInfos?.length > 0) {
+          <h2 class="mt-3">{{ i18n.user.contactInfo }}</h2>
+          <div class="additional-contacts row no-gutters">
+            @for (contactInfo of user.contactInfos; track contactInfo; let first = $first) {
+              <div
+                class="text-center col-12 col-sm-6 col-md-4 col-lg-3 pb-3"
+                >
+                <div class="data-item">
+                  <avatar-lightbox size="140" [image]="contactInfo.image"> </avatar-lightbox>
+                </div>
+                <div class="data-item font-weight-bold">{{ contactInfo.name }}</div>
+                @if (contactInfo.email) {
+                  <a class="data-item" [href]="'mailto:' + contactInfo.email">
+                    {{ contactInfo.email }}
+                  </a>
+                }
+                <a class="data-item" [href]="'tel:' + contactInfo.normalizedMobilePhone">
+                  {{ contactInfo.mobilePhone }}
+                </a>
+                <a class="data-item" [href]="'tel:' + contactInfo.normalizedLandLinePhone">
+                  {{ contactInfo.landLinePhone }}
+                </a>
+                @for (value of contactInfo.customValues; track value) {
+                  <div class="data-item">
+                    <format-field-value [fieldValue]="value"></format-field-value>
+                  </div>
+                }
+                @if (contactInfo.address) {
+                  <div class="data-item text-accent">
+                    <span class="inline-label">{{ i18n.user.contactInfoAtAddress }}</span>
+                    {{ contactInfo.address.name }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </page-content>
+  }
+</page-layout>
+
+@if (activeModal) {
+  @let activeCollectedParts = budgetAmountParts(accountCollected(activeModal), activeModal.currency);
+  @let activeGoalParts = budgetAmountParts(accountGoal(activeModal), activeModal.currency);
+  @let activeDeltaParts = modalDeltaParts(activeModal);
+  @let activeAvailableParts = budgetAmountParts(accountAvailableBalance(activeModal), activeModal.currency);
+  <div class="modal-overlay active" (click)="onModalOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div class="modal-badge" [class.complete]="isAccountComplete(activeModal)">
+            {{ budgetLabel(budgetIndex(activeModal)) }}
+            @if (isAccountComplete(activeModal)) {
+              <span> - ✅ Financé</span>
+            }
+          </div>
+          <div class="modal-title">
+            <span class="modal-title-icon">{{ budgetIcon(activeModal) }}</span>
+            <span>{{ activeModal.type?.name }}</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" (click)="closeModal()">×</button>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="modal-stat-box">
+          <div class="modal-stat-label">💰 Collecté</div>
+          <div class="modal-stat-value modal-stat-amount success">
+            @if (activeCollectedParts.prefix) {
+              <span class="currency-prefix">{{ activeCollectedParts.prefix }}</span>
+            }
+            <span class="amount-number">{{ activeCollectedParts.value }}</span>
+            @if (activeCollectedParts.suffix) {
+              <span class="currency-suffix">{{ activeCollectedParts.suffix }}</span>
+            }
+          </div>
+        </div>
+        <div class="modal-stat-box">
+          <div class="modal-stat-label">🎯 Objectif</div>
+          <div class="modal-stat-value modal-stat-amount primary">
+            @if (activeGoalParts.prefix) {
+              <span class="currency-prefix">{{ activeGoalParts.prefix }}</span>
+            }
+            <span class="amount-number">{{ activeGoalParts.value }}</span>
+            @if (activeGoalParts.suffix) {
+              <span class="currency-suffix">{{ activeGoalParts.suffix }}</span>
+            }
+          </div>
+        </div>
+        <div class="modal-stat-box">
+          <div class="modal-stat-label">📊 Progression</div>
+          <div class="modal-stat-value" [class.success]="isAccountComplete(activeModal)">
+            {{ accountPercentText(activeModal) }}
+          </div>
+        </div>
+        <div class="modal-stat-box">
+          <div class="modal-stat-label">
+            @if (isAccountComplete(activeModal)) {
+              <span>🎉 {{ modalDeltaLabel(activeModal) }}</span>
+            } @else {
+              <span>💸 {{ modalDeltaLabel(activeModal) }}</span>
+            }
+          </div>
+          <div class="modal-stat-value modal-stat-amount" [class.success]="isAccountComplete(activeModal)">
+            @if (activeDeltaParts.prefix) {
+              <span class="currency-prefix">{{ activeDeltaParts.prefix }}</span>
+            }
+            <span class="amount-number">{{ activeDeltaParts.value }}</span>
+            @if (activeDeltaParts.suffix) {
+              <span class="currency-suffix">{{ activeDeltaParts.suffix }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-progress-section">
+        <div class="modal-progress-title">Progression visuelle</div>
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [class.complete]="isAccountComplete(activeModal)"
+            [style.width.%]="accountPercentWidth(activeModal)">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-details">
+        <div class="modal-detail-item">
+          <span class="modal-detail-icon">💰</span>
+          <div class="modal-detail-text">
+            <strong>{{ activeModal.status?.transactionsInPeriod || 0 }} transaction(s)</strong> effectuée(s) au cours
+            des 30 derniers jours
+          </div>
+        </div>
+        <div class="modal-detail-item">
+          <span class="modal-detail-icon">📅</span>
+          <div class="modal-detail-text">
+            <strong>{{ activeModal.status?.transactionsAllTime || 0 }} transaction(s)</strong> au total depuis le
+            début du projet
+          </div>
+        </div>
+        <div class="modal-detail-item">
+          <span class="modal-detail-icon">ℹ️</span>
+          <div class="modal-detail-text">
+            {{ budgetDescription(activeModal) }}
+            @if (activeModal.status?.availableBalance) {
+              <span class="inline-amount">
+                Solde disponible :
+                @if (activeAvailableParts.prefix) {
+                  <span class="currency-prefix">{{ activeAvailableParts.prefix }}</span>
+                }
+                <span class="amount-number">{{ activeAvailableParts.value }}</span>
+                @if (activeAvailableParts.suffix) {
+                  <span class="currency-suffix">{{ activeAvailableParts.suffix }}</span>
+                }
+                .
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-action-buttons">
+        @if (!isAccountComplete(activeModal)) {
+          <button type="button" class="modal-button modal-button-primary" (click)="contribute(activeModal)">
+            💳 Contribuer
+          </button>
+        }
+        <button type="button" class="modal-button modal-button-secondary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+
+<ng-template #actionTpl let-action>
+  <div class="profile-action">
+    <heading-action-button class="heading-action-button" [action]="action"> </heading-action-button>
+  </div>
+</ng-template>

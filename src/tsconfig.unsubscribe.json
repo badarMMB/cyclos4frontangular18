@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/unsubscribe",
+    "types": []
+  },
+  "files": [
+    "unsubscribe/main.ts"
+  ],
+  "include": [
+    "*.d.ts"
+  ]
+}

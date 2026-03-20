@@ -1,0 +1,422 @@
+@import 'src/definitions';
+
+.dropdown-menu {
+  min-width: 100%;
+  max-height: 13rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  visibility: hidden;
+
+  .custom-checkbox {
+    margin-left: 0.6rem;
+
+    .custom-control-label {
+      padding-right: 0.2rem;
+
+      &:hover,
+      &:focus {
+        color: $list-group-hover-color;
+        background-color: $list-group-hover-bg;
+        text-decoration: none;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+}
+
+.dropdown-menu.show {
+  visibility: unset;
+}
+
+bs-dropdown-container {
+  z-index: 9999 !important;
+}
+
+alert .close {
+  font-size: 2rem !important;
+  padding: 0 !important;
+  top: 0.7rem !important;
+  right: 1rem !important;
+  width: auto !important;
+  height: auto !important;
+
+  span {
+    vertical-align: top;
+  }
+}
+
+.modal-form {
+  max-width: 460px;
+}
+
+.modal-form-small {
+  max-width: 300px;
+}
+
+.modal-form-medium {
+  max-width: 570px;
+}
+
+.modal-form-large {
+  max-width: 860px;
+}
+
+.toast {
+  border-color: $push-notification-border-color;
+
+  .toast-header {
+    color: $push-notification-title-color;
+    background-color: $push-notification-title-bg;
+    border-color: $push-notification-border-color;
+
+    icon {
+      color: $push-notification-icon-color;
+    }
+  }
+
+  .toast-body {
+    color: $push-notification-body-color;
+    background-color: $push-notification-body-bg;
+  }
+
+  button.close {
+    font-size: 1.4rem;
+    color: $push-notification-title-color;
+  }
+}
+
+.gt-sm {
+  .toast {
+    min-width: 20rem;
+  }
+}
+
+.alert {
+  font-size: 0.9rem;
+}
+
+.modal-dialog .lt-md .alert {
+  margin: 1rem;
+}
+
+.dropdown-toggle::after {
+  vertical-align: 0.15em;
+}
+
+.modal-dialog.notification {
+  .modal-content {
+    border: none !important;
+  }
+}
+
+.modal-dialog.modal-form {
+
+  h1 {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    margin: 0 -1rem 1rem -1rem;
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  actions {
+    margin: 1rem -1rem 0 -1rem;
+    padding: 1rem 1rem 0 1rem;
+  }
+
+  hr {
+    margin: 1rem -1rem;
+    padding: 0 1rem;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+}
+
+
+.modal-content {
+  max-height: 98vh;
+  overflow-y: auto;
+}
+
+@include media-breakpoint-up(md) {
+  .modal-content {
+    max-height: 94vh;
+  }
+}
+
+.modal-sticky {
+
+  .modal-content {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .modal-header,
+  .modal-footer {
+    background-color: $modal-content-bg;
+    position: sticky;
+    z-index: $zindex-modal + 1;
+  }
+
+  .modal-header {
+    top: 0;
+    padding-top: 1rem !important;
+  }
+
+  .modal-footer {
+    bottom: 0;
+    padding-bottom: 1rem !important;
+  }
+}
+
+body.dark {
+  .modal-sticky {
+
+    .modal-header,
+    .modal-footer {
+      background-color: $modal-content-bg-dark;
+      border-color: $border-color-dark;
+    }
+  }
+}
+
+// This is actually used to show generated password values
+notification data {
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.2rem;
+}
+
+// Force navigation on lightbox to be always visible
+.lb-prev,
+.lb-next {
+  opacity: 0.7 !important;
+}
+
+body.dark {
+  .modal-content {
+    color: $modal-content-color-dark;
+    background-color: $modal-content-bg-dark;
+    border: $modal-content-border-color-dark;
+  }
+
+  .dropdown-menu {
+    color: $dropdown-color-dark;
+    background-color: $dropdown-bg-dark;
+    border-color: $dropdown-border-color-dark;
+
+    .custom-checkbox {
+
+      .custom-control-label:hover,
+      .custom-control-label:focus {
+        color: $list-group-hover-color-dark;
+        background-color: $list-group-hover-bg-dark;
+        text-decoration: none;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    }
+
+  }
+
+  .dropdown-item {
+    color: $dropdown-link-color-dark;
+
+    @include hover-focus {
+      color: $dropdown-link-hover-color-dark;
+      @include gradient-bg($dropdown-link-hover-bg-dark);
+    }
+
+    &.active,
+    &:active {
+      color: $dropdown-link-active-color-dark;
+      @include gradient-bg($dropdown-link-active-bg-dark);
+    }
+  }
+
+  .toast {
+    border-color: $push-notification-border-color-dark;
+
+    .toast-header {
+      color: $push-notification-title-color-dark;
+      background-color: $push-notification-title-bg-dark;
+      border-color: $push-notification-border-color-dark;
+
+      icon {
+        color: $push-notification-icon-color-dark;
+      }
+    }
+
+    .toast-body {
+      color: $push-notification-body-color-dark;
+      background-color: $push-notification-body-bg-dark;
+    }
+
+    button.close {
+      color: $push-notification-title-color-dark;
+    }
+  }
+}
+
+not-found {
+  margin: 1rem;
+}
+
+@include media-breakpoint-up(md) {
+  not-found {
+    margin: 0 1.5rem 0 1.5rem;
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+notification {
+  display: block;
+
+  .alert {
+    margin: 0rem !important;
+    padding: 0.4rem;
+  }
+
+  icon {
+    margin-bottom: 0.4rem;
+  }
+
+  .close {
+    width: auto;
+  }
+
+  .notification-icon {
+    display: flex;
+  }
+
+  .notification-message {
+    margin: 0 1rem;
+    text-align: center;
+    text-align: start;
+  }
+}
+
+@include media-breakpoint-up(xs) {
+  notification {
+    .alert {
+      padding: 0.75rem 1.25rem;
+    }
+
+    icon {
+      margin-bottom: 0;
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+push-notification {
+  width: 100%;
+  margin-bottom: 0.5rem;
+
+  a {
+    color: $body-color !important;
+  }
+
+  .subject {
+    font-weight: $font-weight-bold;
+    flex-grow: 1;
+    padding: 0 0.5rem;
+  }
+
+  .toast {
+    max-width: 100%;
+  }
+
+  .toast-body {
+    display: none;
+  }
+
+  .close {
+    cursor: pointer;
+  }
+}
+
+@include media-breakpoint-up(sm) {
+  push-notification {
+    max-width: 20rem;
+
+    .toast-body {
+      max-height: 6rem;
+      overflow: auto;
+      display: block;
+    }
+  }
+}
+
+body.dark push-notification {
+  a {
+    color: $body-color-dark !important;
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+push-notifications {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  z-index: $zindex-tooltip;
+}
+
+@include media-breakpoint-up(sm) {
+  push-notifications {
+    left: unset;
+    right: 0.5rem;
+    width: auto;
+  }
+}
+
+///////////////////////////////////////////////////////////
+
+snack-bar {
+  opacity: 0;
+  min-width: 10rem;
+  width: 90%;
+  background-color: $snack-bar-bg;
+  color: $snack-bar-color;
+  text-align: center;
+  border-top-left-radius: 0.2rem;
+  border-top-right-radius: 0.2rem;
+  padding: 1rem 2rem;
+  position: fixed;
+  z-index: 9999;
+  /* Ensure it's always at front (e.g modal dialog uses z-index:1050 */
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 100%);
+  transition: transform 0.3s, opacity 0.3s;
+  cursor: pointer;
+}
+
+@include media-breakpoint-up(sm) {
+  snack-bar {
+    width: auto;
+  }
+}
+
+body.dark snack-bar {
+  background-color: $snack-bar-bg-dark;
+  color: $snack-bar-color-dark;
+}
+
+///////////////////////////////////////////////////////////
+
+capture-camera {
+  .camera-container {
+    flex-grow: 1;
+    width: 100%;
+    min-height: 20rem;
+  }
+}

@@ -1,0 +1,67 @@
+@if (label) {
+  <label-value [formField]="self" [informationText]="informationText">
+    <ng-container *ngTemplateOutlet="widget"></ng-container>
+  </label-value>
+} @else {
+  @for (category of categories | async; track category; let firstCat = $first) {
+    @if (category.name) {
+      <div class="font-weight-bold" [ngClass]="{ 'mt-3': !firstCat }">{{ category.name }}</div>
+    }
+    <div class="input-group-container" [ngClass]="{ horizontal, 'no-category': category.name }">
+      @for (option of category.options | async; track option; let firstOpt = $first; let last = $last) {
+        <div
+          #check
+          class="custom-control custom-checkbox d-inline-flex mr-3 align-content-center"
+          [ngClass]="{ 'mt-1': !(firstCat && !category.name && firstOpt) || horizontal }"
+          (click)="toggle(option.value); $event.preventDefault(); $event.stopPropagation()"
+          (keydown.space)="$event.preventDefault(); $event.stopPropagation()"
+          (keyup.enter)="toggle(option.value); $event.preventDefault(); $event.stopPropagation()">
+          <input
+            type="checkbox"
+            [name]="name"
+            class="custom-control-input"
+            [id]="id + '_' + option.value"
+            [value]="option.value"
+            [checked]="isSelected(option)"
+            [disabled]="option.disabled" />
+          <label class="custom-control-label" [for]="id + '_' + option.value">
+            {{ option.text }}
+          </label>
+        </div>
+      }
+    </div>
+  }
+  <field-errors [control]="formControl"></field-errors>
+}
+
+<ng-template #widget>
+  @for (category of categories | async; track category; let firstCat = $first) {
+    @if (category.name) {
+      <div class="font-weight-bold" [ngClass]="{ 'mt-3': !firstCat }">{{ category.name }}</div>
+    }
+    <div class="input-group-container" [ngClass]="{ horizontal, 'no-category': category.name }">
+      @for (option of category.options | async; track option; let firstOpt = $first; let last = $last) {
+        <div
+          #check
+          class="custom-control custom-checkbox d-inline-flex mr-3 align-content-center"
+          [ngClass]="{ 'mt-1': !(firstCat && !category.name && firstOpt) || horizontal }"
+          (click)="toggle(option.value); $event.preventDefault(); $event.stopPropagation()"
+          (keydown.space)="$event.preventDefault(); $event.stopPropagation()"
+          (keyup.enter)="toggle(option.value); $event.preventDefault(); $event.stopPropagation()">
+          <input
+            type="checkbox"
+            [name]="name"
+            class="custom-control-input"
+            [id]="id + '_' + option.value"
+            [value]="option.value"
+            [checked]="isSelected(option)"
+            [disabled]="option.disabled" />
+          <label class="custom-control-label" [for]="id + '_' + option.value">
+            {{ option.text }}
+          </label>
+        </div>
+      }
+    </div>
+  }
+  <field-errors [control]="formControl"></field-errors>
+</ng-template>

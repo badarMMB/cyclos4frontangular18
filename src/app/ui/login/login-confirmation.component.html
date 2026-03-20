@@ -1,0 +1,30 @@
+<page-layout [ready]="data$ | async" size="medium" hideMenu>
+  @if (passwordInput) {
+    <page-content
+      layout="centered"
+      [heading]="i18n.login.titleConfirmation"
+      [mobileHeading]="i18n.login.mobileTitleConfirmation">
+      <confirmation-password
+        focused
+        [formControl]="control"
+        [passwordInput]="passwordInput"
+        [createDeviceConfirmation]="createDeviceConfirmation"
+        (showSubmit)="showSubmit$.next($event)"
+        (confirmed)="submit($event)"
+        [alertMessage]="i18n.login.confirmationText">
+      </confirmation-password>
+      <actions forceRow>
+        @if (showSubmit$ | async) {
+          <action-button
+            [disabled]="!canConfirm || (requesting$ | async)"
+            (action)="submit()"
+            [label]="i18n.general.submit">
+          </action-button>
+        } @else {
+          &nbsp;
+        }
+        <action-button outline (action)="cancel()" [label]="i18n.general.cancel"> </action-button>
+      </actions>
+    </page-content>
+  }
+</page-layout>

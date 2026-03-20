@@ -1,0 +1,11 @@
+<div class="toolbar">
+  <div class="d-flex justify-content-start flex-grow-1">
+    @for (action of leftHeadingActions; track action) {
+      <heading-action-button [action]="action"></heading-action-button>
+    }
+  </div>
+
+  @for (action of rightHeadingActions; track action) {
+    <heading-action-button [action]="action"></heading-action-button>
+  }
+</div>

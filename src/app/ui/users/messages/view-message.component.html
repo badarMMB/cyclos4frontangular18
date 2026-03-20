@@ -1,0 +1,101 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      mode="viewForm"
+      [heading]="i18n.message.title.details"
+      [mobileHeading]="i18n.message.mobileTitle.details"
+      [headingActions]="headingActions$ | async">
+      <label-value [label]="i18n.general.date">
+        {{ data.date | dateTime }}
+      </label-value>
+      @if (data.category) {
+        <label-value [label]="i18n.general.category" [value]="data.category.name"> </label-value>
+      }
+      @if (data.kind === MessageKind.OUTGOING) {
+        @if (data.destination === MessageDestinationEnum.USER) {
+          <label-value [label]="i18n.message.sentTo">
+            @for (user of data.toUsers; track user; let last = $last) {
+              <user-link [ngClass]="{ 'mb-2': !last }" [user]="user">
+              </user-link>
+            }
+          </label-value>
+        }
+        @if (data.destination === MessageDestinationEnum.BROKERED) {
+          <label-value
+            [label]="i18n.message.sentTo"
+            [value]="i18n.message.sendToBrokered">
+          </label-value>
+        }
+        @if (data.destination === MessageDestinationEnum.GROUP) {
+          <label-value
+            [label]="i18n.message.sentTo"
+            [value]="groups.join(', ')">
+          </label-value>
+        }
+        @if (data.destination === MessageDestinationEnum.SYSTEM) {
+          <label-value
+            [label]="i18n.message.sentTo"
+            [value]="dataForFrontendHolder.dataForUi.applicationUsername">
+          </label-value>
+        }
+        @if (dataForFrontendHolder.role === RoleEnum.ADMINISTRATOR) {
+          <label-value
+            [label]="i18n.message.sentBy"
+            [value]="data.sentBy.display">
+          </label-value>
+        }
+      }
+      @if (data.kind === MessageKind.INCOMING) {
+        @if (data.fromOwnerKind === MessageOwnerEnum.SYSTEM) {
+          <label-value
+            [label]="i18n.message.from"
+            [value]="dataForFrontendHolder.dataForUi.applicationUsername">
+          </label-value>
+        }
+        @if (data.fromOwnerKind === MessageOwnerEnum.USER) {
+          <label-value [label]="i18n.message.from">
+            <user-link [user]="data.fromOwner"> </user-link>
+          </label-value>
+        }
+      }
+      <hr />
+      @if (data.subject) {
+        <h3>{{ data.subject }}</h3>
+      }
+      <rich-text-container autoHeight [value]="data.body"> </rich-text-container>
+      @if ((data.replies || []).length > 1) {
+        <hr />
+        <h3>{{ i18n.message.replies }}</h3>
+        <table class="table table-hover">
+          @if (layout.gtxs$ | async) {
+            <thead>
+              <th class="avatar"></th>
+              <th>{{ i18n.message.subject }}</th>
+              <th>{{ i18n.general.date }}</th>
+            </thead>
+          }
+          <tbody>
+            @for (message of data.replies; track message) {
+              <tr
+              [ngClass]="{
+                'cursor-pointer': path(message),
+                'font-weight-bold': isCurrent(message)
+              }"
+                (click)="path(message) ? router.navigate(path(message)) : null">
+                <td>
+                  <icon [icon]="message.kind === MessageKind.INCOMING ? SvgIcon.ArrowLeft : SvgIcon.ArrowRight"> </icon>
+                </td>
+                <td>
+                  {{ message.subject }}
+                </td>
+                <td>
+                  {{ message.date | dateTime }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </page-content>
+  }
+</page-layout>

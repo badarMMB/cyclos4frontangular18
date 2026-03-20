@@ -1,0 +1,99 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Injector,
+  Input,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
+import { UntypedFormControl, Validators } from '@angular/forms';
+import { CodeVerificationStatusEnum, PhoneEditWithId } from 'app/api/models';
+import { PhonesService } from 'app/api/services/phones.service';
+import { BaseComponent } from 'app/shared/base.component';
+import { validateBeforeSubmit } from 'app/shared/helper';
+import { InputFieldComponent } from 'app/shared/input-field.component';
+import { BsModalRef } from 'ngx-bootstrap/modal';
+import { BehaviorSubject } from 'rxjs';
+
+/**
+ * Form used to verify a phone
+ */
+@Component({
+  selector: 'verify-phone',
+  templateUrl: 'verify-phone.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class VerifyPhoneComponent extends BaseComponent implements OnInit {
+  @Input() phone: PhoneEditWithId;
+  @Output() verified = new EventEmitter<boolean>();
+
+  code: UntypedFormControl;
+  message$ = new BehaviorSubject('');
+  disabled = false;
+
+  @ViewChild('codeField', { static: true }) codeField: InputFieldComponent;
+
+  constructor(injector: Injector, public modalRef: BsModalRef, private phonesService: PhonesService) {
+    super(injector);
+
+    this.code = this.formBuilder.control(null, Validators.required);
+  }
+
+  ngOnInit() {
+    super.ngOnInit();
+    this.message = this.i18n.phone.verify.message;
+  }
+
+  /**
+   * Sends the verification code
+   */
+  sendCode() {
+    this.addSub(
+      this.phonesService.sendPhoneVerificationCode({ idOrNumber: this.phone.id }).subscribe(phoneNumber => {
+        this.message = this.i18n.phone.verify.done(phoneNumber);
+        this.code.setValue(null);
+        this.codeField.focus();
+      })
+    );
+  }
+
+  private set message(message: string) {
+    this.message$.next(message);
+  }
+
+  get disableLabel(): (remainingSeconds: number) => string {
+    return remainingSeconds => this.i18n.phone.verify.sendDisabled(remainingSeconds);
+  }
+
+  /**
+   * Performs the phone verification
+   */
+  verify() {
+    if (!validateBeforeSubmit(this.code)) {
+      return;
+    }
+    this.addSub(
+      this.phonesService
+        .verifyPhone({
+          idOrNumber: this.phone.id,
+          code: this.code.value
+        })
+        .subscribe(status => {
+          switch (status) {
+            case CodeVerificationStatusEnum.SUCCESS:
+              this.disabled = true;
+              this.verified.emit(true);
+              break;
+            case CodeVerificationStatusEnum.MAX_ATTEMPTS_REACHED:
+              this.notification.error(this.i18n.phone.error.verify.maxAttempts);
+              break;
+            default:
+              this.notification.error(this.i18n.phone.error.verify.invalid);
+              break;
+          }
+        })
+    );
+  }
+}

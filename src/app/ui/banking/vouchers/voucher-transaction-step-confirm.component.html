@@ -1,0 +1,57 @@
+@if (!self) {
+  <user-info [user]="preview.user"></user-info>
+  <hr />
+}
+
+<div class="d-flex flex-grow-1 flex-column">
+  <div [ngClass]="{ 'd-flex flex-row-reverse justify-content-between': (layout.gtsm$ | async) && preview.type.image }">
+    @if (preview.type.image) {
+      <div
+        class="image d-flex justify-content-center mt-2 mb-4"
+        [ngClass]="{ 'flex-grow-1': !preview.type.voucherDescription }">
+        <avatar-lightbox size="160" imageSize="200" [image]="preview.type.image"> </avatar-lightbox>
+      </div>
+    }
+    @if (preview.type.voucherDescription) {
+      <div class="break-nl">{{ preview.type.voucherDescription }}</div>
+    }
+  </div>
+  <hr class="mt-3" />
+  <label-value [label]="i18n.voucher.voucher" [value]="preview.type.voucherTitle" kind="fieldView"> </label-value>
+  @if (data && data.type.allowPartialRedeems && balance) {
+    <label-value
+      [label]="i18n.voucher.redeem.voucherBalance"
+      [value]="balance | currency : currency">
+    </label-value>
+  }
+  <label-value
+    [label]="
+      data && data.type.allowPartialRedeems ? i18n.voucher.redeem.amountToRedeem : i18n.voucher.transaction.amount
+    "
+    [value]="preview.amount | currency : currency">
+  </label-value>
+  @if (topUp?.email) {
+    <label-value
+      [label]="pinIsSent ? i18n.voucher.topUp.sendPinBy : i18n.voucher.topUp.sendNotificationsBy"
+      [value]="i18n.general.sendMedium.email">
+    </label-value>
+    <label-value [label]="i18n.user.email" [value]="topUp.email"> </label-value>
+  }
+  @if (topUp?.mobilePhone) {
+    <label-value
+      [label]="pinIsSent ? i18n.voucher.topUp.sendPinBy : i18n.voucher.topUp.sendNotificationsBy"
+      [value]="i18n.general.sendMedium.sms">
+    </label-value>
+    <label-value [label]="i18n.phone.mobile" [value]="topUpPreview.formattedMobilePhone"> </label-value>
+  }
+  @if (topUpPreview?.owner) {
+    <label-value [label]="i18n.voucher.owner" [value]="topUpPreview.owner.display">
+    </label-value>
+  }
+  @for (fv of topUpPreview?.voucherCustomValues; track fv) {
+    <custom-field-value [fieldValue]="fv"> </custom-field-value>
+  }
+  @for (fv of preview.paymentCustomValues; track fv) {
+    <custom-field-value [fieldValue]="fv"> </custom-field-value>
+  }
+</div>

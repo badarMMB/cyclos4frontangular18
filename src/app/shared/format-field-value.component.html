@@ -1,0 +1,67 @@
+@if (hasValue$ | async) {
+  @if (directValue) {
+    @if (showCountdownTimer) {
+      <countdown-timer [targetDate]="countdownTargetDate"></countdown-timer>
+    } @else if (!link && !externalLink && !isLinkedUser()) {
+      {{ value }}
+    }
+    @if (isLinkedUser()) {
+      <user-link [user]="fieldValue.userValue" hideIcon></user-link>
+    }
+    @if (!isLinkedUser() && link) {
+      <a [routerLink]="link">{{ value }}</a>
+    }
+    @if (externalLink) {
+      <a [href]="externalLink">{{ value }}</a>
+    }
+  }
+  @if (type === CustomFieldTypeEnum.TEXT) {
+    <div class="break-nl" [ngClass]="{ 'd-inline': inline }">{{ value }}</div>
+  }
+  @if (type === CustomFieldTypeEnum.RICH_TEXT) {
+    @if (isMapUsersField) {
+      <map-users [field]="field" [fieldValue]="fieldValue"></map-users>
+    } @else {
+      <rich-text-container [value]="value"> </rich-text-container>
+    }
+  }
+  @if (type === CustomFieldTypeEnum.SINGLE_SELECTION || type === CustomFieldTypeEnum.MULTI_SELECTION) {
+    @for (pv of value; track pv; let last = $last) {
+      <span>
+        @if (pv.category) {
+          <span>{{ pv.category.name }} - </span>
+          }{{ pv.value + (last ? '' : ', ') }}
+        </span>
+      }
+    }
+    @if (type === CustomFieldTypeEnum.FILE && (value || []).length > 0) {
+      @for (file of value; track file; let last = $last) {
+        <a
+          [href]="appendAuth(file.url)"
+          [type]="file.contentType"
+          target="_blank"
+          (click)="downloadFile($event, file)"
+          [download]="file.name"
+          >{{ file.name }}</a
+          >
+          @if (!last) {
+            ,
+          }
+        }
+      }
+      @if (type === CustomFieldTypeEnum.IMAGE && (value || []).length > 0) {
+        <div class="flex-wrap" [ngClass]="{ 'd-flex': !inline, 'd-inline-flex': inline }">
+          @for (img of value; track img) {
+            <avatar-lightbox
+              class="d-block mr-1"
+              size="small"
+              [image]="img"
+              [additionalImages]="value">
+            </avatar-lightbox>
+          }
+        </div>
+      }
+    } @else {
+      <ng-content></ng-content>
+    }
+

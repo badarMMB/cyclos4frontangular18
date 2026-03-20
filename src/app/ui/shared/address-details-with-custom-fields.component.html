@@ -1,0 +1,7 @@
+<address-details [address]="address" [elementClass]="elementClass"> </address-details>
+@for (fieldValue of contactInfo?.customValues; track fieldValue) {
+  <div [ngClass]="elementClass">
+    <span class="inline-label">{{ fieldValue.field.name }}</span>
+    <format-field-value inline [fieldValue]="fieldValue"> </format-field-value>
+  </div>
+}

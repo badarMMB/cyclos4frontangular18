@@ -1,0 +1,241 @@
+@import 'src/definitions';
+
+table.table {
+  background-color: $table-bg;
+
+  &, td, th {
+    border-color: $table-border-color;
+  }
+
+  &, a, a:hover {
+    color: $table-color;
+  }
+
+  tr:hover {
+    background-color: $table-hover-bg;
+    &, a, a:hover {
+      color: $table-hover-color;
+    }
+  }
+
+  tr.no-hover {
+    background-color: $table-bg !important;
+  }
+
+  td {
+    vertical-align: middle;
+    border-top: none;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+  }
+  th {
+    color: $table-head-color;
+    background-color: $table-head-bg;
+    font-weight: $font-weight-bold;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+  }
+  th.no-border {
+    border-top: none;
+  }
+  td.no-border {
+    border-bottom: none;
+  }
+  .table-head-color {
+    color: $table-head-color;
+    font-weight: $font-weight-bold;
+  }
+  a, a:hover {
+    text-decoration: none !important;
+  }
+  avatar {
+    icon {
+      color: $table-icon-color;
+    }
+  }
+  th,
+  td {
+    padding: 0.8rem 0.4rem;
+  }
+  td.amount, th.amount {
+    padding-left: 0.1rem;
+    padding-right: 0.9rem;
+    text-align: right;
+  }
+  td.amount {
+    white-space: nowrap;
+  }
+
+  td.avatar {
+    padding-left: 0.9rem;
+    padding-right: 0.1rem;
+  }
+  td.avatar, th.avatar {
+    width: 3.7rem;
+    $avatar-size: 34px;
+    avatar {
+      display: table-cell !important;
+      icon {
+        width: $avatar-size !important;
+        height: $avatar-size !important;
+      }
+    }
+  }
+  th.actions, td.actions {
+    width: 1rem;
+  }
+  td.actions {
+    text-align: right;
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    white-space: nowrap;
+  }
+}
+
+.table-no-header {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+.table-fixed {
+  table-layout: fixed;
+}
+
+.lt-md table.table {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+table.compact-height {
+  td, th {
+    height: calc(#{$input-height}) !important;
+    padding: 0.2rem !important;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  table.table {
+    th {
+      vertical-align: middle;
+    }
+    td.amount, th.amount {
+      padding-right: 1rem;
+    }
+    td.avatar {
+      padding-left: 1rem;
+    }
+    td.actions {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+  table:not(.table-auto-height) {
+    td, th {
+      padding: 0.75rem;
+    }
+    td {
+      height: 3.8rem;
+    }
+    th {
+      height: 3.3rem;
+    }
+  }
+  table.small-height {
+    td {
+      height: 2.8rem !important;
+    }
+  }
+}
+
+
+.paginator-container {
+  border: none !important;
+}
+
+.tile-floating-avatar {
+  position: absolute;
+  right: 0.5rem;
+  top: 0;
+  transform: translateY(-75%)
+}
+
+.tile-floating-avatar avatar {
+  $avatar-size: 50px;
+  icon {
+    width: $avatar-size !important;
+    height: $avatar-size !important;
+    font-size: $avatar-size !important;
+    line-height: $avatar-size !important;
+  }
+  svg path {
+    width: $avatar-size !important;
+    height: $avatar-size !important;
+  }
+}
+
+.link {
+  color: $link-color !important;
+  cursor: pointer;
+}
+.link:hover {
+  text-decoration: underline !important;
+}
+.link-undecorated:hover {
+  text-decoration: none !important;
+}
+
+body.dark {
+  .table {
+    background-color: $table-bg-dark;
+
+    &, td, th {
+      border-color: $table-border-color-dark;
+    }
+    th {
+      color: $table-head-color-dark;
+      background-color: $table-head-bg-dark;
+    }
+
+    .table-head-color {
+      color: $table-head-color-dark;
+    }
+
+    &, a, a:hover {
+      color: $table-color-dark;
+    }
+
+    tr:hover {
+      background-color: $table-hover-bg-dark;
+      &, a, a:hover {
+        color: $table-hover-color-dark;
+      }
+    }
+
+    tr.no-hover {
+      background-color: $table-bg-dark !important;
+    }
+
+    th, td, thead th {
+      border-color: $table-border-color-dark;
+    }
+
+    .link {
+      color: $link-color-dark !important;
+    }
+
+    &.table-hover {
+      tbody tr {
+        @include hover {
+          color: $table-hover-color-dark;
+          background-color: $table-hover-bg-dark;
+        }
+      }
+    }
+    avatar {
+      icon {
+        color: $table-icon-color-dark;
+      }
+    }
+
+  }
+}

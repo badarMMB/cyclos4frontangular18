@@ -1,0 +1,46 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content [heading]="i18n.ad.title.history" [mobileHeading]="i18n.ad.mobileTitle.history">
+      @if (!seller) {
+        <label-value [label]="i18n.ad.seller">
+          <user-link [user]="data.seller"></user-link>
+        </label-value>
+      }
+      @if (!buyer) {
+        <label-value [label]="i18n.ad.buyer">
+          <user-link [user]="data.buyer"></user-link>
+        </label-value>
+      }
+    </page-content>
+    <results-layout [results]="data.history" [onClick]="onClick">
+      <mobile-result *mobileResult="let row">
+        <div class="cell-main">
+          {{ resolveStatusLabel(row) }}
+        </div>
+        <div class="cell-date">
+          {{ row.date | dateTime }}
+        </div>
+        <div class="cell-text">{{ i18n.general.by }} {{ row.by.display }}</div>
+      </mobile-result>
+      <table *resultTable class="table table-hover">
+        <thead>
+          <th>{{ i18n.general.date }}</th>
+          <th>{{ i18n.general.status }}</th>
+          <th>{{ i18n.general.by }}</th>
+          <th>{{ i18n.ad.remarks }}</th>
+        </thead>
+        <tbody>
+          @for (row of data.history; track row) {
+            <tr>
+              <td>{{ row.date | dateTime }}</td>
+              <td>{{ resolveStatusLabel(row) }}</td>
+              <td>{{ row.by.display }}</td>
+              <td>{{ row.remarks }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </results-layout>
+  }
+</page-layout>
+

@@ -1,0 +1,136 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      [heading]="i18n.user.title.operatorRegistration"
+      [mobileHeading]="i18n.user.mobileTitle.operatorRegistration"
+      last>
+      @if ((result$ | async) == null) {
+        <ng-container [formGroup]="form" autocomplete="off">
+          @if (!self) {
+            <label-value [label]="i18n.user.operatorOwner">
+              <user-link [user]="data.user"></user-link>
+            </label-value>
+          }
+          <!-- Operator group -->
+          @if (data.groups.length > 0) {
+            <single-selection-field
+              [label]="i18n.user.group"
+              formControlName="group"
+              [emptyOption]="i18n.user.operatorNoGroup">
+              @for (group of data.groups; track group) {
+                <field-option
+                  [value]="ApiHelper.internalNameOrId(group)"
+                  [id]="group.id"
+                  [internalName]="group.internalName"
+                  [text]="group.name">
+                </field-option>
+              }
+            </single-selection-field>
+          }
+          <!-- Basic profile fields-->
+          @if (canEdit('name')) {
+            <input-field formControlName="name" [label]="i18n.user.name" required></input-field>
+          }
+          @if (canEdit('username')) {
+            <input-field formControlName="username" [label]="i18n.user.username" required>
+          </input-field>
+        }
+        @if (canEdit('email')) {
+          @if (canEdit('email')) {
+            <input-field
+              formControlName="email"
+              [label]="i18n.user.email"
+              [required]="data.emailRequired">
+          </input-field>
+        }
+        @if (data.allowSetSendActivationEmail) {
+          <boolean-field
+            [label]="i18n.user.registration.skipActivationEmail"
+          formControlName="skipActivationEmail"></boolean-field>
+        }
+      }
+      <!-- Custom profile fields -->
+      @for (cf of data.customFields; track cf) {
+        <ng-container [formGroup]="form.get('customValues')">
+          @if (canEdit(cf)) {
+            <custom-field-input [field]="cf" [formControlName]="cf.internalName"> </custom-field-input>
+          }
+        </ng-container>
+      }
+      <!-- Mobile phone -->
+      @if (mobileAvailability !== 'disabled') {
+        <ng-container [formGroup]="mobileForm">
+          <input-field
+            [label]="i18n.phone.mobile"
+            [required]="mobileAvailability === 'required'"
+            formControlName="number"
+          [placeholder]="data.phoneConfiguration.mobileExample"></input-field>
+        </ng-container>
+      }
+      <!-- Land-line phone -->
+      @if (landLineAvailability !== 'disabled') {
+        <ng-container [formGroup]="landLineForm">
+          <input-field
+            [label]="i18n.phone.landLine"
+            [required]="data.phoneConfiguration.landLineAvailability === 'required'"
+            formControlName="number"
+            [placeholder]="data.phoneConfiguration.landLineExample">
+        </input-field>
+        @if (data.phoneConfiguration.extensionEnabled) {
+          <input-field
+            formControlName="extension"
+            fieldSize="tiny"
+          [label]="i18n.phone.extension"></input-field>
+        }
+      </ng-container>
+    }
+    <!-- Passwords-->
+    @for (pt of data.passwordTypes; track pt; let i = $index) {
+      <h2>{{ pt.name }}</h2>
+      <ng-container [formGroup]="passwordForms[i]">
+        @if (pt.description) {
+          <div class="mb-2">{{ pt.description }}</div>
+        }
+        @if (login.user) {
+          <boolean-field
+            formControlName="defined"
+          [label]="i18n.user.registration.passwordAssign"></boolean-field>
+        }
+        @if (passwordForms[i].get('defined').value) {
+          <input-field
+            required
+            formControlName="value"
+            type="password"
+            [label]="pt.name"
+          autocomplete="new-password"></input-field>
+          <input-field
+            required
+            formControlName="confirmationValue"
+            type="password"
+            autocomplete="new-password"
+            [label]="i18n.user.passwordConfirmation(pt.name)">
+        </input-field>
+        @if (pt.canForceChange) {
+          <boolean-field
+            formControlName="forceChange"
+            [label]="i18n.user.registration.passwordForceChange">
+          </boolean-field>
+        }
+      }
+    </ng-container>
+  }
+  <actions>
+    <action-button (action)="register()" [label]="i18n.general.submit"> </action-button>
+  </actions>
+</ng-container>
+} @else {
+  <p [innerHTML]="doneMessageHtml | trust"></p>
+  <actions forceRow>
+    <action-button (action)="reload()" [label]="i18n.user.operatorRegistrationAddAnother"> </action-button>
+    <action-button (action)="viewProfile()" [label]="i18n.user.registration.viewProfile"> </action-button>
+  </actions>
+}
+</page-content>
+}
+
+</page-layout>

@@ -1,0 +1,284 @@
+<label-value [label]="i18n.transaction.amount">
+  {{ transfer.amount | currency : transfer.currency }}
+</label-value>
+@if (showBy()) {
+  <label-value [label]="i18n.general.performedBy">
+    <user-link [user]="transfer.transaction.by"></user-link>
+  </label-value>
+}
+@if (transfer.transaction?.receivedBy) {
+  <label-value [label]="i18n.transaction.receivedBy">
+    <user-link [user]="transfer.transaction.receivedBy"></user-link>
+  </label-value>
+}
+<label-value [label]="i18n.general.date">
+  {{ transfer.date | dateTime }}
+</label-value>
+<label-value [label]="i18n.transaction.from">
+  @if (transfer.transaction?.fromName) {
+    <user-link [account]="transfer.from" [display]="transfer.transaction.fromName"></user-link>
+  } @else {
+    <user-link [account]="transfer.from"></user-link>
+  }
+</label-value>
+<label-value [label]="i18n.transaction.to">
+  @if (transfer.transaction?.toName) {
+    <user-link [account]="transfer.to" [display]="transfer.transaction.toName"></user-link>
+  } @else {
+    <user-link [account]="transfer.to"></user-link>
+  }
+</label-value>
+<label-value [label]="i18n.transaction.type">
+  {{ transfer.type.name }}
+</label-value>
+@if (transfer.accountFee) {
+  <label-value [label]="i18n.transaction.transferkind.accountFee">
+    {{ transfer.accountFee.name }}
+  </label-value>
+}
+@if (transfer.transferFee) {
+  <label-value [label]="i18n.transaction.transferkind.transferFee">
+    {{ transfer.transferFee.name }}
+  </label-value>
+}
+@if (transfer.transaction?.voucherTransaction; as voucherTransaction) {
+  <label-value
+    [label]="
+      voucherTransaction.kind === VoucherTransactionKind.REDEEM
+        ? i18n.transaction.voucherRedeemed
+        : i18n.transaction.voucherToppedUp
+    ">
+    <maybe-link
+      [link]="voucherTransaction.voucherId ? ['/banking', 'vouchers', 'view', voucherTransaction.voucherId] : null">
+      {{ voucherTransaction.token }}
+    </maybe-link>
+  </label-value>
+  <label-value [label]="i18n.voucher.voucher" [value]="voucherTransaction.type.voucherTitle"> </label-value>
+}
+@if (transfer.transaction?.channel) {
+  <label-value [label]="i18n.transaction.channel">
+    {{ transfer.transaction.channel.name }}
+  </label-value>
+}
+@if (transfer.transactionNumber) {
+  <label-value [label]="i18n.transaction.number">
+    {{ transfer.transactionNumber }}
+  </label-value>
+}
+@for (status of transfer.statuses; track status) {
+  <label-value [label]="status.flow.name">
+    {{ status.name }}
+  </label-value>
+}
+@for (value of transfer.transaction?.customValues; track value) {
+  <custom-field-value [fieldValue]="value"> </custom-field-value>
+}
+<!-- The description is sent from the server regardless there are bought vouchers or not. We ignore it in case of bought vouchers -->
+@if (!transfer.transaction?.boughtVouchers?.length && (transfer.description || transfer.transaction?.description)) {
+  <label-value
+    [label]="i18n.general.description"
+    valueFormat="break"
+    [value]="transfer.description || transfer.transaction?.description">
+  </label-value>
+}
+
+@if (transfer.chargedBackBy) {
+  <label-value [label]="i18n.transaction.chargedBackBy">
+    <a [routerLink]="path(transfer.chargedBackBy)">
+      {{ transfer.chargedBackBy.display }}
+    </a>
+  </label-value>
+}
+@if (transfer.chargebackOf) {
+  <label-value [label]="i18n.transaction.chargebackOf">
+    <a [routerLink]="path(transfer.chargebackOf)">
+      {{ transfer.chargebackOf.display }}
+    </a>
+  </label-value>
+}
+
+@if (lastAuthComment) {
+  <label-value
+    [label]="i18n.transaction.authorizationComments"
+    [value]="lastAuthComment"
+    valueFormat="break">
+  </label-value>
+}
+
+@if (showNewPaymentButton()) {
+  <actions forceRow>
+    <action-button (action)="navigateToPerformNew()" [label]="i18n.transaction.doneNew"> </action-button>
+    @if (canAddReceiverToContacts$ | async) {
+      <action-button
+        outline
+        (action)="addReceiverToContacts()"
+        [label]="i18n.transaction.doneAddReceiverToContacts">
+      </action-button>
+    }
+  </actions>
+}
+
+@if (transfer.transaction?.boughtVouchers?.length === 1 && transfer.transaction.boughtVouchers[0]; as voucher) {
+  @if (voucher.creationType === VoucherCreationTypeEnum.BOUGHT) {
+    <h2 class="mt-4">
+      {{ (layout.gtxs$ | async) ? i18n.transaction.title.boughtVoucher : i18n.transaction.mobileTitle.boughtVoucher }}
+    </h2>
+  }
+  @if (voucher.creationType === VoucherCreationTypeEnum.SENT) {
+    <h2 class="mt-4">
+      {{ (layout.gtxs$ | async) ? i18n.transaction.title.sentVoucher : i18n.transaction.mobileTitle.sentVoucher }}
+    </h2>
+  }
+  <voucher-details [voucher]="transfer.transaction.boughtVouchers[0]"> </voucher-details>
+  <actions>
+    <a class="btn btn-outline-primary" [routerLink]="voucherPath(voucher)">
+      {{ i18n.transaction.viewThisVoucher }}
+    </a>
+  </actions>
+}
+
+@if (transfer.transaction?.boughtVouchers?.length > 1) {
+  <h2 class="mt-4 mb-0">
+    {{ (layout.gtxs$ | async) ? i18n.transaction.title.boughtVouchers : i18n.transaction.mobileTitle.boughtVouchers }}
+  </h2>
+  <results-layout [results]="transfer.transaction.boughtVouchers" [toLink]="toVoucherLink">
+    <mobile-result *mobileResult="let row" [amount]="row.amount" [currency]="transfer.currency" [amountColor]="false">
+      <div class="cell-text">
+        {{ row.token }}
+      </div>
+    </mobile-result>
+    <table *resultTable class="table table-hover cursor-pointer">
+      <thead>
+        <th>{{ i18n.voucher.token }}</th>
+        <th>{{ i18n.general.status }}</th>
+        @if (hasVoucherExpirationDate) {
+          <th>{{ i18n.general.expirationDate }}</th>
+        }
+        <th class="text-right">{{ i18n.transaction.amount }}</th>
+        <th class="text-right">{{ i18n.voucher.balance }}</th>
+      </thead>
+      <tbody>
+        @for (row of transfer.transaction.boughtVouchers; track row) {
+          <tr
+            [tooltip]="row.token"
+            (click)="router.navigate(voucherPath(row))">
+            <td>
+              <a [routerLink]="voucherPath(row)">
+                {{ row.token }}
+              </a>
+            </td>
+            <td>
+              <a [routerLink]="voucherPath(row)">
+                {{ apiI18n.voucherStatus(row.status) }}
+              </a>
+            </td>
+            @if (hasVoucherExpirationDate) {
+              <td>
+                <a [routerLink]="voucherPath(row)">
+                  {{ row.expirationDate | dateTime }}
+                </a>
+              </td>
+            }
+            <td class="text-right">
+              <a [routerLink]="voucherPath(row)">
+                {{ row.amount | currency : transfer.currency }}
+              </a>
+            </td>
+            <td class="text-right">
+              <a [routerLink]="voucherPath(row)">
+                {{ row.balance | currency : transfer.currency }}
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </results-layout>
+}
+
+@if (transfer.parent; as parent) {
+  <h2 class="mt-4">
+    {{ (layout.gtxs$ | async) ? i18n.transaction.title.parentTransfer : i18n.transaction.mobileTitle.parentTransfer }}
+  </h2>
+  <transfer-simple-details [transfer]="parent"></transfer-simple-details>
+  <actions>
+    <a class="btn btn-outline-primary" [routerLink]="path(parent)">
+      {{ i18n.transaction.viewThisTransfer }}
+    </a>
+  </actions>
+}
+
+@if (transfer.children?.length === 1 && transfer.children[0]; as child) {
+  <h2 class="mt-4">
+    {{ (layout.gtxs$ | async) ? i18n.transaction.title.childTransfer : i18n.transaction.mobileTitle.childTransfer }}
+  </h2>
+  <transfer-simple-details [transfer]="child"></transfer-simple-details>
+  <actions>
+    <a class="btn btn-outline-primary" [routerLink]="path(child)">
+      {{ i18n.transaction.viewThisTransfer }}
+    </a>
+  </actions>
+}
+
+@if (transfer.children?.length > 1) {
+  <h2 class="mt-4 mb-0">
+    {{ (layout.gtxs$ | async) ? i18n.transaction.title.childTransfers : i18n.transaction.mobileTitle.childTransfers }}
+  </h2>
+  <results-layout [results]="transfer.children" [toLink]="toLink">
+    <mobile-result
+      *mobileResult="let row"
+      [date]="row.date"
+      [amount]="(row.from.user?.id === login.user?.id ? '-' : '') + row.amount"
+      [amountColor]="row.from.user?.id === login.user?.id"
+      [currency]="row.currency">
+      <div class="cell-text">
+        @if (row.from.user?.id !== login.user?.id) {
+          <div>
+            {{ i18n.transaction.from }}
+            <user-link [account]="row.from"></user-link>
+          </div>
+        }
+        <div>
+          @if (row.from.user?.id !== login.user?.id) {
+            {{ i18n.transaction.to }}
+          }
+          <user-link [account]="row.to"></user-link>
+        </div>
+      </div>
+    </mobile-result>
+    <table *resultTable class="table table-hover cursor-pointer">
+      <thead>
+        <th>{{ i18n.general.date }}</th>
+        <th>{{ i18n.transaction.from }}</th>
+        <th>{{ i18n.transaction.to }}</th>
+        <th class="text-right">{{ i18n.transaction.amount }}</th>
+      </thead>
+      <tbody>
+        @for (row of transfer.children; track row) {
+          <tr [tooltip]="row.description" (click)="router.navigate(path(row))">
+            <td>
+              <a [routerLink]="path(row)">
+                {{ row.date | date }}
+              </a>
+            </td>
+            <td>
+              <a [routerLink]="path(row)">
+                <user-link [account]="row.from"></user-link>
+              </a>
+            </td>
+            <td>
+              <a [routerLink]="path(row)">
+                <user-link [account]="row.to"></user-link>
+              </a>
+            </td>
+            <td class="text-right">
+              <a [routerLink]="path(row)">
+                {{ row.amount | currency : row.currency }}
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </results-layout>
+}

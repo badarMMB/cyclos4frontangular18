@@ -1,0 +1,149 @@
+<page-layout [ready]="data$ | async" size="large">
+  @if (data?.step) {
+    <ng-container *ngTemplateOutlet="step"></ng-container>
+  }
+  @if (data?.resultType) {
+    <ng-container *ngTemplateOutlet="result"></ng-container>
+  }
+</page-layout>
+
+<ng-template #step>
+  <page-content
+    [heading]="data.step.title"
+    [mobileHeading]="data.step.title"
+    [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+    last
+    [hideBack]="showBack">
+    @if ((updating$ | async) === false) {
+      @if (informationText) {
+        <alert type="info" class="mb-3">
+          <div [innerHTML]="informationText | trust"></div>
+        </alert>
+      }
+      <div class="flex-grow-1">
+        @if (data.step.kind === WizardStepKind.GROUP) {
+          <run-wizard-step-group [groups]="data.step.groups" [control]="group"></run-wizard-step-group>
+        }
+        @if (data.step.kind === WizardStepKind.IDENTITY_PROVIDER) {
+          <run-wizard-step-idp
+            [identityProviders]="data.step.identityProviders"
+            (continue)="continueWithProvider($event)">
+          </run-wizard-step-idp>
+        }
+        @if (data.step.kind === WizardStepKind.FORM_FIELDS && data.action !== WizardActionEnum.ALREADY_EXECUTED) {
+          @for (field of data.step.fields; track field) {
+            <run-wizard-step-field
+              [field]="field"
+              [data]="data"
+              [user]="user"
+              [emailValidation]="emailValidation"
+              [smsValidation]="smsValidation"
+              [mobilePhone]="mobilePhone"
+              [landLinePhone]="landLinePhone"
+              [defineAddress]="defineAddress"
+              [address]="address"
+              [defineContactInfo]="defineContactInfo"
+              [contactInfo]="contactInfo"
+              [customValues]="customValues"
+              [submitAction]="resolveSubmitAction()">
+            </run-wizard-step-field>
+          }
+        }
+        @if ([WizardStepKind.EMAIL_VERIFICATION, WizardStepKind.PHONE_VERIFICATION].includes(data.step.kind)) {
+          <run-wizard-step-verification [data]="data" [control]="verificationCode"></run-wizard-step-verification>
+        }
+
+        @if (transitions?.length > 0) {
+          <div class="d-flex flex-column mt-3 mt-md-4">
+            @for (t of transitions; track t) {
+              <action-button
+                type="button"
+                actionKind="primary"
+                class="centered-button"
+                (action)="transition(t)"
+                [disabled]="requesting$ | async"
+                [label]="t.label">
+              </action-button>
+            }
+          </div>
+        }
+      </div>
+      <actions forceRow>
+        @switch (data.action) {
+          @case (WizardActionEnum.FINISH) {
+            <action-button
+              (action)="resolveSubmitAction()()"
+              [disabled]="requesting$ | async"
+              [label]="i18n.general.finish">
+            </action-button>
+          }
+          @case (WizardActionEnum.EXTERNAL_REDIRECT) {
+            <action-button
+              [disabled]="requesting$ | async"
+              (action)="externalRedirect()"
+              [label]="i18n.general.next">
+            </action-button>
+          }
+          @default {
+            @if (singleTransition) {
+              <action-button
+                (action)="transition(singleTransition)"
+                [disabled]="requesting$ | async"
+                [label]="singleTransition.label">
+              </action-button>
+            } @else {
+              <span></span>
+            }
+          }
+        }
+        @if (data.stepCount != null) {
+          <div class="d-flex align-items-center justify-content-center py-2">
+            {{
+              i18n.wizard.currentStep({
+                current: data.stepNumber,
+                total: data.stepCount
+              })
+            }}
+          </div>
+        }
+        @if (showBack) {
+          <action-button
+            (action)="back()"
+            outline
+            [disabled]="requesting$ | async"
+            [label]="i18n.general.back">
+          </action-button>
+        } @else {
+          <div></div>
+        }
+      </actions>
+    }
+  </page-content>
+</ng-template>
+
+<ng-template #result>
+  <page-content
+    [heading]="resultTitle"
+    [mobileHeading]="mobileResultTitle"
+    [mode]="(layout.ltsm$ | async) ? 'fullHeight' : 'normal'"
+    last
+    hideBack>
+    @switch (data.resultType) {
+      @case (WizardResultTypeEnum.REGISTRATION) {
+        <p [innerHTML]="registrationMessage | trust"></p>
+        @if (registrationPrincipals) {
+          <p [innerHTML]="registrationPrincipals | trust"></p>
+        }
+        @if (registrationPasswords) {
+          <p>{{ registrationPasswords }}</p>
+        }
+      }
+      @case (WizardResultTypeEnum.PLAIN_TEXT) {
+        <div class="break-nl">{{ resultMessage }}</div>
+      }
+      @case (WizardResultTypeEnum.RICH_TEXT) {
+        <rich-text-container [value]="resultMessage"> </rich-text-container>
+      }
+    }
+  </page-content>
+</ng-template>

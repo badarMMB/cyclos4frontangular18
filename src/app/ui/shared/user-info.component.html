@@ -1,0 +1,18 @@
+@if (operator) {
+  @if (authHelper.isSelf(user.user)) {
+    <label-value [label]="i18n.user.operatorOwner" [kind]="kind">
+      <user-link [user]="user.user"></user-link>
+    </label-value>
+  }
+  <label-value [label]="i18n.general.operator" [kind]="kind">
+    <user-link [user]="user"></user-link>
+  </label-value>
+} @else {
+  @if (layout.gtxs$ | async) {
+    <label-value [label]="i18n.general.user" [kind]="kind">
+      <user-link [user]="user"></user-link>
+    </label-value>
+  } @else {
+    <user-link class="my-3" [user]="user"></user-link>
+  }
+}

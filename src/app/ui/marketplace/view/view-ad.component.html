@@ -1,0 +1,192 @@
+<page-layout [ready]="data$ | async">
+  @if (data) {
+    <page-content
+      last
+      mode="viewForm"
+      [heading]="title"
+      [mobileHeading]="i18n.ad.mobileTitle.details"
+      [headingActions]="headingActions$ | async">
+      @if (ad.image && (layout.ltsm$ | async)) {
+        <profile-images
+          [image]="ad.image"
+          [additionalImages]="ad.additionalImages">
+        </profile-images>
+      }
+      <float-labels>
+        @if (ad.image && (layout.gtxs$ | async)) {
+          <profile-images
+            [icon]="SvgIcon.Basket"
+            [image]="ad.image"
+            [additionalImages]="ad.additionalImages"
+            class="float-right">
+          </profile-images>
+        }
+        <label-value [label]="i18n.ad.name" [value]="ad.name"></label-value>
+        <label-value [label]="categoryLabel">
+          @for (category of ad.categories || []; track category) {
+            <div>
+              @for (curr of categoryLevels(category); track curr; let first = $first) {
+                @if (!first) {
+                  &gt;
+                }
+                {{ curr.name }}
+              }
+            </div>
+          }
+        </label-value>
+        @if (ad.user) {
+          <label-value [label]="i18n.ad.owner">
+            <user-link [user]="ad.user"></user-link>
+          </label-value>
+        }
+        @if (status) {
+          <label-value [label]="i18n.general.status">
+            {{ status }}
+          </label-value>
+        }
+        @if (ad.publicationPeriod?.begin) {
+          <label-value [label]="i18n.ad.publicationDate">
+            {{ data.publicationPeriod.begin | date }}
+          </label-value>
+        }
+        @if (ad.publicationPeriod?.end) {
+          <label-value [label]="i18n.ad.expirationDate">
+            {{ data.publicationPeriod.end | date }}
+          </label-value>
+        }
+        @if (ad.promotionalPeriodActive) {
+          <label-value [label]="i18n.ad.promotionalPeriod">
+            <span
+              >{{ data.promotionalPeriod.begin | date }}<span class="d-inline pl-2 pr-2"> - </span
+              >{{ data.promotionalPeriod.end | date }}</span
+              >
+            </label-value>
+          }
+          @for (value of ad.customValues; track value) {
+            <custom-field-value [fieldValue]="value"></custom-field-value>
+          }
+          @if (webshop) {
+            @if (!data.unlimitedStock) {
+              <label-value [label]="i18n.ad.stockQuantity">
+                {{ stock }}
+              </label-value>
+            }
+            @if (data.minAllowedInCart) {
+              <label-value [label]="i18n.ad.minAllowedInCart">
+                {{ formatStock(data.minAllowedInCart) }}
+              </label-value>
+            }
+            @if (data.maxAllowedInCart) {
+              <label-value [label]="i18n.ad.maxAllowedInCart">
+                {{ formatStock(data.maxAllowedInCart) }}
+              </label-value>
+            }
+            <label-value [label]="i18n.ad.productNumber">
+              {{ data.productNumber }}
+            </label-value>
+          }
+          @if (ad.price) {
+            <label-value [label]="i18n.ad.price" class="totalAmount">
+              @if (ad.promotionalPeriodActive) {
+                {{ ad.promotionalPrice | currency : ad.currency }}
+                <span class="promo-price">
+                  {{ ad.price | currency : ad.currency }}
+                </span>
+              } @else {
+                {{ ad.price | currency : ad.currency }}
+              }
+            </label-value>
+          }
+        </float-labels>
+        @if (data.lastAuthorizationComments) {
+          <h2 class="d-none d-sm-block my-ls pt-ls">
+            {{ i18n.ad.authorizationNotes }}
+          </h2>
+          <hr class="d-block d-sm-none" />
+          {{ ad.lastAuthorizationComments }}
+        }
+        <h2 class="d-none d-sm-block my-ls pt-ls">{{ i18n.general.description }}</h2>
+        <hr class="d-block d-sm-none" />
+        <rich-text-container autoHeight [value]="ad.description"> </rich-text-container>
+        @if (data.deliveryMethods && data.deliveryMethods.length > 0) {
+          <div>
+            <h2 class="mt-3">{{ i18n.ad.deliveryMethods }}</h2>
+            @for (dm of data.deliveryMethods; track dm; let first = $first) {
+              <h3 [ngClass]="{ 'pt-2': !first }">{{ dm.name }}</h3>
+              @if (dm.minDeliveryTime && dm.minDeliveryTime.amount > 0) {
+                <label-value [label]="i18n.ad.minDeliveryTime">
+                  {{ format.formatTimeInterval(dm.minDeliveryTime) }}
+                </label-value>
+              }
+              @if (dm.maxDeliveryTime && dm.maxDeliveryTime.amount > 0) {
+                <label-value [label]="i18n.ad.maxDeliveryTime">
+                  {{ format.formatTimeInterval(dm.maxDeliveryTime) }}
+                </label-value>
+              }
+              @if (hasFixedDeliveryPrice(dm)) {
+                <label-value [label]="i18n.ad.price">
+                  {{ dm.chargeAmount | currency : ad.currency }}
+                </label-value>
+              }
+              @if (dm.address) {
+                <label-value [label]="i18n.ad.pickupAddress">
+                  {{ format.formatAddress(dm.address) }}
+                </label-value>
+              }
+              @if (dm.description) {
+                <label-value [label]="i18n.general.description">
+                  {{ dm.description }}
+                </label-value>
+              }
+            }
+          </div>
+        }
+        @if (questionsEnabled) {
+          <div>
+            <h2 class="d-flex mb-ls flex-column flex-xs-row justify-content-between mt-ls">
+              <div class="mb-2 mb-xs-0">
+                {{ i18n.ad.questionsAndAnswers }}
+              </div>
+            </h2>
+            @for (q of data.questions; track q; let last = $last) {
+              <div class="d-flex flex-row pb-1">
+                <div class="d-flex">
+                  <icon size="1rem" [icon]="SvgIcon.ChatLeft"></icon>
+                </div>
+                <div class="pl-2" style="line-height: 1rem">
+                  <span class="font-weight-bold">{{ q.question }}</span>
+                  <div style="font-size: 0.6rem">{{ q.user.display }} - {{ q.questionDate | dateTime }}</div>
+                </div>
+                @if (canRemoveQuestion(q)) {
+                  <div class="d-flex" style="margin-left: auto">
+                    <a
+                      href="#"
+                      class="icon"
+                      [tooltip]="i18n.ad.removeQuestion"
+                      (click)="removeQuestion(q.id); $event.preventDefault()">
+                      <icon size="1rem" [icon]="SvgIcon.Trash"></icon>
+                    </a>
+                  </div>
+                }
+              </div>
+              @if (q.answer) {
+                <div class="d-flex flex-row pb-1 pt-1">
+                  <div class="d-flex">
+                    <icon size="1rem" [icon]="SvgIcon.ChatRight"></icon>
+                  </div>
+                  <div class="pl-2" style="line-height: 1rem">
+                    {{ q.answer }}
+                    <div style="font-size: 0.6rem">{{ data.user.display }} - {{ q.answerDate | dateTime }}</div>
+                  </div>
+                </div>
+              }
+              @if (!last) {
+                <hr class="inner-separator pb-1" />
+              }
+            }
+          </div>
+        }
+      </page-content>
+    }
+  </page-layout>
+

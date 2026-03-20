@@ -1,0 +1,43 @@
+@if ((indicators$ | async)?.length > 0) {
+  <div class="container mw-100 px-0">
+    @if (showSeparator) {
+      <hr class="mt-0" />
+    }
+    <div class="row no-gutters">
+      @if (showAccount) {
+        <div
+          class="status-label col-12"
+          [ngClass]="{ 'status-label-last': !account.user || !showUser }">
+          {{ account.type.name }}
+        </div>
+      }
+      @if (account.user && showUser) {
+        <div class="status-label col-6 col-md-3 mb-0">
+          {{ i18n.general.user }}
+        </div>
+        <div class="status-label col-6 col-md-9 mb-0">
+          <user-link [user]="account.user"></user-link>
+        </div>
+      }
+      @if (showAccount || (account.user && showUser)) {
+        <hr />
+      }
+      @for (indicator of indicators$.value; track indicator; let last = $last) {
+        <div class="status-label col-6 col-sm-3" [ngClass]="last ? 'status-label-last' : ''">
+          <span class="ellipsis">{{ indicator.label }}</span>
+        </div>
+        <div
+          class="status-value col-6 col-sm-3"
+        [ngClass]="{
+          negative: !indicator.skipColor && (indicator.alwaysNegative || format.isNegative(indicator.amount)),
+          positive: !indicator.skipColor && !indicator.alwaysNegative && format.isPositive(indicator.amount),
+          'status-value-last': last
+        }">
+          @if (indicator.amount) {
+            {{ indicator.amount | currency : currency }}
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

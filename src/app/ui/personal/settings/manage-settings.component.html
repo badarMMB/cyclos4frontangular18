@@ -1,0 +1,32 @@
+<page-layout>
+  <page-content [heading]="i18n.setting.title" [mobileHeading]="i18n.setting.mobileTitle" last>
+    <radio-group-field [label]="i18n.setting.theme" [formControl]="darkThemeControl">
+      <field-option [value]="false" [text]="i18n.setting.themeLight"> </field-option>
+      <field-option [value]="true" [text]="i18n.setting.themeDark"> </field-option>
+    </radio-group-field>
+
+    @if (localeControl) {
+      @if ((layout.gtxs$ | async) && localeOptions.length <= 2) {
+        <radio-group-field
+          [label]="i18n.setting.locale"
+          [formControl]="localeControl"
+          [fieldOptions]="localeOptions">
+        </radio-group-field>
+      }
+      @if ((layout.ltsm$ | async) || localeOptions.length > 2) {
+        <single-selection-field
+          [label]="i18n.setting.locale"
+          [formControl]="localeControl"
+          [fieldOptions]="localeOptions">
+        </single-selection-field>
+      }
+    }
+
+    @if (canSwitchFrontend) {
+      <actions kind="secondary">
+        <span></span>
+        <action-button [label]="i18n.setting.useClassicFrontend" outline (action)="switchFrontend()"></action-button>
+      </actions>
+    }
+  </page-content>
+</page-layout>

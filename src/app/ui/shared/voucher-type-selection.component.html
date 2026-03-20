@@ -25,13 +25,13 @@
           <div class="d-flex justify-content-end">
             @if ((resultType$ | async) !== ResultType.CATEGORIES) {
               <heading-action-button
-                class="heading-action-button pl-2 w-auto flex-grow-0"
+                class="heading-action-button ps-2 w-auto flex-grow-0"
                 [action]="showCategoriesAction">
             </heading-action-button>
           }
           @if ((resultType$ | async) === ResultType.CATEGORIES) {
             <heading-action-button
-              class="heading-action-button pl-2 w-auto flex-grow-0"
+              class="heading-action-button ps-2 w-auto flex-grow-0"
               [action]="showTypesAction">
             </heading-action-button>
           }
@@ -90,7 +90,7 @@
           </td>
           <td>
             <div>
-              <a ngClass="font-weight-bold">
+              <a class="fw-bold">
                 {{ type.voucherTitle }}
               </a>
               <div>

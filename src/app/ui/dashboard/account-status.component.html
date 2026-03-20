@@ -3,7 +3,7 @@
   [mobileHeading]="i18n.account.mobileTitle.account"
   [headingActions]="headingActions"
   hideBack>
-  @if (balance) {
+  @if (balance != null && balance !== '') {
     <div class="balance">
       <div class="balance-label">{{ i18n.account.balance }}</div>
       <div
@@ -23,21 +23,21 @@
 <ng-template #transfersTpl>
   <div class="flex-grow-1 d-flex flex-column justify-content-end">
     <h3 class="last-transfers">{{ i18n.dashboard.lastPayments }}</h3>
-    @if (account.lastTransfers.length > 0) {
+    @if ((account.lastTransfers?.length || 0) > 0) {
       <table
         class="table table-fixed table-hover table-auto-height mb-0 cursor-pointer"
         >
-        @for (transfer of account.lastTransfers; track transfer; let last = $last) {
+        @for (transfer of account.lastTransfers || []; track transfer; let last = $last) {
           <tr (click)="viewTransfer(transfer, $event)">
-            <td style="width: 20%" class="text-left pl-0 text-muted" [ngClass]="{ 'border-0': last }">
+            <td style="width: 20%" class="text-start ps-0 text-muted" [ngClass]="{ 'border-0': last }">
               {{ transfer.date | date }}
             </td>
             <td style="width: 55%" class="text-center text-muted" [ngClass]="{ 'border-0': last }">
-              <div class="single-line">{{ subjectName(transfer) }}</div>
+              <div class="single-line last-transfer-subject">{{ subjectName(transfer) }}</div>
             </td>
             <td
               style="width: 25%"
-              class="text-right"
+              class="text-end"
           [ngClass]="{
             negative: format.isNegative(transfer.amount),
             positive: format.isPositive(transfer.amount),

@@ -35,7 +35,7 @@
         <div class="d-flex mb-2">
           <div class="cell-main">{{ prod.name }}</div>
           @if (!readOnly && canRemove(prod)) {
-            <div class="ml-auto text-right">
+            <div class="ms-auto text-end">
               <button
                 type="button"
                 [tooltip]="i18n.general.remove"

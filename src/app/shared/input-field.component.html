@@ -21,7 +21,7 @@
     class="form-control w-100"
     [ngClass]="{
       'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched,
-      'text-right': type === 'number'
+      'text-end': type === 'number'
     }" />
   <field-errors [control]="formControl"></field-errors>
 }
@@ -45,7 +45,7 @@
     class="form-control w-100"
     [ngClass]="{
       'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched,
-      'text-right': type === 'number'
+      'text-end': type === 'number'
     }" />
   <field-errors [control]="formControl"></field-errors>
 </ng-template>

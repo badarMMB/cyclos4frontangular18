@@ -274,7 +274,7 @@
                       {{ installmentStatus(installment.status) }}
                     </maybe-link>
                   </td>
-                  <td class="text-right">
+                  <td class="text-end">
                     <maybe-link [link]="path(installment)">
                       {{ installment.amount | currency : transaction.currency }}
                     </maybe-link>
@@ -295,7 +295,7 @@
                           type="button"
                           [tooltip]="i18n.transaction.settleInstallment"
                           class="btn btn-icon align-items-center"
-                          [ngClass]="{ 'ml-2': installment.canProcess }"
+                          [ngClass]="{ 'ms-2': installment.canProcess }"
                           (click)="settleInstallment(installment)">
                           <icon [icon]="SvgIcon.Check2"></icon>
                         </button>
@@ -329,7 +329,7 @@
                 <th>{{ i18n.transaction.installmentNumber }}</th>
                 <th>{{ i18n.general.date }}</th>
                 <th>{{ i18n.general.status }}</th>
-                <th class="text-right">{{ i18n.transaction.amount }}</th>
+                <th class="text-end">{{ i18n.transaction.amount }}</th>
                 @if (hasActions) {
                   <th class="actions"></th>
                 }
@@ -355,7 +355,7 @@
                       {{ installmentStatus(occurrence.status) }}
                     </maybe-link>
                   </td>
-                  <td class="text-right">
+                  <td class="text-end">
                     <maybe-link [link]="path(occurrence)">
                       {{ occurrence.amount | currency : transaction.currency }}
                     </maybe-link>

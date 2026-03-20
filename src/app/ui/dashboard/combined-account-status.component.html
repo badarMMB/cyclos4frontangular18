@@ -21,7 +21,7 @@
               {{ entry.account.type.name }}
             </a>
           </div>
-          @if (entry.balance) {
+          @if (entry.balance != null && entry.balance !== '') {
             <div
               class="balance-value"
             [ngClass]="{

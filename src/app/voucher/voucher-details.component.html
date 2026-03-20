@@ -19,7 +19,7 @@
       <div class="d-flex flex-column flex-grow-1">
         @if (voucher) {
           <div class="content">
-            <div class="d-sm-none mb-3 text-center font-weight-bold">
+            <div class="d-sm-none mb-3 text-center fw-bold">
               {{ voucher.token }}
             </div>
             <label-value class="d-none d-sm-flex" [label]="i18n.voucher.token" [value]="voucher.token"> </label-value>
@@ -112,7 +112,7 @@
               {{ i18n.voucher.transaction.user }}
             </th>
           }
-          <th class="text-right">{{ i18n.voucher.transaction.amount }}</th>
+          <th class="text-end">{{ i18n.voucher.transaction.amount }}</th>
         </tr>
       </thead>
       <tbody>
@@ -123,7 +123,7 @@
               <td>{{ tx.user?.display }}</td>
             }
             <td
-              class="text-right"
+              class="text-end"
             [ngClass]="{
               positive: format.isPositive(tx.amount),
               negative: format.isNegative(tx.amount)

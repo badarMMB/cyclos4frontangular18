@@ -7,7 +7,7 @@
 }
 
 @if ((cameras$ | async).length > 1) {
-  <select class="mt-3 custom-select" [formControl]="cameraControl">
+  <select class="mt-3 custom-select form-select" [formControl]="cameraControl">
     @for (cam of cameras$.value; track cam) {
       <option [value]="cam.id" [text]="cam.label"></option>
     }

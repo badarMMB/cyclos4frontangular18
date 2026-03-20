@@ -79,7 +79,7 @@
               <tr
               [ngClass]="{
                 'cursor-pointer': path(message),
-                'font-weight-bold': isCurrent(message)
+                'fw-bold': isCurrent(message)
               }"
                 (click)="path(message) ? router.navigate(path(message)) : null">
                 <td>

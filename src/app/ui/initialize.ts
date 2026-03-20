@@ -38,7 +38,7 @@ export function initialize(
     const themeLoaded$ = timer(1000, 500).pipe(
       filter(() => {
         const style = getComputedStyle(document.body);
-        return !empty(style.getPropertyValue('--primary').trim());
+        return !empty(style.getPropertyValue('--bs-primary').trim());
       }),
       first()
     );

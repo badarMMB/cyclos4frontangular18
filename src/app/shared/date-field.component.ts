@@ -23,9 +23,9 @@ import { CustomFieldSizeEnum } from 'app/api/models';
 import { ISO_DATE } from 'app/core/format.service';
 import { LayoutService } from 'app/core/layout.service';
 import { BaseFormFieldComponent } from 'app/shared/base-form-field.component';
-import { DateConstraint, dateConstraintAsMoment } from 'app/shared/date-constraint';
+import { DateConstraint, dateConstraintAsDate } from 'app/shared/date-constraint';
 import { empty } from 'app/shared/helper';
-import moment, { Moment } from 'moment-mini-ts';
+import { format as dateFnsFormat, isValid, parseISO } from 'date-fns';
 
 /**
  * Input used to edit a single date
@@ -45,8 +45,8 @@ export class DateFieldComponent extends BaseFormFieldComponent<string> implement
 
   private tempValue: string;
 
-  min: moment.Moment;
-  max: moment.Moment;
+  min: Date;
+  max: Date;
 
   @ViewChild('input') inputRef: ElementRef;
 
@@ -70,25 +70,26 @@ export class DateFieldComponent extends BaseFormFieldComponent<string> implement
     return ((this.inputRef || {}) as any).nativeElement;
   }
 
-  get valueAsMoment(): Moment {
+  get valueAsDate(): Date {
     const value = this.value;
     if (empty(value)) {
       return null;
     } else {
-      return moment(value);
+      const parsed = parseISO(value);
+      return isValid(parsed) ? parsed : null;
     }
   }
 
-  set valueAsMoment(value: Moment) {
-    this.value = value ? value.format(ISO_DATE) : null;
+  set valueAsDate(value: Date) {
+    this.value = value && isValid(value) ? dateFnsFormat(value, ISO_DATE) : null;
   }
 
   get minValue() {
-    return this.min ? this.min.format(ISO_DATE) : '';
+    return this.min && isValid(this.min) ? dateFnsFormat(this.min, ISO_DATE) : '';
   }
 
   get maxValue() {
-    return this.max ? this.max.format(ISO_DATE) : '';
+    return this.max && isValid(this.max) ? dateFnsFormat(this.max, ISO_DATE) : '';
   }
 
   ngOnInit() {
@@ -97,8 +98,8 @@ export class DateFieldComponent extends BaseFormFieldComponent<string> implement
       this.fieldSize = CustomFieldSizeEnum.MEDIUM;
     }
     const now = this.dataForFrontendHolder.now();
-    this.min = dateConstraintAsMoment(this.minDate, now);
-    this.max = dateConstraintAsMoment(this.maxDate, now);
+    this.min = dateConstraintAsDate(this.minDate, now);
+    this.max = dateConstraintAsDate(this.maxDate, now);
   }
 
   ngAfterViewChecked() {
@@ -148,13 +149,13 @@ export class DateFieldComponent extends BaseFormFieldComponent<string> implement
       if (isNaN(date.getTime())) {
         errors.date = true;
       } else {
-        var min = this.min ? new Date(this.min.format('YYYY-MM-DD')) : null;
+        var min = this.min && isValid(this.min) ? this.min : null;
         if (min && date < min) {
           errors.minDate = {
             min: this.format.formatAsDate(this.min)
           };
         }
-        var max = this.max ? new Date(this.max.format('YYYY-MM-DD')) : null;
+        var max = this.max && isValid(this.max) ? this.max : null;
         if (max && date > max) {
           errors.maxDate = {
             max: this.format.formatAsDate(this.max)

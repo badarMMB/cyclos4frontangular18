@@ -10,17 +10,17 @@
     <label-value [label]="i18n.transaction.toAccount" required kind="field">
       @for (account of data.accounts; track account) {
         <div class="w-100 row no-gutters mb-2">
-          <div class="custom-control custom-radio">
+          <div class="custom-control form-check custom-radio">
             <input
               #radio
               type="radio"
               formControlName="account"
-              class="custom-control-input"
+              class="custom-control-input form-check-input"
               [id]="'from_' + account.id"
               (keyup.enter)="radio.click()"
               [value]="account.type.id" />
-            <label class="custom-control-label" [for]="'from_' + account.id">
-              <div class="ml-1">
+            <label class="custom-control-label form-check-label" [for]="'from_' + account.id">
+              <div class="ms-1">
                 {{ account.type.name }}
                 @if (account.number) {
                   @if (layout.ltsm$ | async) {

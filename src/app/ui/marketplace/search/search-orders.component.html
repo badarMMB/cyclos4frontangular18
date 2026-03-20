@@ -97,7 +97,7 @@
               {{ row.relatedUser.display }}
             </div>
           </div>
-          <div class="ml-auto">
+          <div class="ms-auto">
             {{ row.totalPrice | currency : row.currency }}
           </div>
         </div>
@@ -108,7 +108,7 @@
           <th>{{ i18n.general.status }}</th>
           <th>{{ i18n.general.date }}</th>
           <th>{{ sales ? i18n.ad.buyer : i18n.ad.seller }}</th>
-          <th class="text-right">{{ i18n.ad.total }}</th>
+          <th class="text-end">{{ i18n.ad.total }}</th>
         </thead>
         <tbody>
           @for (row of (results$ | async)?.results; track row) {
@@ -117,7 +117,7 @@
               <td>{{ resolveStatusLabel(row) }}</td>
               <td>{{ row.creationDate | date }}</td>
               <td>{{ row.relatedUser.display }}</td>
-              <td class="text-right">
+              <td class="text-end">
                 {{ row.totalPrice | currency : row.currency }}
               </td>
             </tr>

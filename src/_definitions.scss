@@ -59,16 +59,35 @@ $danger:        $red !default;
 $light:         $gray-100 !default;
 $dark:          $gray-800 !default;
 
-$yiq-contrasted-threshold:  150 !default;
-$yiq-text-dark:             $gray-900 !default;
-$yiq-text-light:            white !default;
-$yiq-dark-text-dark:             black !default;
-$yiq-dark-text-light:            #f0f0f0 !default;
+// Bootstrap 5 replaces $yiq-* with $color-contrast-*
+$min-contrast-ratio:        4.5 !default;
+$color-contrast-dark:       $gray-900 !default;
+$color-contrast-light:      white !default;
+// Custom dark-theme contrast variables
+$yiq-dark-text-dark:        black !default;
+$yiq-dark-text-light:       #f0f0f0 !default;
 
 
 // Import the basic Bootstrap definitions
 @import 'styles/custom-definitions';
 @import "bootstrap/scss/functions";
+
+@function color-yiq($color, $dark: $color-contrast-dark, $light: $color-contrast-light) {
+  @return color-contrast($color, $dark, $light);
+}
+
+@mixin hover {
+  &:hover {
+    @content;
+  }
+}
+
+@mixin hover-focus {
+  &:hover,
+  &:focus {
+    @content;
+  }
+}
 
 // Global layout
 $layout-spacer-xxs: 0.4rem !default;
@@ -77,7 +96,7 @@ $layout-spacer: 1.25rem !default;
 $section-margin: 1.5rem !default;
 $side-area-width: 18rem !default;
 $body-bg: $gray-100 !default;
-$body-color: $yiq-text-dark !default;
+$body-color: $color-contrast-dark !default;
 $border-color: $gray-300 !default;
 $link-color: $accent !default;
 $link-hover-color: darken($link-color, 15%) !default;
@@ -91,7 +110,7 @@ $menu-inactive-icon: $accent;
 $menu-inactive-color: #565656;
 $menu-inactive-bg: $menu-bg;
 $menu-inactive-hover-bg: #f5f5f5;
-$menu-inactive-hover-color: color-yiq($menu-inactive-hover-bg);
+$menu-inactive-hover-color: color-contrast($menu-inactive-hover-bg);
 $menu-inactive-hover-icon: $menu-inactive-icon;
 $menu-active-icon: $accent;
 $menu-active-color: $accent;
@@ -111,9 +130,9 @@ $theme-color-dark: darken($primary-dark, 10%) !default;
 $info-dark: lighten($primary-dark, 30%) !default;
 $menu-bg-dark: #252525;
 $menu-inactive-icon-dark: $accent-dark;
-$menu-inactive-color-dark: color-yiq($menu-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light);
+$menu-inactive-color-dark: color-contrast($menu-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light);
 $menu-inactive-hover-bg-dark: #202020;
-$menu-inactive-hover-color-dark: color-yiq($menu-inactive-hover-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light);
+$menu-inactive-hover-color-dark: color-contrast($menu-inactive-hover-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light);
 $menu-inactive-hover-icon-dark: $menu-inactive-icon-dark;
 $menu-active-icon-dark: $accent-dark;
 $menu-active-color-dark: $accent-dark;
@@ -144,7 +163,7 @@ $card-bg-dark: #252525 !default;
 
 // Top bar (shows title, hamburger menu on mobile / tablet, profile link, logout)
 $top-bar-bg: $primary !default;
-$top-bar-color: color-yiq($top-bar-bg) !default;
+$top-bar-color: color-contrast($top-bar-bg) !default;
 $top-bar-height-xxs: 2.6rem !default;
 $top-bar-height-xs: 3.4rem !default;
 $top-icon-size-xxs: 1.4rem !default;
@@ -156,7 +175,7 @@ $top-bar-height: 3.25rem !default;
 $top-bar-with-menu-height: 3.6rem !default;
 $top-bar-popup-separator-color: darken($top-bar-bg, 10%) !default;
 $top-bar-item-focus-bg: darken($top-bar-bg, 5%) !default;
-$top-bar-item-focus-color: color-yiq($top-bar-item-focus-bg) !default;;
+$top-bar-item-focus-color: color-contrast($top-bar-item-focus-bg) !default;;
 $top-bar-item-marker-color: change-color($top-bar-color, $alpha: 0.6) !default;
 $top-bar-item-marker-hover-color: $top-bar-item-marker-color !default;
 $top-bar-item-spacing-spacious: 1.2rem !default;
@@ -170,10 +189,10 @@ $top-bar-sub-item-hover-icon-color: $top-bar-sub-item-hover-color !default;
 
 // Top bar on dark background
 $top-bar-bg-dark: $primary-dark !default;
-$top-bar-color-dark: color-yiq($top-bar-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$top-bar-color-dark: color-contrast($top-bar-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $top-bar-popup-separator-color-dark: darken($top-bar-bg-dark, 10%) !default;
 $top-bar-item-focus-bg-dark: darken($top-bar-bg-dark, 5%) !default;
-$top-bar-item-focus-color-dark: color-yiq($top-bar-item-focus-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;;
+$top-bar-item-focus-color-dark: color-contrast($top-bar-item-focus-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;;
 $top-bar-item-marker-color-dark: change-color($top-bar-color-dark, $alpha: 0.6) !default;
 $top-bar-item-marker-hover-color-dark: $top-bar-item-marker-color-dark !default;
 $top-bar-sub-item-hover-bg-dark: darken($top-bar-bg-dark, 5%) !default;
@@ -324,6 +343,8 @@ $label-color: $gray-700 !default;
 $input-group-addon-color: $input-color !default;
 $input-group-addon-bg: $gray-100 !default;
 $input-group-addon-border-color: $input-border-color !default;
+$custom-control-label-disabled-color: $input-disabled-color !default;
+$custom-control-indicator-disabled-bg: $input-disabled-bg !default;
 $custom-select-bg-size: 8px 10px !default;
 $custom-select-padding-x: 0.75rem;
 $custom-select-indicator-color: $gray-800 !default;
@@ -362,11 +383,11 @@ $custom-select-background-dark: $custom-select-indicator-dark no-repeat right $c
 
 // Snack bars (small and non-intrusive notifications shown on bottom)
 $snack-bar-bg: $gray-900 !default;
-$snack-bar-color: color-yiq($snack-bar-bg) !default;
+$snack-bar-color: color-contrast($snack-bar-bg) !default;
 
 // Snack bars on dark background
 $snack-bar-bg-dark: $black !default;
-$snack-bar-color-dark: color-yiq($snack-bar-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$snack-bar-color-dark: color-contrast($snack-bar-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 
 // Page title
 $title-bg: $menu-bar-bg !default;
@@ -375,17 +396,17 @@ $title-height-xxs: 2.6rem !default;
 $title-height-xs: 3.4rem !default;
 $title-height: 3.4rem !default;
 $title-button-bg: $gray-100 !default;
-$title-button-color: color-yiq($title-button-bg) !default;
+$title-button-color: color-contrast($title-button-bg) !default;
 $title-button-border-color: $border-color !default;
 $title-button-icon-color: $text-muted !default;
 $title-button-active-border-color: darken($title-button-border-color, 20%) !default;
 $title-button-active-color: $title-button-color !default;
 $title-button-active-bg: $title-button-bg !default;
 $title-button-option-hover-bg: darken($title-button-bg, 5%) !default;
-$title-button-option-hover-color: color-yiq($title-button-option-hover-bg) !default;
+$title-button-option-hover-color: color-contrast($title-button-option-hover-bg) !default;
 $title-button-option-hover-icon-color: $title-button-icon-color !default;
 $title-plain-button-bg: $gray-100 !default;
-$title-plain-button-color: color-yiq($title-plain-button-bg) !default;
+$title-plain-button-color: color-contrast($title-plain-button-bg) !default;
 $title-plain-button-border-color: $title-plain-button-bg !default;
 $title-plain-button-icon-color: $menu-bar-active-icon-color !default;
 $title-plain-button-active-border-color: $menu-bar-active-marker-color !default;
@@ -396,17 +417,17 @@ $title-plain-button-active-bg: $title-plain-button-bg !default;
 $title-bg-dark: $menu-bar-bg-dark !default;
 $title-color-dark: $body-color-dark !default;
 $title-button-bg-dark: darken($title-bg-dark, 3%) !default;
-$title-button-color-dark: color-yiq($title-button-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$title-button-color-dark: color-contrast($title-button-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $title-button-border-color-dark: $border-color-dark !default;
 $title-button-icon-color-dark: $text-muted-dark !default;
 $title-button-active-border-color-dark: darken($title-button-border-color-dark, 5%) !default;
 $title-button-active-color-dark: $title-button-color-dark !default;
 $title-button-active-bg-dark: $title-button-bg-dark !default;
 $title-button-option-hover-bg-dark: darken($title-button-bg-dark, 5%) !default;
-$title-button-option-hover-color-dark: color-yiq($title-button-option-hover-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$title-button-option-hover-color-dark: color-contrast($title-button-option-hover-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $title-button-option-hover-icon-color-dark: $title-button-icon-color-dark !default;
 $title-plain-button-bg-dark: $side-menu-active-hover-bg-dark !default;
-$title-plain-button-color-dark: color-yiq($title-plain-button-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$title-plain-button-color-dark: color-contrast($title-plain-button-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $title-plain-button-border-color-dark: $title-plain-button-bg-dark !default;
 $title-plain-button-icon-color-dark: $menu-bar-active-icon-color-dark !default;
 $title-plain-button-active-border-color-dark: $menu-bar-active-marker-color-dark !default;
@@ -476,7 +497,7 @@ $mobile-results-bg: $table-bg !default;
 $mobile-results-border-color: $table-border-color !default;
 $mobile-results-icon-color: $table-icon-color !default;
 $mobile-results-focus-bg: rgba($accent, 0.4) !default;
-$mobile-results-focus-color: color-yiq($mobile-results-focus-bg) !default;
+$mobile-results-focus-color: color-contrast($mobile-results-focus-bg) !default;
 $mobile-results-focus-icon-color: $mobile-results-focus-color !default;
 
 // Mobile results on dark background
@@ -485,17 +506,17 @@ $mobile-results-bg-dark: $table-bg-dark !default;
 $mobile-results-border-color-dark: $table-border-color-dark !default;
 $mobile-results-icon-color-dark: $table-icon-color-dark !default;
 $mobile-results-focus-bg-dark: rgba($accent-dark, 0.4) !default;
-$mobile-results-focus-color-dark: color-yiq($mobile-results-focus-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$mobile-results-focus-color-dark: color-contrast($mobile-results-focus-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $mobile-results-focus-icon-color-dark: $mobile-results-focus-color-dark !default;
 
 // Date-picker calendar
 $calendar-header-bg: $accent !default;
-$calendar-header-color: color-yiq($calendar-header-bg) !default;
+$calendar-header-color: color-contrast($calendar-header-bg) !default;
 $calendar-hover-bg: $gray-200 !default;
-$calendar-hover-color: color-yiq($calendar-hover-bg) !default;
+$calendar-hover-color: color-contrast($calendar-hover-bg) !default;
 $calendar-today-border-color: $accent !default;
 $calendar-selected-bg: $accent !default;
-$calendar-selected-color: color-yiq($calendar-selected-bg) !default;
+$calendar-selected-color: color-contrast($calendar-selected-bg) !default;
 $calendar-disabled-color: $text-muted !default;
 $calendar-disabled-bg: transparent !default;
 $calendar-header-padding: 0.5rem;
@@ -507,12 +528,12 @@ $calendar-year-width: 4rem;
 
 // Date-picker calendar on dark background
 $calendar-header-bg-dark: $accent-dark !default;
-$calendar-header-color-dark: color-yiq($calendar-header-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$calendar-header-color-dark: color-contrast($calendar-header-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $calendar-hover-bg-dark: $table-hover-bg-dark !default;
-$calendar-hover-color-dark: color-yiq($calendar-hover-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$calendar-hover-color-dark: color-contrast($calendar-hover-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $calendar-today-border-color-dark: $accent-dark !default;
 $calendar-selected-bg-dark: $accent-dark !default;
-$calendar-selected-color-dark: color-yiq($calendar-selected-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$calendar-selected-color-dark: color-contrast($calendar-selected-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $calendar-disabled-color-dark: $text-muted-dark !default;
 $calendar-disabled-bg-dark: transparent !default;
 
@@ -525,7 +546,7 @@ $breadcrumb-bg: transparent !default;
 
 // Icon with counter (such as notifications indicator)
 $icon-with-counter-bg: $danger !default;
-$icon-with-counter-color: color-yiq($icon-with-counter-bg) !default;
+$icon-with-counter-color: color-contrast($icon-with-counter-bg) !default;
 
 // Modal dialogs
 $modal-content-color: $body-color !default;
@@ -561,7 +582,7 @@ $dropdown-link-color: $body-color !default;
 $dropdown-link-hover-color: $body-color !default;
 $dropdown-link-hover-bg: darken($input-bg, 10%) !default;
 $dropdown-link-active-bg: $accent !default;
-$dropdown-link-active-color: color-yiq($dropdown-link-active-bg) !default;
+$dropdown-link-active-color: color-contrast($dropdown-link-active-bg) !default;
 
 // Dropdowns with dark background
 $dropdown-color-dark: $input-color-dark !default;
@@ -571,7 +592,7 @@ $dropdown-link-color-dark: $body-color-dark !default;
 $dropdown-link-hover-color-dark: $body-color-dark !default;
 $dropdown-link-hover-bg-dark: darken($input-bg-dark, 5%) !default;
 $dropdown-link-active-bg-dark: $accent-dark !default;
-$dropdown-link-active-color-dark: color-yiq($dropdown-link-active-bg, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$dropdown-link-active-color-dark: color-contrast($dropdown-link-active-bg, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 
 // Pagination
 $pagination-color: $link-color !default;
@@ -581,7 +602,7 @@ $pagination-hover-color: $menu-bar-inactive-hover-color !default;
 $pagination-hover-bg: $menu-bar-inactive-hover-bg !default;
 $pagination-hover-border-color: $input-border-color !default;
 $pagination-active-bg: $accent !default;
-$pagination-active-color: color-yiq($pagination-active-bg) !default;
+$pagination-active-color: color-contrast($pagination-active-bg) !default;
 $pagination-active-border-color: $pagination-active-bg !default;
 $pagination-disabled-color: $input-color !default;
 $pagination-disabled-bg: $input-bg !default;
@@ -595,7 +616,7 @@ $pagination-hover-color-dark: $input-color-dark !default;
 $pagination-hover-bg-dark: $menu-bar-inactive-hover-bg-dark !default;
 $pagination-hover-border-color-dark: $input-border-color-dark !default;
 $pagination-active-bg-dark: $accent-dark !default;
-$pagination-active-color-dark: color-yiq($pagination-active-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
+$pagination-active-color-dark: color-contrast($pagination-active-bg-dark, $yiq-dark-text-dark, $yiq-dark-text-light) !default;
 $pagination-active-border-color-dark: $pagination-active-bg-dark !default;
 $pagination-disabled-color-dark: $card-color-dark !default;
 $pagination-disabled-bg-dark: $card-bg-dark !default;

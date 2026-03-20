@@ -14,14 +14,14 @@
     @if (!disabled) {
       <button
         type="button"
-        class="btn btn-icon d-flex align-content-center flex-grow-0 mr-3"
+        class="btn btn-icon d-flex align-content-center flex-grow-0 me-3"
         [tooltip]="i18n.field.file.upload"
         (click)="inputField.click()">
         <icon [icon]="SvgIcon.Upload"></icon>
       </button>
     }
     @for (file of files; track file) {
-      <div class="flex-grow-0 mr-3 d-flex align-items-center">
+      <div class="flex-grow-0 me-3 d-flex align-items-center">
         {{ file.name }} ({{ format.formatFileSize(file.size) }})
       </div>
     }
@@ -41,14 +41,14 @@
     @if (!disabled) {
       <button
         type="button"
-        class="btn btn-icon d-flex align-content-center flex-grow-0 mr-3"
+        class="btn btn-icon d-flex align-content-center flex-grow-0 me-3"
         [tooltip]="i18n.field.file.upload"
         (click)="inputField.click()">
         <icon [icon]="SvgIcon.Upload"></icon>
       </button>
     }
     @for (file of files; track file) {
-      <div class="flex-grow-0 mr-3 d-flex align-items-center">
+      <div class="flex-grow-0 me-3 d-flex align-items-center">
         {{ file.name }} ({{ format.formatFileSize(file.size) }})
       </div>
     }

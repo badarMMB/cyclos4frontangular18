@@ -50,8 +50,8 @@ export class DashboardComponent extends BasePageComponent<DataForFrontendHome> i
   passwordsNeedingAttention: PasswordStatusAndActions[];
   pendingSecurityAnswer = false;
 
-  actions: QuickAccessAction[];
-  accounts: FrontendDashboardAccount[][];
+  actions: QuickAccessAction[] = [];
+  accounts: FrontendDashboardAccount[][] = [];
 
   constructor(
     injector: Injector,
@@ -80,7 +80,7 @@ export class DashboardComponent extends BasePageComponent<DataForFrontendHome> i
         .pipe(
           //Before setting the data, fetch possibly missing icons for the quick access
           switchMap(data => {
-            const icons = data.quickAccess?.map(qa => this.quickAccessHelper.iconAndLabel(qa).icon).filter(i => !!i);
+            const icons = (data.quickAccess || []).map(qa => this.quickAccessHelper.iconAndLabel(qa).icon).filter(i => !!i);
             if (icons.length === 0) {
               return of(data);
             } else {
@@ -95,19 +95,17 @@ export class DashboardComponent extends BasePageComponent<DataForFrontendHome> i
   }
 
   onDataInitialized(data: DataForFrontendHome) {
-    if (data.accounts) {
-      const parts = chunk(data.accounts, data.mergeAccounts ? 4 : 1);
-      if (data.mergeAccounts && parts.length > 1) {
-        // Make sure the last card doesn't have a single account, while others are full
-        const last = parts[parts.length - 1];
-        const previous = parts[parts.length - 2];
-        if (last.length === 1) {
-          const removed = previous.splice(previous.length - 1, 1);
-          Array.prototype.unshift.apply(last, removed);
-        }
+    const parts = chunk(data.accounts || [], data.mergeAccounts ? 4 : 1);
+    if (data.mergeAccounts && parts.length > 1) {
+      // Make sure the last card doesn't have a single account, while others are full
+      const last = parts[parts.length - 1];
+      const previous = parts[parts.length - 2];
+      if (last.length === 1) {
+        const removed = previous.splice(previous.length - 1, 1);
+        Array.prototype.unshift.apply(last, removed);
       }
-      this.accounts = parts;
     }
+    this.accounts = parts;
     this.initDashboardActions(data);
   }
 
@@ -180,7 +178,7 @@ export class DashboardComponent extends BasePageComponent<DataForFrontendHome> i
     const messagesMenu = new ActiveMenu(isAdmin ? Menu.SYSTEM_MESSAGES : Menu.MESSAGES);
     const usersMenu = new ActiveMenu(Menu.SEARCH_USERS);
 
-    for (const quickAccess of data.quickAccess) {
+    for (const quickAccess of data.quickAccess || []) {
       const addAction = (activeMenu: ActiveMenu, onClick?: () => void, customLabel?: string, url?: string): void => {
         const entry = this.menu.menuEntry(activeMenu);
         if (entry) {
@@ -198,7 +196,7 @@ export class DashboardComponent extends BasePageComponent<DataForFrontendHome> i
       switch (quickAccess.type) {
         case QuickAccessTypeEnum.ACCOUNT:
           // Skip the quick access icon for accounts already visible in the dashboard
-          const allAccounts = permissions.banking.accounts || [];
+          const allAccounts = permissions.banking?.accounts || [];
           const showAccount = this.layout.ltmd || empty(data.accounts);
           const accounts = allAccounts.filter(p => showAccount || (p.visible && !p.viewStatus)).map(p => p.account);
           if (accounts.length >= ApiHelper.MIN_ACCOUNTS_FOR_SUMMARY) {
@@ -325,8 +323,9 @@ export class DashboardComponent extends BasePageComponent<DataForFrontendHome> i
           addAction(new ActiveMenu(Menu.EDIT_MY_PROFILE));
           break;
         case QuickAccessTypeEnum.PASSWORDS:
+          const passwordsCount = permissions.passwords?.passwords?.length || 0;
           const passwordsLabel =
-            permissions.passwords.passwords.length === 1
+            passwordsCount === 1
               ? this.i18n.dashboard.action.password
               : this.i18n.dashboard.action.passwords;
           addAction(new ActiveMenu(Menu.PASSWORDS), null, passwordsLabel);

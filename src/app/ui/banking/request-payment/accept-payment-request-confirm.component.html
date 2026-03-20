@@ -40,7 +40,7 @@
     @for (feePreview of fees; track feePreview) {
       <div class="row no-gutters align-items-end">
         <div class="col-3">{{ feePreview.fee.name }}:</div>
-        <div class="col pl-1">{{ feePreview.amount | currency : preview.currency }}</div>
+        <div class="col ps-1">{{ feePreview.amount | currency : preview.currency }}</div>
       </div>
     }
   </label-value>
@@ -60,7 +60,7 @@
         <thead>
           <th>{{ i18n.transaction.installmentNumber }}</th>
           <th>{{ i18n.transaction.dueDate }}</th>
-          <th class="text-right">{{ i18n.transaction.amount }}</th>
+          <th class="text-end">{{ i18n.transaction.amount }}</th>
         </thead>
       }
       <tbody>
@@ -72,7 +72,7 @@
             <td>
               {{ installment.dueDate | date }}
             </td>
-            <td class="text-right">
+            <td class="text-end">
               {{ installment.mainAmount | currency : preview.currency }}
             </td>
           </tr>

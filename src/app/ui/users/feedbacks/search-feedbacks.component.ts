@@ -16,6 +16,7 @@ import { HeadingAction } from 'app/shared/action';
 import { BaseSearchPageComponent } from 'app/ui/shared/base-search-page.component';
 import { Menu } from 'app/ui/shared/menu';
 import { ReferenceHelperService } from 'app/ui/users/references/reference-helper.service';
+import { format as dateFnsFormat, startOfDay, subDays } from 'date-fns';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 type SearchPaymentFeedbackParams = PaymentFeedbackQueryFilters & {
@@ -122,7 +123,7 @@ export class SearchFeedbackComponent
       levels: level ? [level] : null,
       period: allTime
         ? null
-        : [this.dataForFrontendHolder.now().clone().subtract(30, 'day').startOf('day').format(ISO_DATE), null]
+        : [dateFnsFormat(startOfDay(subDays(this.dataForFrontendHolder.now(), 30)), ISO_DATE), null]
     });
   }
 

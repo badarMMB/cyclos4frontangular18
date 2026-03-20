@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { FrontendDashboardAccount } from 'app/api/models';
 import { BaseComponent } from 'app/shared/base.component';
-import moment from 'moment-mini-ts';
+import { getMonth, isSameDay } from 'date-fns';
 import { BehaviorSubject, interval } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 
@@ -109,11 +109,13 @@ export class BalanceHistoryGraphComponent extends BaseComponent implements After
       this.yLabels.unshift(this.format.formatAsNumber(value, 0));
     }
     this.xLabels = balances.map(balance => {
-      const date = moment(balance.date);
-      if (date.isSame(moment(), 'day')) {
+      const date = this.format.parseApiDateObject(balance.date);
+      if (date == null) {
+        return this.i18n.general.now;
+      } else if (isSameDay(date, new Date())) {
         return this.i18n.general.now;
       } else {
-        return this.format.shortMonthName(date.month());
+        return this.format.shortMonthName(getMonth(date));
       }
     });
 

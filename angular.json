@@ -45,8 +45,7 @@
                         },
                         "index": "src/ui/index.html",
                         "polyfills": [
-                            "zone.js",
-                            "configurable-date-input-polyfill"
+                            "zone.js"
                         ],
                         "tsConfig": "src/tsconfig.ui.json",
                         "assets": [
@@ -141,13 +140,11 @@
                     }
                 },
                 "lint": {
-                    "builder": "@angular-devkit/build-angular:tslint",
+                    "builder": "@angular-eslint/builder:lint",
                     "options": {
-                        "tsConfig": [
-                            "src/tsconfig.ui.json"
-                        ],
-                        "exclude": [
-                            "**/node_modules/**"
+                        "lintFilePatterns": [
+                            "src/**/*.ts",
+                            "src/**/*.html"
                         ]
                     }
                 }

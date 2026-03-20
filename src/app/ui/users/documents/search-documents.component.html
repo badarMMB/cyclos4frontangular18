@@ -34,7 +34,7 @@
               {{ row.description }}
             </label-value>
           </div>
-          <div class="ml-auto text-right d-flex flex-column">
+          <div class="ms-auto text-end d-flex flex-column">
             @if (isStatic(row.kind)) {
               <button
                 type="button"
@@ -113,7 +113,7 @@
                   <button
                     type="button"
                     [tooltip]="i18n.general.remove"
-                    class="btn btn-icon ml-2"
+                    class="btn btn-icon ms-2"
                     (click)="remove(row); $event.stopPropagation(); $event.preventDefault()">
                     <icon [icon]="SvgIcon.Trash"></icon>
                   </button>

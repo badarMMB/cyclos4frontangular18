@@ -28,7 +28,7 @@
       <th class="avatar"></th>
       <th width="35%">{{ i18n.ad.product }}</th>
       <th>{{ i18n.ad.stockQuantity }}</th>
-      <th class="text-right">{{ i18n.ad.price }}</th>
+      <th class="text-end">{{ i18n.ad.price }}</th>
     </thead>
     <tbody>
       @for (row of (results$ | async)?.results; track row) {
@@ -42,7 +42,7 @@
           <td [ngClass]="{ 'text-muted': isOutOfStock(row) }">
             {{ resolveStockLabel(row) }}
           </td>
-          <td class="text-right">
+          <td class="text-end">
             {{ row.promotionalPrice || row.price | currency : currency }}
           </td>
         </tr>

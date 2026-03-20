@@ -44,7 +44,7 @@
             @for (entry of levels; track entry) {
               <tr>
                 <td>
-                  <rating-stats class="w-100 pr-3" [level]="entry.level" [textLeft]="entry.text"> </rating-stats>
+                  <rating-stats class="w-100 pe-3" [level]="entry.level" [textLeft]="entry.text"> </rating-stats>
                 </td>
                 <td (click)="filter(entry.level, true)" class="link link-undecorated">
                   <ng-container
@@ -62,14 +62,14 @@
               </tr>
             }
             <tr>
-              <td class="font-weight-bold">{{ i18n.reference.total }}</td>
+              <td class="fw-bold">{{ i18n.reference.total }}</td>
               <td (click)="filter(null, true)" class="link link-undecorated">{{ allTime?.total }}</td>
               <td (click)="filter()" class="link link-undecorated">
                 {{ last30Days?.total }}
               </td>
             </tr>
             <tr>
-              <td class="font-weight-bold">
+              <td class="fw-bold">
                 {{ i18n.reference.percentagePositive }}
               </td>
               <td>
@@ -143,6 +143,6 @@
     @if (count > 0) {
       <div class="bar" [ngStyle]="{ width: (count / total) * 190 + 'px' }">&nbsp;</div>
     }
-    <span class="count" [ngClass]="{ 'pl-2': count > 0 }">{{ count }}</span>
+    <span class="count" [ngClass]="{ 'ps-2': count > 0 }">{{ count }}</span>
   </div>
 </ng-template>

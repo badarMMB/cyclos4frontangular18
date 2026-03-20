@@ -88,7 +88,7 @@
         </thead>
         <tbody>
           @for (row of (results$ | async)?.results; track row) {
-            <tr (click)="rowClick(row)" [ngClass]="{ 'font-weight-bold': !row.read }">
+            <tr (click)="rowClick(row)" [ngClass]="{ 'fw-bold': !row.read }">
               @if (resolveProfile(row); as profile) {
                 <td
                   class="avatar"

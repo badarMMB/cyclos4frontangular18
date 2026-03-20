@@ -70,7 +70,7 @@
         ad.user.id !== dataForFrontendHolder.user.id
         ) {
         <div
-          class="ml-auto text-right d-flex flex-column">
+          class="ms-auto text-end d-flex flex-column">
           <ad-favorite [ad]="ad"></ad-favorite>
         </div>
       }
@@ -88,7 +88,7 @@
         <th>{{ fieldName(field) }}</th>
       }
       @if (!data.hidePrice) {
-        <th class="text-right">{{ i18n.ad.price }}</th>
+        <th class="text-end">{{ i18n.ad.price }}</th>
       }
       @if (dataForFrontendHolder.auth?.permissions?.marketplace?.favorites) {
         <th class="actions"></th>
@@ -120,7 +120,7 @@
             }
           }
           @if (!data.hidePrice) {
-            <td class="text-right">
+            <td class="text-end">
               @if (ad.promotionalPrice) {
                 <span class="promo-price">
                   {{ ad.price | number : decimals(ad) }}
@@ -184,10 +184,10 @@
   </tiled-result>
 
   <map-result *resultInfoWindow="let ad; let addr = address" [image]="ad.image" [address]="addr">
-    <div class="font-weight-bold mb-2">{{ ad.name }}</div>
+    <div class="fw-bold mb-2">{{ ad.name }}</div>
 
     @if (ad.price) {
-      <div class="font-weight-bold">
+      <div class="fw-bold">
         @if (ad.promotionalPrice) {
           <span class="promo-price">
             {{ ad.price | number : decimals(ad) }}

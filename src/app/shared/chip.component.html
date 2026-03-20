@@ -1,12 +1,12 @@
 <div class="chip d-flex justify-content-center align-items-center">
   @if (image || icon) {
-    <avatar size="small" ngClass="mr-2" [image]="image" [icon]="icon"></avatar>
+    <avatar size="small" ngClass="me-2" [image]="image" [icon]="icon"></avatar>
   }
   <div class="text-truncate mw-100">
     <ng-content></ng-content>
   </div>
   @if (closeable) {
-    <a class="close-link ml-2" href="#" (click)="$event.preventDefault(); close.emit(null)">
+    <a class="close-link ms-2" href="#" (click)="$event.preventDefault(); close.emit(null)">
       <icon [icon]="SvgIcon.X"></icon>
     </a>
   }

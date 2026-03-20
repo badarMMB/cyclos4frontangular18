@@ -14,9 +14,7 @@
     }
     @if ((useCustom$ | async) || useCustom) {
       @if (prefix) {
-        <div class="input-group-prepend">
-          <span class="input-group-text">{{ prefix }}</span>
-        </div>
+        <span class="input-group-text">{{ prefix }}</span>
       }
       <!-- Use type text in iOS devices otherwise the user cannot enter comma or dot for decimals -->
       <input
@@ -33,12 +31,10 @@
         (blur)="onBlur()"
         [ngClass]="{
           'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched,
-          'text-right': textRight
+          'text-end': textRight
         }" />
       @if (suffix) {
-        <div class="input-group-append">
-          <span class="input-group-text">{{ suffix }}</span>
-        </div>
+        <span class="input-group-text">{{ suffix }}</span>
       }
     }
   </div>
@@ -58,9 +54,7 @@
     }
     @if ((useCustom$ | async) || useCustom) {
       @if (prefix) {
-        <div class="input-group-prepend">
-          <span class="input-group-text">{{ prefix }}</span>
-        </div>
+        <span class="input-group-text">{{ prefix }}</span>
       }
       <!-- Use type text in iOS devices otherwise the user cannot enter comma or dot for decimals -->
       <input
@@ -77,12 +71,10 @@
         (blur)="onBlur()"
         [ngClass]="{
           'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched,
-          'text-right': textRight
+          'text-end': textRight
         }" />
       @if (suffix) {
-        <div class="input-group-append">
-          <span class="input-group-text">{{ suffix }}</span>
-        </div>
+        <span class="input-group-text">{{ suffix }}</span>
       }
     }
   </div>

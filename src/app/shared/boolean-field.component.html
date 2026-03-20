@@ -8,44 +8,46 @@
   </label-value>
 } @else {
   <div
-    class="custom-control d-flex align-content-center p-0"
+    class="custom-control form-check d-flex align-content-center p-0"
     [ngClass]="{
       'custom-checkbox': !switch,
-      'custom-switch': switch
+      'custom-switch': switch,
+      'form-switch': switch
     }">
     <input
       #checkbox
       type="checkbox"
       [name]="name"
-      class="custom-control-input"
+      class="custom-control-input form-check-input"
       [id]="id"
       (click)="onClick.emit($event)"
       (keyup.enter)="toggle(); onClick.emit($event)"
       [formControl]="formControl"
       [checked]="isTrue(value)" />
-    <label class="custom-control-label" [for]="id">{{ text }}</label>
+    <label class="custom-control-label form-check-label" [for]="id">{{ text }}</label>
   </div>
   <field-errors [control]="formControl"></field-errors>
 }
 
 <ng-template #widget>
   <div
-    class="custom-control d-flex align-content-center p-0"
+    class="custom-control form-check d-flex align-content-center p-0"
     [ngClass]="{
       'custom-checkbox': !switch,
-      'custom-switch': switch
+      'custom-switch': switch,
+      'form-switch': switch
     }">
     <input
       #checkbox
       type="checkbox"
       [name]="name"
-      class="custom-control-input"
+      class="custom-control-input form-check-input"
       [id]="id"
       (click)="onClick.emit($event)"
       (keyup.enter)="toggle(); onClick.emit($event)"
       [formControl]="formControl"
       [checked]="isTrue(value)" />
-    <label class="custom-control-label" [for]="id">{{ text }}</label>
+    <label class="custom-control-label form-check-label" [for]="id">{{ text }}</label>
   </div>
   <field-errors [control]="formControl"></field-errors>
 </ng-template>

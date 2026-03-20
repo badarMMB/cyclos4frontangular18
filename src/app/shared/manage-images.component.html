@@ -6,10 +6,10 @@
   @for (image of images; track image) {
     <div cdkDrag class="d-flex justify-items-center mb-2 cursor-move">
       <avatar size="medium" [image]="image"></avatar>
-      <div class="ml-2 flex-grow-1 d-flex align-items-center text-truncate">
+      <div class="ms-2 flex-grow-1 d-flex align-items-center text-truncate">
         {{ image.name }}
       </div>
-      <div class="ml-2">
+      <div class="ms-2">
         @if (!(requireAtLeastOne && images?.length === 1)) {
           <button
             type="button"

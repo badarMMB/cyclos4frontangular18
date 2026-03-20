@@ -305,14 +305,50 @@ export class FormatService {
     return this.doFormat(date, this.dateFormat + ' ' + this.timeFormat);
   }
 
+  /**
+   * Parses a date coming from the API.
+   * Accepts ISO strings, legacy date-times with a space separator and epoch milliseconds.
+   */
+  parseApiDateObject(value: Date | string): Date | null | undefined {
+    if (value == null || value === '') {
+      return null;
+    }
+    if (value instanceof Date) {
+      return isValid(value) ? value : undefined;
+    }
+
+    const raw = String(value).trim();
+    if (raw === '') {
+      return null;
+    }
+
+    let parsed = parseISO(raw);
+    if (isValid(parsed)) {
+      return parsed;
+    }
+
+    if (/^\d+$/.test(raw)) {
+      parsed = new Date(Number(raw));
+      if (isValid(parsed)) {
+        return parsed;
+      }
+    }
+
+    if (raw.includes(' ') && !raw.includes('T')) {
+      parsed = parseISO(raw.replace(' ', 'T'));
+      if (isValid(parsed)) {
+        return parsed;
+      }
+    }
+
+    return undefined;
+  }
+
   private doFormat(date: Date | string, format: string): string {
-    if (date == null) {
+    const parsed = this.parseApiDateObject(date);
+    if (parsed == null) {
       return '';
     }
-    if (date instanceof Date) {
-      return isValid(date) ? dateFnsFormat(date, format) : '';
-    }
-    const parsed = parseISO(date as string);
     return isValid(parsed) ? dateFnsFormat(parsed, format) : '';
   }
 

@@ -67,7 +67,7 @@
         @if (allowLocate && !allowSearch) {
           <button
             type="button"
-            class="btn btn-icon ml-2"
+            class="btn btn-icon ms-2"
             [tooltip]="i18n.field.user.locateTooltip"
             (click)="locateUser()">
             <icon [icon]="SvgIcon.Search"></icon>
@@ -76,7 +76,7 @@
         @if (allowContacts) {
           <button
             type="button"
-            class="btn btn-icon ml-2"
+            class="btn btn-icon ms-2"
             #contactListButton
             [tooltip]="i18n.field.user.contactTooltip"
             (click)="showContactList()">
@@ -86,7 +86,7 @@
         @if (allowQrCode) {
           <button
             type="button"
-            class="btn btn-icon ml-2"
+            class="btn btn-icon ms-2"
             #scanQrCodeButton
             [tooltip]="i18n.field.user.scanQrCodeTooltip"
             (click)="showScanQrCode()">

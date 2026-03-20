@@ -18,7 +18,7 @@
             [icon]="SvgIcon.Basket"
             [image]="ad.image"
             [additionalImages]="ad.additionalImages"
-            class="float-right">
+            class="float-end">
           </profile-images>
         }
         <label-value [label]="i18n.ad.name" [value]="ad.name"></label-value>
@@ -57,7 +57,7 @@
         @if (ad.promotionalPeriodActive) {
           <label-value [label]="i18n.ad.promotionalPeriod">
             <span
-              >{{ data.promotionalPeriod.begin | date }}<span class="d-inline pl-2 pr-2"> - </span
+              >{{ data.promotionalPeriod.begin | date }}<span class="d-inline ps-2 pe-2"> - </span
               >{{ data.promotionalPeriod.end | date }}</span
               >
             </label-value>
@@ -153,8 +153,8 @@
                 <div class="d-flex">
                   <icon size="1rem" [icon]="SvgIcon.ChatLeft"></icon>
                 </div>
-                <div class="pl-2" style="line-height: 1rem">
-                  <span class="font-weight-bold">{{ q.question }}</span>
+                <div class="ps-2" style="line-height: 1rem">
+                  <span class="fw-bold">{{ q.question }}</span>
                   <div style="font-size: 0.6rem">{{ q.user.display }} - {{ q.questionDate | dateTime }}</div>
                 </div>
                 @if (canRemoveQuestion(q)) {
@@ -174,7 +174,7 @@
                   <div class="d-flex">
                     <icon size="1rem" [icon]="SvgIcon.ChatRight"></icon>
                   </div>
-                  <div class="pl-2" style="line-height: 1rem">
+                  <div class="ps-2" style="line-height: 1rem">
                     {{ q.answer }}
                     <div style="font-size: 0.6rem">{{ data.user.display }} - {{ q.answerDate | dateTime }}</div>
                   </div>

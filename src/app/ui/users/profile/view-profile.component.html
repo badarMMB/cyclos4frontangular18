@@ -39,7 +39,7 @@
             [image]="user.image"
             [additionalImages]="user.additionalImages"
             [icon]="SvgIcon.PersonCircle"
-            class="float-right">
+            class="float-end">
           </profile-images>
         }
         @if (showOperatorOwner) {
@@ -360,7 +360,7 @@
                 <div class="data-item">
                   <avatar-lightbox size="140" [image]="contactInfo.image"> </avatar-lightbox>
                 </div>
-                <div class="data-item font-weight-bold">{{ contactInfo.name }}</div>
+                <div class="data-item fw-bold">{{ contactInfo.name }}</div>
                 @if (contactInfo.email) {
                   <a class="data-item" [href]="'mailto:' + contactInfo.email">
                     {{ contactInfo.email }}

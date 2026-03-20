@@ -103,7 +103,7 @@
           <icon-with-counter [icon]="SvgIcon.Envelope" [count]="(messageHelper.messageStatus$ | async).newMessages">
           </icon-with-counter>
           @if ((layout.gtmd$ | async) && !hasMenu) {
-            <div class="ml-2">
+            <div class="ms-2">
               {{ messageHelper.resolveLabel() }}
             </div>
           }
@@ -121,7 +121,7 @@
         <icon-with-counter [icon]="SvgIcon.Bell" [count]="(notification.notificationsStatus$ | async).newNotifications">
         </icon-with-counter>
         @if ((layout.gtmd$ | async) && !hasMenu) {
-          <div class="ml-2">
+          <div class="ms-2">
             {{ i18n.menu.personalNotifications }}
           </div>
         }
@@ -140,7 +140,7 @@
         (click)="navigate(Menu.SHOPPING_CART, $event); blurIfClick('shopping-cart', $event)">
         <icon-with-counter [icon]="SvgIcon.Cart3" [count]="marketplaceHelper.cartItems$ | async"></icon-with-counter>
         @if ((layout.gtmd$ | async) && !hasMenu) {
-          <div class="ml-2">
+          <div class="ms-2">
             {{ i18n.menu.shoppingCart }}
           </div>
         }
@@ -158,7 +158,7 @@
         (click)="navigate(this.menu.helpMenu, $event); blurIfClick('help-link', $event)">
         <icon [icon]="SvgIcon.QuestionCircle"></icon>
         @if ((layout.gtsm$ | async) && (user == null || !hasMenu)) {
-          <div class="ml-2">
+          <div class="ms-2">
             {{ i18n.menu.help }}
           </div>
         }
@@ -176,7 +176,7 @@
         (click)="navigate(Menu.LOGOUT, $event); blurIfClick('logout-trigger', $event)">
         <icon [icon]="SvgIcon.Logout2"></icon>
         @if ((layout.gtmd$ | async) && !hasMenu) {
-          <div class="ml-2">
+          <div class="ms-2">
             {{ i18n.menu.logout }}
           </div>
         }
@@ -192,7 +192,7 @@
           [ngClass]="customNgClass(Menu.PUBLIC_REGISTRATION)">
           <icon [icon]="SvgIcon.PersonPlus"></icon>
           @if (layout.gtsm$ | async) {
-            <div class="ml-2">
+            <div class="ms-2">
               {{ i18n.menu.register }}
             </div>
           }
@@ -206,7 +206,7 @@
         [ngClass]="customNgClass(Menu.LOGIN)">
         <icon [icon]="SvgIcon.Login2"></icon>
         @if (layout.gtsm$ | async) {
-          <div class="ml-2">
+          <div class="ms-2">
             {{ i18n.menu.login }}
           </div>
         }

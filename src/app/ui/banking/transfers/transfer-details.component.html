@@ -154,8 +154,8 @@
         @if (hasVoucherExpirationDate) {
           <th>{{ i18n.general.expirationDate }}</th>
         }
-        <th class="text-right">{{ i18n.transaction.amount }}</th>
-        <th class="text-right">{{ i18n.voucher.balance }}</th>
+        <th class="text-end">{{ i18n.transaction.amount }}</th>
+        <th class="text-end">{{ i18n.voucher.balance }}</th>
       </thead>
       <tbody>
         @for (row of transfer.transaction.boughtVouchers; track row) {
@@ -179,12 +179,12 @@
                 </a>
               </td>
             }
-            <td class="text-right">
+            <td class="text-end">
               <a [routerLink]="voucherPath(row)">
                 {{ row.amount | currency : transfer.currency }}
               </a>
             </td>
-            <td class="text-right">
+            <td class="text-end">
               <a [routerLink]="voucherPath(row)">
                 {{ row.balance | currency : transfer.currency }}
               </a>
@@ -251,7 +251,7 @@
         <th>{{ i18n.general.date }}</th>
         <th>{{ i18n.transaction.from }}</th>
         <th>{{ i18n.transaction.to }}</th>
-        <th class="text-right">{{ i18n.transaction.amount }}</th>
+        <th class="text-end">{{ i18n.transaction.amount }}</th>
       </thead>
       <tbody>
         @for (row of transfer.children; track row) {
@@ -271,7 +271,7 @@
                 <user-link [account]="row.to"></user-link>
               </a>
             </td>
-            <td class="text-right">
+            <td class="text-end">
               <a [routerLink]="path(row)">
                 {{ row.amount | currency : row.currency }}
               </a>

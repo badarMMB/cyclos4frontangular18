@@ -139,7 +139,7 @@
               </label-value>
             }
           </div>
-          <div class="ml-auto text-right d-flex flex-column">
+          <div class="ms-auto text-end d-flex flex-column">
             @if (data.edit) {
               <button
                 type="button"
@@ -212,7 +212,7 @@
                     type="button"
                     [tooltip]="i18n.general.remove"
                     class="btn btn-icon"
-                    [ngClass]="data.edit ? 'ml-3' : ''"
+                    [ngClass]="data.edit ? 'ms-3' : ''"
                     (click)="remove(row); $event.stopPropagation()">
                     <icon [icon]="SvgIcon.Trash"></icon>
                   </button>

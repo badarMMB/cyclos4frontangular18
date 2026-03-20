@@ -171,7 +171,7 @@
         @if ((resultType$ | async) !== ResultType.CATEGORIES) {
           <div class="col-xs-5 col-sm-7 d-flex justify-content-end">
             @if (layout.gtxs$ | async) {
-              <div class="d-flex pl-3">
+              <div class="d-flex ps-3">
                 <ng-container *ngTemplateOutlet="orderBy"></ng-container>
               </div>
             }
@@ -231,7 +231,7 @@
   <ng-template #orderBy>
     @if (['tiles', 'list'].includes(resultType)) {
       <single-selection-field
-        [ngClass]="{ 'flex-grow-0 mr-3': layout.gtxs, 'mt-2': layout.ltxs }"
+        [ngClass]="{ 'flex-grow-0 me-3': layout.gtxs, 'mt-2': layout.ltxs }"
         [formControl]="form.get('orderBy')"
         [display]="i18n.general.orderBy"
         [emptyOption]="i18n.general.orderByRelevance">

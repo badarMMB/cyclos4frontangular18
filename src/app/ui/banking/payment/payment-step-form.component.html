@@ -11,17 +11,17 @@
       @for (account of data.accounts; track account) {
         <div class="w-100 row no-gutters mb-2">
           <div class="col">
-            <div class="custom-control custom-radio">
+            <div class="custom-control form-check custom-radio">
               <input
                 #radio
                 type="radio"
                 formControlName="account"
-                class="custom-control-input"
+                class="custom-control-input form-check-input"
                 [id]="'from_' + account.id"
                 (keyup.enter)="radio.click()"
                 [value]="account.type.id" />
-              <label class="custom-control-label" [for]="'from_' + account.id">
-                <div class="ml-1">
+              <label class="custom-control-label form-check-label" [for]="'from_' + account.id">
+                <div class="ms-1">
                   <div class="d-inline-block">{{ account.type.name }}</div>
                   @if (account.number) {
                     <div class="d-inline-block">&nbsp;-&nbsp;</div>
@@ -45,11 +45,11 @@
         labelPosition="sideForced"
         noWrapLabel>
         <div
-          class="w-100 text-nowrap text-right text-xs-left font-weight-bold"
+          class="w-100 text-nowrap text-end text-xs-start fw-bold"
         [ngClass]="{
           positive: format.isPositive(account.status.balance),
           negative: format.isNegative(account.status.balance),
-          'text-right': layout.ltsm$ | async
+          'text-end': layout.ltsm$ | async
         }">
           {{ account.status.balance | currency : account.currency }}
         </div>

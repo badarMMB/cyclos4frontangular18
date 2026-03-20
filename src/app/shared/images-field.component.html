@@ -15,7 +15,7 @@
     <div class="d-flex flex-wrap flex-grow-1 align-content-center mt-1 mb-2 mb-xs-0">
       @for (img of images; track img) {
         <avatar-lightbox
-          class="d-block mr-2"
+          class="d-block me-2"
           [size]="avatarSize"
           [image]="img"
           [additionalImages]="images">
@@ -35,7 +35,7 @@
           </button>
           <button
             type="button"
-            class="ml-2 btn btn-icon d-flex align-content-center"
+            class="ms-2 btn btn-icon d-flex align-content-center"
             [tooltip]="i18n.field.image.camera"
             (click)="captureCamera()">
             <icon [icon]="SvgIcon.Camera"></icon>
@@ -44,7 +44,7 @@
         @if (maxFiles > 1 && images.length > 0) {
           <button
             type="button"
-            class="ml-2 btn btn-icon d-flex align-content-center"
+            class="ms-2 btn btn-icon d-flex align-content-center"
             [tooltip]="i18n.field.image.manage"
             (click)="manageImages()">
             <icon [icon]="SvgIcon.Pencil"></icon>
@@ -53,7 +53,7 @@
         @if (maxFiles === 1 && images.length > 0) {
           <button
             type="button"
-            class="ml-2 btn btn-icon d-flex align-content-center"
+            class="ms-2 btn btn-icon d-flex align-content-center"
             [tooltip]="i18n.field.image.remove"
             (click)="removeAllImages()">
             <icon [icon]="SvgIcon.Trash"></icon>
@@ -87,7 +87,7 @@
     <div class="d-flex flex-wrap flex-grow-1 align-content-center mt-1 mb-2 mb-xs-0">
       @for (img of images; track img) {
         <avatar-lightbox
-          class="d-block mr-2"
+          class="d-block me-2"
           [size]="avatarSize"
           [image]="img"
           [additionalImages]="images">
@@ -107,7 +107,7 @@
           </button>
           <button
             type="button"
-            class="ml-2 btn btn-icon d-flex align-content-center"
+            class="ms-2 btn btn-icon d-flex align-content-center"
             [tooltip]="i18n.field.image.camera"
             (click)="captureCamera()">
             <icon [icon]="SvgIcon.Camera"></icon>
@@ -116,7 +116,7 @@
         @if (maxFiles > 1 && images.length > 0) {
           <button
             type="button"
-            class="ml-2 btn btn-icon d-flex align-content-center"
+            class="ms-2 btn btn-icon d-flex align-content-center"
             [tooltip]="i18n.field.image.manage"
             (click)="manageImages()">
             <icon [icon]="SvgIcon.Pencil"></icon>
@@ -125,7 +125,7 @@
         @if (maxFiles === 1 && images.length > 0) {
           <button
             type="button"
-            class="ml-2 btn btn-icon d-flex align-content-center"
+            class="ms-2 btn btn-icon d-flex align-content-center"
             [tooltip]="i18n.field.image.remove"
             (click)="removeAllImages()">
             <icon [icon]="SvgIcon.Trash"></icon>

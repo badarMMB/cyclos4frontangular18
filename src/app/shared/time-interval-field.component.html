@@ -11,11 +11,11 @@
       numbersOnly
       autocomplete="off"
       formControlName="amount"
-      class="form-control text-right"
+      class="form-control text-end"
       [ngClass]="{
         'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
       }" />
-    <single-selection-field formControlName="field" class="pl-1">
+    <single-selection-field formControlName="field" class="ps-1">
       <field-option value="days" [text]="i18n.general.timeField.plural.days"> </field-option>
       <field-option value="weeks" [text]="i18n.general.timeField.plural.weeks"> </field-option>
       <field-option value="months" [text]="i18n.general.timeField.plural.months"> </field-option>
@@ -33,11 +33,11 @@
       numbersOnly
       autocomplete="off"
       formControlName="amount"
-      class="form-control text-right"
+      class="form-control text-end"
       [ngClass]="{
         'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
       }" />
-    <single-selection-field formControlName="field" class="pl-1">
+    <single-selection-field formControlName="field" class="ps-1">
       <field-option value="days" [text]="i18n.general.timeField.plural.days"> </field-option>
       <field-option value="weeks" [text]="i18n.general.timeField.plural.weeks"> </field-option>
       <field-option value="months" [text]="i18n.general.timeField.plural.months"> </field-option>

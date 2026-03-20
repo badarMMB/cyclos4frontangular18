@@ -27,7 +27,7 @@
     @for (feePreview of fees; track feePreview) {
       <div class="row no-gutters align-items-end">
         <div class="col-3">{{ feePreview.fee.name }}:</div>
-        <div class="col pl-1">{{ feePreview.amount | currency : preview.currency }}</div>
+        <div class="col ps-1">{{ feePreview.amount | currency : preview.currency }}</div>
       </div>
     }
   </label-value>

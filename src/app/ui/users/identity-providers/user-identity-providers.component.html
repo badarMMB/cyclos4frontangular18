@@ -14,7 +14,7 @@
             <div class="col-4 col-xs-3 col-md-2">
               @if (layout.gtxxs$ | async) {
                 <avatar
-                  class="ml-2 mr-5 management"
+                  class="ms-2 me-5 management"
                   [size]="64"
                   iconSize="64px"
                   [image]="uip.identityProvider.image"
@@ -52,7 +52,7 @@
             <div class="col-12 col-md-3 mt-3 mt-md-0">
               @for (action of actions(uip); track action; let last = $last) {
                 <action-button
-                  class="d-block ml-auto"
+                  class="d-block ms-auto"
                   [ngClass]="{ 'mb-3': !last }"
                   (action)="action.onClick()"
                   [label]="action.label">

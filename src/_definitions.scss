@@ -72,6 +72,23 @@ $yiq-dark-text-light:       #f0f0f0 !default;
 @import 'styles/custom-definitions';
 @import "bootstrap/scss/functions";
 
+@function color-yiq($color, $dark: $color-contrast-dark, $light: $color-contrast-light) {
+  @return color-contrast($color, $dark, $light);
+}
+
+@mixin hover {
+  &:hover {
+    @content;
+  }
+}
+
+@mixin hover-focus {
+  &:hover,
+  &:focus {
+    @content;
+  }
+}
+
 // Global layout
 $layout-spacer-xxs: 0.4rem !default;
 $layout-spacer-xs: 0.7rem !default;
@@ -326,6 +343,8 @@ $label-color: $gray-700 !default;
 $input-group-addon-color: $input-color !default;
 $input-group-addon-bg: $gray-100 !default;
 $input-group-addon-border-color: $input-border-color !default;
+$custom-control-label-disabled-color: $input-disabled-color !default;
+$custom-control-indicator-disabled-bg: $input-disabled-bg !default;
 $custom-select-bg-size: 8px 10px !default;
 $custom-select-padding-x: 0.75rem;
 $custom-select-indicator-color: $gray-800 !default;

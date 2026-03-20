@@ -12,7 +12,7 @@
       }
       <div class="d-flex flex-row-reverse">
         @if (data.image && (layout.gtxs$ | async)) {
-          <div class="image ml-4">
+          <div class="image ms-4">
             <avatar-lightbox [roundBorders]="false" [zoom]="false" size="140" [image]="data.image"> </avatar-lightbox>
           </div>
         }
@@ -54,11 +54,11 @@
           <th class="no-border">{{ i18n.ad.product }}</th>
           <th class="no-border">{{ i18n.ad.quantity }}</th>
           @if (layout.gtxs$ | async) {
-            <th class="no-border text-right">
+            <th class="no-border text-end">
               {{ i18n.ad.unitPrice }}
             </th>
           }
-          <th class="no-border text-right">{{ i18n.transaction.amount }}</th>
+          <th class="no-border text-end">{{ i18n.transaction.amount }}</th>
         </thead>
         <tbody>
           @for (row of data.items; track row) {
@@ -69,11 +69,11 @@
               <td class="link">{{ row.product.name }}</td>
               <td>{{ format.formatAsNumber(row.quantity, row.product.allowDecimalQuantity ? 2 : 0) }}</td>
               @if (layout.gtxs$ | async) {
-                <td class="text-right">
+                <td class="text-end">
                   {{ row.price | currency : data.currency }}
                 </td>
               }
-              <td class="text-right">
+              <td class="text-end">
                 {{ row.totalPrice | currency : data.currency }}
               </td>
             </tr>
@@ -82,7 +82,7 @@
             <td class="table-head-color" [attr.colspan]="(layout.gtxs$ | async) ? 4 : 2">
               {{ i18n.ad.subtotal }}
             </td>
-            <td class="table-head-color text-right">
+            <td class="table-head-color text-end">
               {{ subtotal | currency : data.currency }}
             </td>
           </tr>
@@ -90,7 +90,7 @@
             <td [attr.colspan]="(layout.gtxs$ | async) ? 4 : 2">
               {{ i18n.ad.deliveryMethod + ': ' + resolveDeliveryLabel() }}
             </td>
-            <td class="text-right">
+            <td class="text-end">
               {{ data.deliveryMethod.price | currency : data.currency }}
             </td>
           </tr>
@@ -98,7 +98,7 @@
             <td class="border-bottom-0 label label-value-label" [attr.colspan]="(layout.gtxs$ | async) ? 4 : 2">
               {{ i18n.ad.total }}
             </td>
-            <td class="border-bottom-0 text-right label-value-value">
+            <td class="border-bottom-0 text-end label-value-value">
               {{ data.totalPrice | currency : data.currency }}
             </td>
           </tr>

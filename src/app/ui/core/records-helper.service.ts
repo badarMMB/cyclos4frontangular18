@@ -85,6 +85,6 @@ export class RecordHelperService {
    */
   resolveColumnClass(field: RecordCustomField, type: RecordTypeDetailed): string {
     const colspan = field != null && field.colspan != null ? ' colspan-' + field.colspan : '';
-    return this.isColumnLayout(type) ? 'pr-3 columns-' + type.fieldColumns + colspan : '';
+    return this.isColumnLayout(type) ? 'pe-3 columns-' + type.fieldColumns + colspan : '';
   }
 }

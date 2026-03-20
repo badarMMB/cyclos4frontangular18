@@ -16,11 +16,6 @@ import { BasePageComponent } from 'app/ui/shared/base-page.component';
 import { ActiveMenu, Menu } from 'app/ui/shared/menu';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
-import { Validators } from '@angular/forms';
-import { PaymentSchedulingEnum, TransactionTypeData } from 'app/api/models';
-import { PaymentsService } from 'app/api/services/payments.service';
-import { first } from 'rxjs/operators';
-
 
 export type CheckoutStep = 'delivery' | 'address' | 'payment' | 'confirm';
 
@@ -41,16 +36,15 @@ export class CartCheckoutComponent extends BasePageComponent<ShoppingCartDataFor
   form: UntypedFormGroup;
   addressForm: UntypedFormGroup;
   confirmationPassword: UntypedFormControl;
-  paymentTypeData$ = new BehaviorSubject<TransactionTypeData>(null);
 
   constructor(
-  injector: Injector,
-  private shoppingCartService: ShoppingCartsService,
-  private paymentsService: PaymentsService,   // 👈
-  private addressHelper: AddressHelperService,
-  private marketplaceHelper: MarketplaceHelperService
-) { super(injector); }
-
+    injector: Injector,
+    private shoppingCartService: ShoppingCartsService,
+    private addressHelper: AddressHelperService,
+    private marketplaceHelper: MarketplaceHelperService
+  ) {
+    super(injector);
+  }
 
   ngOnInit() {
     super.ngOnInit();
@@ -59,68 +53,41 @@ export class CartCheckoutComponent extends BasePageComponent<ShoppingCartDataFor
   }
 
   onDataInitialized(data: ShoppingCartDataForCheckout) {
-    const hasDeliveryMethods = !empty(data.deliveryMethods);
+    data.deliveryMethods = data.deliveryMethods || [];
+    data.addresses = data.addresses || [];
+    data.paymentTypes = data.paymentTypes || [];
+
     this.form = this.formBuilder.group({ remarks: null });
+
     this.step = data.deliveryMethods.length > 1 ? 'delivery' : 'address';
-    this.addSub(this.form.get('scheduling').valueChanges.subscribe(() => this.adjustInstallmentsValidators()));
-    this.addSub(this.form.get('firstInstallmentIsNow').valueChanges.subscribe(() => this.adjustInstallmentsValidators()));
-    
 
-
-    // The confirmation password is hold in a separated control
+    // The confirmation password is held in a separate control
     this.confirmationPassword = this.formBuilder.control(null);
     this.form.setControl('confirmationPassword', this.confirmationPassword);
 
-    // Delivery methods
-    if (hasDeliveryMethods) {
-      const deliveryField = this.formBuilder.control(data.deliveryMethods);
+    if (!empty(data.deliveryMethods)) {
+      const deliveryField = this.formBuilder.control(null);
       this.form.addControl('deliveryMethod', deliveryField);
-      this.addSub(deliveryField.valueChanges.subscribe(dm => this.updateDeliveryMethod(dm, data)));
+      this.addSub(deliveryField.valueChanges.subscribe(id => this.updateDeliveryMethod(id, data)));
       deliveryField.setValue(data.deliveryMethods[0].id, { emitEvent: true });
     }
 
-    // Addresses
     const customAddress: Address = {
       id: 'customAddress',
       name: this.i18n.ad.customAddress
     };
-    data.addresses.push(customAddress);
-    const addressField = this.formBuilder.control(data.addresses);
+    data.addresses = [...data.addresses, customAddress];
+    const addressField = this.formBuilder.control(null);
     this.form.addControl('address', addressField);
-    this.addSub(addressField.valueChanges.subscribe(a => this.updateAddress(a, data)));
+    this.addSub(addressField.valueChanges.subscribe(id => this.updateAddress(id, data)));
     this.addressForm = this.addressHelper.addressFormGroup(data.addressConfiguration);
     addressField.setValue(data.addresses[0].id, { emitEvent: true });
 
-    // Payment types
-     if (!empty(data.paymentTypes)) {
-  const paymentField = this.formBuilder.control(data.paymentTypes);
-  this.form.addControl('paymentType', paymentField);
-
-  this.addSub(
-    paymentField.valueChanges.subscribe((typeId: string) => {
-      // seller locator: mieux d’utiliser le même helper que device confirmation
-      const to = this.ApiHelper.accountOwner(this.data.cart.seller);
-
-      this.paymentsService
-        .dataForPerformPayment({ owner: 'self', to, type: typeId, fields: ['paymentTypeData'] })
-        .pipe(first())
-        .subscribe(res => {
-          this.paymentTypeData$.next(res.paymentTypeData);
-          this.adjustInstallmentsValidators(); // 👈
-        });
-    })
-  );
-
-  paymentField.setValue(data.paymentTypes[0].id, { emitEvent: true });
-}
-
-
-    // Scheduling / installments (like banking payment form)
-this.form.addControl('scheduling', this.formBuilder.control(PaymentSchedulingEnum.DIRECT, Validators.required));
-this.form.addControl('installmentsCount', this.formBuilder.control(null));
-this.form.addControl('firstInstallmentIsNow', this.formBuilder.control(true));
-this.form.addControl('firstInstallmentDate', this.formBuilder.control(null));
-
+    if (!empty(data.paymentTypes)) {
+      const paymentField = this.formBuilder.control(null);
+      this.form.addControl('paymentType', paymentField);
+      paymentField.setValue(data.paymentTypes[0].id, { emitEvent: true });
+    }
   }
 
   /**
@@ -217,37 +184,6 @@ this.form.addControl('firstInstallmentDate', this.formBuilder.control(null));
         })
     );
   }
-private adjustInstallmentsValidators() {
-  const scheduling = this.form.get('scheduling')?.value;
-  const max = this.paymentTypeData$.value?.maxInstallments || 0;
-
-  const count = this.form.get('installmentsCount');
-  const firstIsNow = this.form.get('firstInstallmentIsNow')?.value;
-  const firstDate = this.form.get('firstInstallmentDate');
-
-  if (scheduling === PaymentSchedulingEnum.SCHEDULED) {
-    count.setValidators([
-      Validators.required,
-      Validators.min(2),
-      max > 0 ? Validators.max(max) : null,
-    ].filter(Boolean));
-
-    if (firstIsNow === false) {
-      firstDate.setValidators([Validators.required]);
-    } else {
-      firstDate.clearValidators();
-      firstDate.setValue(null, { emitEvent: false });
-    }
-  } else {
-    count.clearValidators();
-    count.setValue(null, { emitEvent: false });
-    firstDate.clearValidators();
-    firstDate.setValue(null, { emitEvent: false });
-  }
-
-  count.updateValueAndValidity({ emitEvent: false });
-  firstDate.updateValueAndValidity({ emitEvent: false });
-}
 
   get step(): CheckoutStep {
     return this.step$.value;

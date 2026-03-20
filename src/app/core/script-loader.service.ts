@@ -10,17 +10,17 @@ import { Observable, ReplaySubject } from 'rxjs';
   providedIn: 'root'
 })
 export class ScriptLoaderService {
-  _loadedLibraries: { [url: string]: ReplaySubject<any> } = {};
+  _loadedLibraries: { [url: string]: ReplaySubject<void> } = {};
 
   constructor(@Inject(DOCUMENT) private readonly document: HTMLDocument) {}
 
   /**
    * Loads a script from the given URL
    */
-  loadScript(url: string): Observable<any> {
-    let subject: ReplaySubject<any> = this._loadedLibraries[url];
+  loadScript(url: string): Observable<void> {
+    let subject: ReplaySubject<void> = this._loadedLibraries[url];
     if (!subject) {
-      subject = new ReplaySubject();
+      subject = new ReplaySubject<void>(1);
       this._loadedLibraries[url] = subject;
 
       const script = this.document.createElement('script');
@@ -28,7 +28,7 @@ export class ScriptLoaderService {
       script.async = true;
       script.src = url;
       script.onload = () => {
-        subject.next();
+        subject.next(void 0);
         subject.complete();
       };
       script.onerror = e => {

@@ -31,7 +31,7 @@
           </div>
         </div>
         @if (data.canEdit) {
-          <div class="ml-auto text-right">
+          <div class="ms-auto text-end">
             <button
               type="button"
               [tooltip]="i18n.general.remove"
@@ -47,7 +47,7 @@
           <th>{{ i18n.general.name }}</th>
           <th>{{ i18n.ad.chargeType }}</th>
           <th>{{ i18n.ad.deliveryType }}</th>
-          <th class="text-right">{{ i18n.ad.price }}</th>
+          <th class="text-end">{{ i18n.ad.price }}</th>
           <th>{{ i18n.ad.minDeliveryTime }}</th>
           <th>{{ i18n.ad.maxDeliveryTime }}</th>
           <th>{{ i18n.general.enabled }}</th>
@@ -67,7 +67,7 @@
               <td>
                 {{ resolveDeliveryTypeLabel(row.deliveryType) }}
               </td>
-              <td class="text-right">
+              <td class="text-end">
                 {{ row.chargeAmount | currency : row.chargeCurrency }}
               </td>
               <td>

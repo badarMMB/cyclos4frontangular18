@@ -34,7 +34,7 @@
       </thead>
       <tbody>
         @for (row of (results$ | async)?.results; track row) {
-          <tr (click)="rowClick(row)" [ngClass]="{ 'font-weight-bold': !row.read, 'cursor-pointer': path(row) }">
+          <tr (click)="rowClick(row)" [ngClass]="{ 'fw-bold': !row.read, 'cursor-pointer': path(row) }">
             <td
               class="avatar"
               [ngClass]="{

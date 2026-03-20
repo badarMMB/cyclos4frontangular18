@@ -11,10 +11,10 @@
     <results-layout [results]="data.history" [onClick]="showAgreement">
       <mobile-result *mobileResult="let row">
         <div>
-          <div class="cell-text float-left">
+          <div class="cell-text float-start">
             {{ row.date | date }}
           </div>
-          <div class="cell-main float-right">
+          <div class="cell-main float-end">
             @if (!row.accepted) {
               <del>
                 {{ row.agreement.name }}

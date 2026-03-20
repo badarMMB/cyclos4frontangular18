@@ -89,7 +89,7 @@
                   >
                   <action-button
                     outline
-                    [ngClass]="{ 'mr-3': !(layout.ltxs$ | async), 'mb-2': layout.ltxs$ | async }"
+                    [ngClass]="{ 'me-3': !(layout.ltxs$ | async), 'mb-2': layout.ltxs$ | async }"
                     (action)="enableNotifications(section, true)"
                     [label]="i18n.notificationSettings.enableAll">
                   </action-button>

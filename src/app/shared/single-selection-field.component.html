@@ -14,13 +14,13 @@
       dropdownToggle
       [id]="id"
       type="button"
-      class="form-control text-left custom-select w-100"
+      class="form-control text-start custom-select w-100"
       [title]="display$ | async"
       [attr.aria-controls]="dropdownMenuId"
       [ngClass]="{
         'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
       }">
-      <div class="w-100 mw-100 text-truncate pr-3" [innerHTML]="display$ | async | trust"></div>
+      <div class="w-100 mw-100 text-truncate pe-3" [innerHTML]="display$ | async | trust"></div>
     </button>
     <div
       #dropDownMenu
@@ -46,7 +46,7 @@
         }
         @for (category of categories | async; track category; let firstCat = $first) {
           @if (category.name) {
-            <div class="pl-2 font-weight-bold" [ngClass]="{ 'mt-3': !firstCat }">
+            <div class="ps-2 fw-bold" [ngClass]="{ 'mt-3': !firstCat }">
               {{ category.name }}
             </div>
           }
@@ -59,7 +59,7 @@
               [id]="id + '_' + option.value"
           [ngClass]="{
             'mt-1': emptyLabel != null || !(firstCat && firstOpt),
-            'pl-3': category.name,
+            'ps-3': category.name,
             selected: isSelected(option)
           }"
               (click)="select(option); $event.preventDefault()">
@@ -84,13 +84,13 @@
         dropdownToggle
         [id]="id"
         type="button"
-        class="form-control text-left custom-select w-100"
+        class="form-control text-start custom-select w-100"
         [title]="display$ | async"
         [attr.aria-controls]="dropdownMenuId"
       [ngClass]="{
         'is-invalid': (formControl.statusChanges | async) === 'INVALID' && formControl.touched
       }">
-        <div class="w-100 mw-100 text-truncate pr-3" [innerHTML]="display$ | async | trust"></div>
+        <div class="w-100 mw-100 text-truncate pe-3" [innerHTML]="display$ | async | trust"></div>
       </button>
 
       <div
@@ -117,7 +117,7 @@
           }
           @for (category of categories | async; track category; let firstCat = $first) {
             @if (category.name) {
-              <div class="pl-2 font-weight-bold" [ngClass]="{ 'mt-3': !firstCat }">
+              <div class="ps-2 fw-bold" [ngClass]="{ 'mt-3': !firstCat }">
                 {{ category.name }}
               </div>
             }
@@ -130,7 +130,7 @@
                 [id]="id + '_' + option.value"
           [ngClass]="{
             'mt-1': emptyLabel != null || !(firstCat && firstOpt),
-            'pl-3': category.name,
+            'ps-3': category.name,
             selected: isSelected(option)
           }"
                 (click)="select(option); $event.preventDefault()">
